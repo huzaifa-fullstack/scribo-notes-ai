@@ -114,7 +114,7 @@ NoteSchema.pre('save', function (next) {
 NoteSchema.methods.canUserAccess = function (userId, permission = 'read') {
     // Get the user ID whether it's populated or not
     const noteUserId = this.user._id ? this.user._id.toString() : this.user.toString();
-    
+
     // Owner always has full access
     if (noteUserId === userId.toString()) {
         return true;
