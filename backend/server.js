@@ -61,7 +61,7 @@ app.get('/api/health', (req, res) => {
 
 // API Routes
 app.use('/api/auth', require('./src/routes/auth'));
-// app.use('/api/notes', require('./src/routes/notes')); // Will be added in next feature
+app.use('/api/notes', require('./src/routes/notes'));
 
 // 404 handler for undefined API routes
 app.use('/api', (req, res, next) => {
