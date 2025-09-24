@@ -55,11 +55,11 @@ const UserSchema = new mongoose.Schema({
 UserSchema.pre('save', async function (next) {
     // Only hash the password if it has been modified (or is new)
     if (!this.isModified('password')) {
-        next();
+        return next();
     }
 
     try {
-        const salt = await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(12);
         this.password = await bcrypt.hash(this.password, salt);
         next();
     } catch (error) {
@@ -149,9 +149,5 @@ UserSchema.statics.findByCredentials = async function (email, password) {
 
     return user;
 };
-
-// Index for better query performance
-UserSchema.index({ email: 1 });
-UserSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('User', UserSchema);

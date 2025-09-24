@@ -59,12 +59,13 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// API Routes (to be added later)
-// app.use('/api/auth', require('./src/routes/auth'));
-// app.use('/api/notes', require('./src/routes/notes'));
+// API Routes
+app.use('/api/auth', require('./src/routes/auth'));
+// app.use('/api/notes', require('./src/routes/notes')); // Will be added in next feature
 
-// 404 handler for undefined routes
-app.use('/api', (req, res) => {
+// 404 handler for undefined API routes
+app.use('/api', (req, res, next) => {
+    // Only handle if no other route matched
     logger.warn(`404 - API route not found: ${req.method} ${req.originalUrl}`);
     res.status(404).json({
         success: false,
@@ -74,6 +75,7 @@ app.use('/api', (req, res) => {
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
+    const path = require('path');
     app.use(express.static('public'));
 
     app.get('*', (req, res) => {
