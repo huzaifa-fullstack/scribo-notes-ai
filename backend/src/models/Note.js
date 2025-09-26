@@ -112,8 +112,11 @@ NoteSchema.pre('save', function (next) {
 
 // Instance method to check if user can access this note
 NoteSchema.methods.canUserAccess = function (userId, permission = 'read') {
+    // Get the user ID whether it's populated or not
+    const noteUserId = this.user._id ? this.user._id.toString() : this.user.toString();
+
     // Owner always has full access
-    if (this.user.toString() === userId.toString()) {
+    if (noteUserId === userId.toString()) {
         return true;
     }
 
@@ -246,8 +249,8 @@ NoteSchema.statics.getUserStats = async function (userId) {
         {
             $match: {
                 $or: [
-                    { user: mongoose.Types.ObjectId(userId) },
-                    { 'sharedWith.user': mongoose.Types.ObjectId(userId) }
+                    { user: new mongoose.Types.ObjectId(userId) },
+                    { 'sharedWith.user': new mongoose.Types.ObjectId(userId) }
                 ]
             }
         },
