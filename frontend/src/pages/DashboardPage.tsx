@@ -1,268 +1,293 @@
+import { useState, useEffect } from "react";
+import { Plus, Search, Filter } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { useNotesStore } from "../store/notesStore";
 import { useAuthStore } from "../store/authStore";
+import NoteCard from "../components/notes/NoteCard";
+import CreateNoteModal from "../components/notes/CreateNoteModal";
+import EditNoteModal from "../components/notes/EditNoteModal";
 import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import type { Note } from "../types/note";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import {
-  FileText,
-  LogOut,
-  User,
-  Plus,
-  PinIcon,
-  Archive,
-  Clock,
-} from "lucide-react";
-import { motion } from "framer-motion";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
+import { useToast } from "../components/ui/use-toast";
 
 const DashboardPage = () => {
+  const { notes, isLoading, fetchNotes, deleteNote, togglePin, toggleArchive } =
+    useNotesStore();
   const { user, logout } = useAuthStore();
+  const { toast } = useToast();
 
-  const handleLogout = () => {
-    logout();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterArchived, setFilterArchived] = useState(false);
+
+  useEffect(() => {
+    fetchNotes();
+  }, [fetchNotes]);
+
+  const handleEdit = (note: Note) => {
+    setSelectedNote(note);
+    setEditModalOpen(true);
   };
 
-  const handleCreateNote = () => {
-    // TODO: Navigate to create note page or open modal
-    console.log("Create note clicked");
+  const handleDeleteClick = (id: string) => {
+    setNoteToDelete(id);
+    setDeleteDialogOpen(true);
   };
+
+  const handleDeleteConfirm = async () => {
+    if (!noteToDelete) return;
+
+    try {
+      await deleteNote(noteToDelete);
+      toast({
+        title: "Success!",
+        description: "Note deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete note.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setNoteToDelete(null);
+    }
+  };
+
+  const handleTogglePin = async (id: string) => {
+    try {
+      await togglePin(id);
+      toast({
+        title: "Success!",
+        description: "Note pin status updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update pin status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleArchive = async (id: string) => {
+    try {
+      await toggleArchive(id);
+      toast({
+        title: "Success!",
+        description: "Note archive status updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update archive status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const filteredNotes = notes.filter((note) => {
+    const matchesSearch =
+      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesArchived = filterArchived ? note.isArchived : !note.isArchived;
+    return matchesSearch && matchesArchived;
+  });
+
+  const pinnedNotes = filteredNotes.filter((note) => note.isPinned);
+  const regularNotes = filteredNotes.filter((note) => !note.isPinned);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center space-x-3"
-            >
-              <div className="p-2 bg-blue-600 rounded-lg">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-gray-900">Notes App</h1>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center space-x-4"
-            >
-              <div className="hidden sm:flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
-                <User className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-700 font-medium">
-                  {user?.name}
-                </span>
-                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                  Online
-                </span>
-              </div>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
-              </Button>
-            </motion.div>
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">My Notes</h1>
+              <p className="text-sm text-gray-500 mt-1">
+                Welcome back, {user?.name}!
+              </p>
+            </div>
+            <Button onClick={logout} variant="outline">
+              Logout
+            </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
-          {/* Welcome Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h2 className="text-3xl font-bold text-gray-900">
-              Welcome back, {user?.name}!
-            </h2>
-            <p className="text-gray-600 mt-2 text-lg">
-              Here's what you've been working on. Ready to capture some new
-              ideas?
-            </p>
-          </motion.div>
-
-          {/* Stats Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  Total Notes
-                </CardTitle>
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <FileText className="h-4 w-4 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">0</div>
-                <p className="text-xs text-gray-500 flex items-center mt-1">
-                  <span className="text-green-600">+0</span>
-                  <span className="ml-1">from last week</span>
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  Pinned Notes
-                </CardTitle>
-                <div className="p-2 bg-yellow-100 rounded-lg">
-                  <PinIcon className="h-4 w-4 text-yellow-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">0</div>
-                <p className="text-xs text-gray-500">Important notes pinned</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  Archived
-                </CardTitle>
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <Archive className="h-4 w-4 text-gray-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">0</div>
-                <p className="text-xs text-gray-500">Notes in archive</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  Last Activity
-                </CardTitle>
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Clock className="h-4 w-4 text-purple-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">--</div>
-                <p className="text-xs text-gray-500">No recent activity</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Empty State - Create First Note */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex justify-center"
-          >
-            <Card className="w-full max-w-2xl border-2 border-dashed border-gray-300 bg-gradient-to-br from-blue-50 to-purple-50">
-              <CardContent className="flex flex-col items-center justify-center py-16 px-8">
-                <motion.div
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
-                  className="p-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg"
-                >
-                  <Plus className="h-12 w-12 text-white" />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="text-center space-y-4"
-                >
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    Create your first note
-                  </h3>
-                  <p className="text-gray-600 text-lg max-w-md">
-                    Start organizing your thoughts and ideas. Your first note is
-                    just a click away.
-                  </p>
-                  <div className="pt-4">
-                    <Button
-                      onClick={handleCreateNote}
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      <Plus className="h-5 w-5 mr-2" />
-                      Create Your First Note
-                    </Button>
-                  </div>
-                </motion.div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Quick Tips Section */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-            className="bg-white rounded-xl border border-gray-200 p-6"
-          >
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Quick Tips
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-start space-x-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <FileText className="h-4 w-4 text-blue-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">
-                    Rich Text Editor
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Format your notes with bold, italic, lists, and more.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="p-2 bg-yellow-100 rounded-lg">
-                  <PinIcon className="h-4 w-4 text-yellow-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">
-                    Pin Important Notes
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Keep your most important notes at the top.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <Archive className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">
-                    Organize & Search
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Archive old notes and use search to find anything quickly.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+        {/* Actions Bar */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Input
+              type="text"
+              placeholder="Search notes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant={filterArchived ? "default" : "outline"}
+              onClick={() => setFilterArchived(!filterArchived)}
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              {filterArchived ? "Archived" : "Active"}
+            </Button>
+            <Button onClick={() => setCreateModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Note
+            </Button>
+          </div>
         </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && filteredNotes.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <Plus className="h-16 w-16 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {searchQuery
+                ? "No notes found"
+                : filterArchived
+                ? "No archived notes"
+                : "No notes yet"}
+            </h3>
+            <p className="text-gray-500 mb-4">
+              {searchQuery
+                ? "Try a different search term"
+                : "Create your first note to get started"}
+            </p>
+            {!searchQuery && (
+              <Button onClick={() => setCreateModalOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Note
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Notes Grid */}
+        {!isLoading && filteredNotes.length > 0 && (
+          <div className="space-y-8">
+            {/* Pinned Notes */}
+            {pinnedNotes.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <span className="text-yellow-600 mr-2">📌</span>
+                  Pinned Notes
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <AnimatePresence>
+                    {pinnedNotes.map((note) => (
+                      <NoteCard
+                        key={note._id}
+                        note={note}
+                        onEdit={handleEdit}
+                        onDelete={handleDeleteClick}
+                        onTogglePin={handleTogglePin}
+                        onToggleArchive={handleToggleArchive}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
+
+            {/* Regular Notes */}
+            {regularNotes.length > 0 && (
+              <div>
+                {pinnedNotes.length > 0 && (
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    Other Notes
+                  </h2>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <AnimatePresence>
+                    {regularNotes.map((note) => (
+                      <NoteCard
+                        key={note._id}
+                        note={note}
+                        onEdit={handleEdit}
+                        onDelete={handleDeleteClick}
+                        onTogglePin={handleTogglePin}
+                        onToggleArchive={handleToggleArchive}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </main>
+
+      {/* Modals */}
+      <CreateNoteModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+      />
+
+      <EditNoteModal
+        open={editModalOpen}
+        note={selectedNote}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedNote(null);
+        }}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              note.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setNoteToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
