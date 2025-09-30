@@ -6,6 +6,7 @@ import { useAuthStore } from "../store/authStore";
 import NoteCard from "../components/notes/NoteCard";
 import CreateNoteModal from "../components/notes/CreateNoteModal";
 import EditNoteModal from "../components/notes/EditNoteModal";
+import ViewNoteModal from "../components/notes/ViewNoteModal";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import type { Note } from "../types/note";
@@ -34,6 +35,8 @@ const DashboardPage = () => {
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterArchived, setFilterArchived] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewNote, setViewNote] = useState<Note | null>(null);
 
   useEffect(() => {
     fetchNotes();
@@ -100,6 +103,11 @@ const DashboardPage = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleView = (note: Note) => {
+    setViewNote(note);
+    setViewModalOpen(true);
   };
 
   const filteredNotes = notes.filter((note) => {
@@ -211,6 +219,7 @@ const DashboardPage = () => {
                       <NoteCard
                         key={note._id}
                         note={note}
+                        onView={handleView}
                         onEdit={handleEdit}
                         onDelete={handleDeleteClick}
                         onTogglePin={handleTogglePin}
@@ -236,6 +245,7 @@ const DashboardPage = () => {
                       <NoteCard
                         key={note._id}
                         note={note}
+                        onView={handleView}
                         onEdit={handleEdit}
                         onDelete={handleDeleteClick}
                         onTogglePin={handleTogglePin}
@@ -262,6 +272,15 @@ const DashboardPage = () => {
         onClose={() => {
           setEditModalOpen(false);
           setSelectedNote(null);
+        }}
+      />
+
+      <ViewNoteModal
+        open={viewModalOpen}
+        note={viewNote}
+        onClose={() => {
+          setViewModalOpen(false);
+          setViewNote(null);
         }}
       />
 
