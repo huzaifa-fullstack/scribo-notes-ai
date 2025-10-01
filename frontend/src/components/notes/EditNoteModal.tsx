@@ -6,7 +6,6 @@ import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
 import {
   Form,
   FormControl,
@@ -18,6 +17,7 @@ import {
 import type { Note } from "../../types/note";
 import { useNotesStore } from "../../store/notesStore";
 import { useToast } from "../ui/use-toast";
+import RichTextEditor from "../editor/RichTextEditor";
 
 const noteSchema = z.object({
   title: z.string().min(1, "Title is required").max(100, "Title too long"),
@@ -121,10 +121,10 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
                 <FormItem>
                   <FormLabel>Content</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <RichTextEditor
+                      content={field.value}
+                      onChange={field.onChange}
                       placeholder="Write your note here..."
-                      rows={10}
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

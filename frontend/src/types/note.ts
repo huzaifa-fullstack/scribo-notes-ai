@@ -35,4 +35,5 @@ export interface NotesStore {
   togglePin: (id: string) => Promise<void>;
   toggleArchive: (id: string) => Promise<void>;
   clearError: () => void;
+  clearNotes: () => void;
 }

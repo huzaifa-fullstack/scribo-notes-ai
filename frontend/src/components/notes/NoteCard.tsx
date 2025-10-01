@@ -122,9 +122,10 @@ const NoteCard = ({
         <CardContent className="pb-4 flex-1 flex flex-col">
           {/* Fixed height content area */}
           <div className="flex-1 min-h-[80px] max-h-[80px] overflow-hidden">
-            <p className="text-sm text-gray-600 whitespace-pre-wrap break-words line-clamp-3">
-              {note.content}
-            </p>
+            <div
+              className="text-sm text-gray-600 prose prose-sm max-w-none line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: note.content }}
+            />
           </div>
 
           {/* Fixed height tags area */}
