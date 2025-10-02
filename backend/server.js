@@ -86,7 +86,12 @@ if (process.env.NODE_ENV === 'production') {
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-});
+// Start server only if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+    });
+}
+
+// Export app for testing
+module.exports = app;
