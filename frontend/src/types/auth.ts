@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
   isEmailVerified: boolean;
   lastLogin: string;
   createdAt: string;
@@ -34,11 +34,12 @@ export interface AuthStore {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   getCurrentUser: () => Promise<void>;
   clearError: () => void;
+  setAuthData: (token: string, user: User) => void; // Add this
 }

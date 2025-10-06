@@ -5,6 +5,7 @@ import type {
   AuthStore,
   LoginCredentials,
   RegisterCredentials,
+  User,
 } from "../types/auth";
 
 export const useAuthStore = create<AuthStore>()(
@@ -113,6 +114,19 @@ export const useAuthStore = create<AuthStore>()(
 
       clearError: () => {
         set({ error: null });
+      },
+
+      setAuthData: (token: string, user: User) => {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
       },
     }),
     {
