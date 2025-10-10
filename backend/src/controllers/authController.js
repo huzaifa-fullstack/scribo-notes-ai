@@ -183,10 +183,38 @@ const logout = async (req, res, next) => {
   }
 };
 
+// @desc    Google OAuth callback
+// @route   GET /api/auth/google/callback
+// @access  Public
+const googleCallback = async (req, res) => {
+  try {
+    // User is available in req.user from passport
+    const user = req.user;
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Generate token
+    const token = user.getSignedJwtToken();
+
+    logger.info(`Google OAuth successful for: ${user.email}`);
+
+    // Redirect to frontend with token
+    const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+    res.redirect(`${frontendURL}/auth/callback?token=${token}`);
+  } catch (error) {
+    logger.error('Google callback error:', error);
+    const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+    res.redirect(`${frontendURL}/login?error=authentication_failed`);
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
   updateProfile,
-  logout
+  logout,
+  googleCallback  // Add this
 };

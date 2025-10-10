@@ -1,41 +1,56 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { motion } from 'framer-motion';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuthStore } from '../../store/authStore';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { useToast } from '../ui/use-toast';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAuthStore } from "../../store/authStore";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { useToast } from "../ui/use-toast";
+import GoogleSignInButton from "./GoogleSignInButton";
 
-const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(6, 'Please confirm your password'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register: registerUser, isLoading, error, clearError } = useAuthStore();
+  const {
+    register: registerUser,
+    isLoading,
+    error,
+    clearError,
+  } = useAuthStore();
   const { toast } = useToast();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -48,15 +63,15 @@ const RegisterForm = () => {
         password: data.password,
       });
       toast({
-        title: 'Welcome to Notes App!',
-        description: 'Your account has been created successfully.',
-        variant: 'default',
+        title: "Welcome to Notes App!",
+        description: "Your account has been created successfully.",
+        variant: "default",
       });
     } catch (error) {
       toast({
-        title: 'Registration failed',
-        description: 'Please check your information and try again.',
-        variant: 'destructive',
+        title: "Registration failed",
+        description: "Please check your information and try again.",
+        variant: "destructive",
       });
     }
   };
@@ -78,6 +93,19 @@ const RegisterForm = () => {
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
+          <GoogleSignInButton />
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">
+                Or continue with email
+              </span>
+            </div>
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -127,7 +155,7 @@ const RegisterForm = () => {
                       <div className="relative">
                         <Input
                           placeholder="Create a password"
-                          type={showPassword ? 'text' : 'password'}
+                          type={showPassword ? "text" : "password"}
                           className="h-11 pr-10"
                           {...field}
                         />
@@ -159,14 +187,16 @@ const RegisterForm = () => {
                       <div className="relative">
                         <Input
                           placeholder="Confirm your password"
-                          type={showConfirmPassword ? 'text' : 'password'}
+                          type={showConfirmPassword ? "text" : "password"}
                           className="h-11 pr-10"
                           {...field}
                         />
                         <button
                           type="button"
                           className="absolute inset-y-0 right-0 flex items-center pr-3"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                         >
                           {showConfirmPassword ? (
                             <EyeOff className="h-4 w-4 text-gray-400" />
@@ -184,7 +214,7 @@ const RegisterForm = () => {
               {error && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md"
                 >
@@ -203,7 +233,7 @@ const RegisterForm = () => {
                     Creating account...
                   </>
                 ) : (
-                  'Create account'
+                  "Create account"
                 )}
               </Button>
             </form>

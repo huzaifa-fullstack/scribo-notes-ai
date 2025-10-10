@@ -1,8 +1,10 @@
+require('dotenv').config(); // Load environment variables first
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const passport = require('./src/config/passport');
 
 const connectDB = require('./src/config/database');
 const logger = require('./src/config/logger');
@@ -22,6 +24,9 @@ app.use(cors({
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
     credentials: true
 }));
+
+// Initialize Passport  // ADD THIS
+app.use(passport.initialize());
 
 // Rate limiting
 const limiter = rateLimit({

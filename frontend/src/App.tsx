@@ -9,6 +9,7 @@ import { useAuthStore } from "./store/authStore";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
+import AuthCallbackPage from "./pages/AuthCallbackPage";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import { Toaster } from "./components/ui/toaster";
 
@@ -71,6 +72,9 @@ function App() {
               </PublicRoute>
             }
           />
+
+          {/* Auth Callback Route */}
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
           {/* Protected Routes */}
           <Route

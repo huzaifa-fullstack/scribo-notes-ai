@@ -22,9 +22,13 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Password is required'],
         minlength: [6, 'Password must be at least 6 characters'],
         select: false
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true
     },
     avatar: {
         type: String,
@@ -51,10 +55,14 @@ const UserSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Encrypt password using bcrypt before saving
+// Make password optional for Google OAuth users
 UserSchema.pre('save', async function (next) {
-    // Only hash the password if it has been modified (or is new)
-    if (!this.isModified('password')) {
+    // Skip password hashing if user is Google OAuth user or password not modified
+    if (!this.isModified('password') || this.googleId) {
+        return next();
+    }
+
+    if (!this.password) {
         return next();
     }
 
