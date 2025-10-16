@@ -135,19 +135,25 @@ const ExportImportModal = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Export & Import Notes</DialogTitle>
+          <DialogTitle>
+            {noteId ? "Export Note" : "Export & Import All Notes"}
+          </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="export" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList
+            className={`grid w-full ${noteId ? "grid-cols-1" : "grid-cols-2"}`}
+          >
             <TabsTrigger value="export">
               <Download className="h-4 w-4 mr-2" />
               Export
             </TabsTrigger>
-            <TabsTrigger value="import">
-              <Upload className="h-4 w-4 mr-2" />
-              Import
-            </TabsTrigger>
+            {!noteId && (
+              <TabsTrigger value="import">
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Export Tab */}
@@ -187,23 +193,23 @@ const ExportImportModal = ({
                   </Label>
                 </div>
 
-                {noteId && (
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                    <RadioGroupItem value="pdf" id="export-pdf" />
-                    <Label
-                      htmlFor="export-pdf"
-                      className="flex items-center cursor-pointer flex-1"
-                    >
-                      <FileType className="h-4 w-4 mr-2 text-red-600" />
-                      <div>
-                        <div className="font-medium">PDF</div>
-                        <div className="text-xs text-gray-500">
-                          Print-ready document
-                        </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
+                  <RadioGroupItem value="pdf" id="export-pdf" />
+                  <Label
+                    htmlFor="export-pdf"
+                    className="flex items-center cursor-pointer flex-1"
+                  >
+                    <FileType className="h-4 w-4 mr-2 text-red-600" />
+                    <div>
+                      <div className="font-medium">PDF</div>
+                      <div className="text-xs text-gray-500">
+                        {noteId
+                          ? "Print-ready document"
+                          : "Single PDF with all notes"}
                       </div>
-                    </Label>
-                  </div>
-                )}
+                    </div>
+                  </Label>
+                </div>
               </RadioGroup>
             </div>
 
@@ -218,91 +224,96 @@ const ExportImportModal = ({
             </Button>
           </TabsContent>
 
-          {/* Import Tab */}
-          <TabsContent value="import" className="space-y-4">
-            <div className="space-y-3">
-              <Label>Import Format</Label>
-              <RadioGroup value={importFormat} onValueChange={setImportFormat}>
-                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                  <RadioGroupItem value="json" id="import-json" />
-                  <Label
-                    htmlFor="import-json"
-                    className="flex items-center cursor-pointer flex-1"
-                  >
-                    <FileJson className="h-4 w-4 mr-2 text-blue-600" />
-                    <div>
-                      <div className="font-medium">JSON</div>
-                      <div className="text-xs text-gray-500">
-                        Import from backup
+          {/* Import Tab - Only show for bulk operations */}
+          {!noteId && (
+            <TabsContent value="import" className="space-y-4">
+              <div className="space-y-3">
+                <Label>Import Format</Label>
+                <RadioGroup
+                  value={importFormat}
+                  onValueChange={setImportFormat}
+                >
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
+                    <RadioGroupItem value="json" id="import-json" />
+                    <Label
+                      htmlFor="import-json"
+                      className="flex items-center cursor-pointer flex-1"
+                    >
+                      <FileJson className="h-4 w-4 mr-2 text-blue-600" />
+                      <div>
+                        <div className="font-medium">JSON</div>
+                        <div className="text-xs text-gray-500">
+                          Import from backup
+                        </div>
                       </div>
-                    </div>
-                  </Label>
-                </div>
+                    </Label>
+                  </div>
 
-                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                  <RadioGroupItem value="markdown" id="import-markdown" />
-                  <Label
-                    htmlFor="import-markdown"
-                    className="flex items-center cursor-pointer flex-1"
-                  >
-                    <FileText className="h-4 w-4 mr-2 text-purple-600" />
-                    <div>
-                      <div className="font-medium">Markdown</div>
-                      <div className="text-xs text-gray-500">
-                        Import .md files
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
+                    <RadioGroupItem value="markdown" id="import-markdown" />
+                    <Label
+                      htmlFor="import-markdown"
+                      className="flex items-center cursor-pointer flex-1"
+                    >
+                      <FileText className="h-4 w-4 mr-2 text-purple-600" />
+                      <div>
+                        <div className="font-medium">Markdown</div>
+                        <div className="text-xs text-gray-500">
+                          Import .md files
+                        </div>
                       </div>
-                    </div>
-                  </Label>
-                </div>
+                    </Label>
+                  </div>
 
-                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                  <RadioGroupItem value="notion" id="import-notion" />
-                  <Label
-                    htmlFor="import-notion"
-                    className="flex items-center cursor-pointer flex-1"
-                  >
-                    <FileType className="h-4 w-4 mr-2 text-gray-600" />
-                    <div>
-                      <div className="font-medium">Notion</div>
-                      <div className="text-xs text-gray-500">
-                        Import from Notion export
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
+                    <RadioGroupItem value="notion" id="import-notion" />
+                    <Label
+                      htmlFor="import-notion"
+                      className="flex items-center cursor-pointer flex-1"
+                    >
+                      <FileType className="h-4 w-4 mr-2 text-gray-600" />
+                      <div>
+                        <div className="font-medium">Notion</div>
+                        <div className="text-xs text-gray-500">
+                          Import from Notion export
+                        </div>
                       </div>
-                    </div>
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="import-file">Select File</Label>
-              <input
-                id="import-file"
-                type="file"
-                accept=".json,.md,.txt"
-                onChange={handleFileChange}
-                className="block w-full text-sm text-gray-500
+              <div className="space-y-2">
+                <Label htmlFor="import-file">Select File</Label>
+                <input
+                  id="import-file"
+                  type="file"
+                  accept=".json,.md,.txt"
+                  onChange={handleFileChange}
+                  className="block w-full text-sm text-gray-500
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-md file:border-0
                   file:text-sm file:font-semibold
                   file:bg-blue-50 file:text-blue-700
                   hover:file:bg-blue-100
                   cursor-pointer"
-              />
-              {importFile && (
-                <p className="text-sm text-gray-600">
-                  Selected: {importFile.name}
-                </p>
-              )}
-            </div>
+                />
+                {importFile && (
+                  <p className="text-sm text-gray-600">
+                    Selected: {importFile.name}
+                  </p>
+                )}
+              </div>
 
-            <Button
-              onClick={handleImport}
-              className="w-full"
-              disabled={isLoading || !importFile}
-            >
-              {isLoading ? "Importing..." : "Import Notes"}
-            </Button>
-          </TabsContent>
+              <Button
+                onClick={handleImport}
+                className="w-full"
+                disabled={isLoading || !importFile}
+              >
+                {isLoading ? "Importing..." : "Import Notes"}
+              </Button>
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
     </Dialog>
