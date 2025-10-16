@@ -179,17 +179,31 @@ class ExportService {
     cleanHtmlTags(html) {
         if (!html || typeof html !== 'string') return '';
 
-        // Remove HTML tags and decode HTML entities
-        return html
-            .replace(/<[^>]*>/g, '') // Remove all HTML tags
-            .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
-            .replace(/&lt;/g, '<') // Replace &lt; with <
-            .replace(/&gt;/g, '>') // Replace &gt; with >
-            .replace(/&amp;/g, '&') // Replace &amp; with &
-            .replace(/&quot;/g, '"') // Replace &quot; with "
-            .replace(/&#39;/g, "'") // Replace &#39; with '
-            .replace(/\n\s*\n/g, '\n') // Remove extra line breaks
+        logger.info('Cleaning HTML content:', html);
+
+        // More comprehensive HTML tag removal and decoding
+        let cleaned = html
+            // Remove script and style contents completely
+            .replace(/<script[^>]*>.*?<\/script>/gi, '')
+            .replace(/<style[^>]*>.*?<\/style>/gi, '')
+            // Remove all HTML tags including self-closing ones
+            .replace(/<\/?[^>]+(>|$)/g, '')
+            // Decode common HTML entities
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&#x27;/g, "'")
+            .replace(/&apos;/g, "'")
+            // Clean up multiple spaces and line breaks
+            .replace(/\s+/g, ' ')
+            .replace(/\n\s*\n/g, '\n')
             .trim();
+
+        logger.info('Cleaned HTML result:', cleaned);
+        return cleaned;
     }
 
     // Export multiple notes as PDF
