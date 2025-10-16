@@ -140,18 +140,54 @@ const importNotes = async (req, res, next) => {
 
         let parsedNotes;
 
+        // Validate and parse based on format
         switch (format.toLowerCase()) {
             case 'json':
-                parsedNotes = exportService.parseImportedJSON(data);
+                // Validate JSON structure
+                try {
+                    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                    if (!parsed || typeof parsed !== 'object') {
+                        throw new Error('Invalid JSON structure');
+                    }
+                    parsedNotes = exportService.parseImportedJSON(data);
+                } catch (parseError) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid JSON file. Please ensure the file is in correct JSON format.'
+                    });
+                }
                 break;
 
             case 'notion':
-                parsedNotes = exportService.parseNotionFormat(data);
+                // Validate Notion format
+                try {
+                    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                    parsedNotes = exportService.parseNotionFormat(data);
+                } catch (parseError) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid Notion file. Please ensure the file is exported from Notion.'
+                    });
+                }
                 break;
 
             case 'markdown':
             case 'md':
-                parsedNotes = exportService.parseMarkdownFormat(data);
+                // Validate markdown format
+                if (typeof data !== 'string' || !data.trim()) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid Markdown file. Please ensure the file is in text format.'
+                    });
+                }
+                try {
+                    parsedNotes = exportService.parseMarkdownFormat(data);
+                } catch (parseError) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid Markdown format. Please check the file structure.'
+                    });
+                }
                 break;
 
             default:
@@ -159,6 +195,14 @@ const importNotes = async (req, res, next) => {
                     success: false,
                     error: 'Invalid format. Use json, notion, or markdown'
                 });
+        }
+
+        // Validate parsed notes
+        if (!parsedNotes || parsedNotes.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'No valid notes found in the file'
+            });
         }
 
         // Create notes

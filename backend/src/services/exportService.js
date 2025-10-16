@@ -193,17 +193,36 @@ class ExportService {
         try {
             const parsed = typeof data === 'string' ? JSON.parse(data) : data;
 
+            let notesArray = [];
+
             // Support both single note and multiple notes format
             if (parsed.notes && Array.isArray(parsed.notes)) {
-                return parsed.notes;
+                notesArray = parsed.notes;
             } else if (Array.isArray(parsed)) {
-                return parsed;
+                notesArray = parsed;
+            } else if (parsed.title || parsed.content) {
+                notesArray = [parsed];
             } else {
-                return [parsed];
+                throw new Error('Invalid JSON structure');
             }
+
+            // Validate and normalize each note
+            return notesArray.map(note => {
+                if (!note || typeof note !== 'object') {
+                    throw new Error('Invalid note object');
+                }
+
+                return {
+                    title: note.title || 'Untitled',
+                    content: note.content || '',
+                    tags: Array.isArray(note.tags) ? note.tags : [],
+                    isPinned: note.isPinned || false,
+                    isArchived: note.isArchived || false
+                };
+            });
         } catch (error) {
             logger.error('Parse imported JSON error:', error);
-            throw new Error('Invalid JSON format');
+            throw new Error(`Invalid JSON format: ${error.message}`);
         }
     }
 
@@ -234,39 +253,52 @@ class ExportService {
     // Parse Markdown files
     parseMarkdownFormat(markdown) {
         try {
-            const lines = markdown.split('\n');
-            let title = 'Untitled';
-            let content = '';
-            let tags = [];
+            // Split content by note separator (--- surrounded by blank lines)
+            const noteSections = markdown.split(/\n---\n\n/).filter(section => section.trim());
 
-            // Extract title (first # heading)
-            const titleMatch = lines.find(line => line.startsWith('# '));
-            if (titleMatch) {
-                title = titleMatch.replace('# ', '').trim();
+            // If no separators found, treat whole content as single note
+            if (noteSections.length === 0) {
+                noteSections.push(markdown);
             }
 
-            // Extract content (everything except metadata)
-            const contentLines = lines.filter(line =>
-                !line.startsWith('# ') &&
-                !line.startsWith('**Tags:**') &&
-                !line.startsWith('---') &&
-                !line.startsWith('Created:') &&
-                !line.startsWith('Updated:')
-            );
-            content = contentLines.join('\n').trim();
+            const notes = noteSections.map(section => {
+                const lines = section.trim().split('\n');
+                let title = 'Untitled';
+                let content = '';
+                let tags = [];
 
-            // Extract tags
-            const tagsLine = lines.find(line => line.startsWith('**Tags:**'));
-            if (tagsLine) {
-                const tagsStr = tagsLine.replace('**Tags:**', '').trim();
-                tags = tagsStr.split(',').map(tag => tag.replace('#', '').trim()).filter(Boolean);
-            }
+                // Extract title (first # heading)
+                const titleMatch = lines.find(line => line.startsWith('# '));
+                if (titleMatch) {
+                    title = titleMatch.replace('# ', '').trim();
+                }
 
-            return [{
-                title,
-                content,
-                tags
-            }];
+                // Extract content (everything except metadata)
+                const contentLines = lines.filter(line =>
+                    !line.startsWith('# ') &&
+                    !line.startsWith('**Tags:**') &&
+                    !line.startsWith('---') &&
+                    !line.startsWith('Created:') &&
+                    !line.startsWith('Updated:')
+                );
+                content = contentLines.join('\n').trim();
+
+                // Extract tags
+                const tagsLine = lines.find(line => line.startsWith('**Tags:**'));
+                if (tagsLine) {
+                    const tagsStr = tagsLine.replace('**Tags:**', '').trim();
+                    tags = tagsStr.split(',').map(tag => tag.replace('#', '').trim()).filter(Boolean);
+                }
+
+                return {
+                    title,
+                    content,
+                    tags
+                };
+            });
+
+            logger.info(`Parsed ${notes.length} notes from markdown`);
+            return notes;
         } catch (error) {
             logger.error('Parse Markdown format error:', error);
             throw new Error('Invalid Markdown format');
