@@ -87,8 +87,9 @@ class ExportService {
             });
             yPosition -= 30;
 
-            // Content
-            const contentLines = this.splitTextIntoLines(note.content, pageWidth, font, 12);
+            // Content - clean HTML tags for PDF
+            const cleanContent = this.cleanHtmlTags(note.content);
+            const contentLines = this.splitTextIntoLines(cleanContent, pageWidth, font, 12);
 
             for (const line of contentLines) {
                 if (yPosition < 100) {
@@ -174,6 +175,149 @@ class ExportService {
         return lines;
     }
 
+    // Clean HTML tags from content for PDF export
+    cleanHtmlTags(html) {
+        if (!html || typeof html !== 'string') return '';
+
+        // Remove HTML tags and decode HTML entities
+        return html
+            .replace(/<[^>]*>/g, '') // Remove all HTML tags
+            .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+            .replace(/&lt;/g, '<') // Replace &lt; with <
+            .replace(/&gt;/g, '>') // Replace &gt; with >
+            .replace(/&amp;/g, '&') // Replace &amp; with &
+            .replace(/&quot;/g, '"') // Replace &quot; with "
+            .replace(/&#39;/g, "'") // Replace &#39; with '
+            .replace(/\n\s*\n/g, '\n') // Remove extra line breaks
+            .trim();
+    }
+
+    // Export multiple notes as PDF
+    async exportMultipleAsPDF(notes) {
+        try {
+            const pdfDoc = await PDFDocument.create();
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+            let currentPage = pdfDoc.addPage([595.28, 841.89]); // A4 size
+            let yPosition = 750;
+            const margin = 50;
+            const pageWidth = currentPage.getWidth() - 2 * margin;
+
+            // Title Page
+            currentPage.drawText('Notes Export', {
+                x: margin,
+                y: yPosition,
+                size: 24,
+                font: boldFont,
+                color: rgb(0.15, 0.38, 0.91),
+            });
+            yPosition -= 40;
+
+            currentPage.drawText(`Total Notes: ${notes.length}`, {
+                x: margin,
+                y: yPosition,
+                size: 14,
+                font: font,
+                color: rgb(0.4, 0.4, 0.4),
+            });
+            yPosition -= 30;
+
+            currentPage.drawText(`Exported on: ${new Date().toLocaleString()}`, {
+                x: margin,
+                y: yPosition,
+                size: 12,
+                font: font,
+                color: rgb(0.4, 0.4, 0.4),
+            });
+            yPosition -= 60;
+
+            // Process each note
+            for (let i = 0; i < notes.length; i++) {
+                const note = notes[i];
+
+                // Check if we need a new page for the note
+                if (yPosition < 200) {
+                    currentPage = pdfDoc.addPage([595.28, 841.89]);
+                    yPosition = 750;
+                }
+
+                // Note separator (except for first note)
+                if (i > 0) {
+                    currentPage.drawLine({
+                        start: { x: margin, y: yPosition + 10 },
+                        end: { x: pageWidth + margin, y: yPosition + 10 },
+                        thickness: 1,
+                        color: rgb(0.8, 0.8, 0.8),
+                    });
+                    yPosition -= 30;
+                }
+
+                // Note title
+                currentPage.drawText(note.title, {
+                    x: margin,
+                    y: yPosition,
+                    size: 16,
+                    font: boldFont,
+                    color: rgb(0.15, 0.38, 0.91),
+                });
+                yPosition -= 25;
+
+                // Note metadata
+                const createdText = `Created: ${new Date(note.createdAt).toLocaleString()}`;
+                currentPage.drawText(createdText, {
+                    x: margin,
+                    y: yPosition,
+                    size: 9,
+                    font: font,
+                    color: rgb(0.4, 0.4, 0.4),
+                });
+                yPosition -= 20;
+
+                // Note content
+                const cleanContent = this.cleanHtmlTags(note.content);
+                const contentLines = this.splitTextIntoLines(cleanContent, pageWidth, font, 11);
+
+                for (const line of contentLines) {
+                    if (yPosition < 100) {
+                        currentPage = pdfDoc.addPage([595.28, 841.89]);
+                        yPosition = 750;
+                    }
+
+                    currentPage.drawText(line, {
+                        x: margin,
+                        y: yPosition,
+                        size: 11,
+                        font: font,
+                        color: rgb(0, 0, 0),
+                    });
+                    yPosition -= 16;
+                }
+
+                // Note tags
+                if (note.tags && note.tags.length > 0) {
+                    yPosition -= 10;
+                    const tagsText = `Tags: ${note.tags.map(tag => `#${tag}`).join(', ')}`;
+                    currentPage.drawText(tagsText, {
+                        x: margin,
+                        y: yPosition,
+                        size: 9,
+                        font: font,
+                        color: rgb(0.15, 0.38, 0.91),
+                    });
+                    yPosition -= 30;
+                }
+
+                yPosition -= 20; // Space between notes
+            }
+
+            return await pdfDoc.save();
+        } catch (error) {
+            logger.error('Export multiple notes as PDF error:', error);
+            throw error;
+        }
+    }
+
     // Export multiple notes as JSON
     exportMultipleAsJSON(notes) {
         try {
@@ -253,10 +397,29 @@ class ExportService {
     // Parse Markdown files
     parseMarkdownFormat(markdown) {
         try {
-            // Split content by note separator (--- surrounded by blank lines)
-            const noteSections = markdown.split(/\n---\n\n/).filter(section => section.trim());
+            // Try different separator patterns to split notes
+            let noteSections = [];
 
-            // If no separators found, treat whole content as single note
+            // Pattern 1: --- with blank lines on both sides
+            if (markdown.includes('\n---\n\n')) {
+                noteSections = markdown.split(/\n---\n\n/).filter(section => section.trim());
+            }
+            // Pattern 2: --- with just newlines 
+            else if (markdown.includes('\n---\n')) {
+                noteSections = markdown.split(/\n---\n/).filter(section => section.trim());
+            }
+            // Pattern 3: --- at start of line
+            else if (markdown.includes('\n---')) {
+                noteSections = markdown.split(/\n---/).filter(section => section.trim());
+            }
+            // Pattern 4: Single note (no separators)
+            else {
+                noteSections = [markdown];
+            }
+
+            logger.info(`Found ${noteSections.length} note sections in markdown`);
+
+            // If no valid sections found, treat whole content as single note
             if (noteSections.length === 0) {
                 noteSections.push(markdown);
             }
