@@ -287,21 +287,26 @@ const DashboardPage = () => {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white border-2 border-gray-200">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-xl font-semibold text-gray-900">
+              Are you sure?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600">
               This action cannot be undone. This will permanently delete your
               note.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setNoteToDelete(null)}>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel
+              onClick={() => setNoteToDelete(null)}
+              className="border-gray-300 hover:bg-gray-50"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Delete
             </AlertDialogAction>
