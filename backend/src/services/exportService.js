@@ -6,7 +6,7 @@ class ExportService {
     // Clean HTML tags from content for PDF export
     cleanHtmlTags(htmlContent) {
         if (!htmlContent) return '';
-        
+
         let cleanText = htmlContent
             // Handle common HTML elements
             .replace(/<p[^>]*>/gi, '')
@@ -59,17 +59,17 @@ class ExportService {
     // Split text into lines that fit within the given width
     splitTextIntoLines(text, maxLineWidth, font, fontSize) {
         if (!text) return [];
-        
+
         const words = text.split(/\s+/);
         const lines = [];
         let currentLine = '';
 
         for (const word of words) {
             const testLine = currentLine ? `${currentLine} ${word}` : word;
-            
+
             try {
                 const testWidth = font.widthOfTextAtSize(testLine, fontSize);
-                
+
                 if (testWidth <= maxLineWidth) {
                     currentLine = testLine;
                 } else {
@@ -82,7 +82,7 @@ class ExportService {
                         while (remainingWord.length > 0) {
                             let charCount = 0;
                             let testWord = '';
-                            
+
                             for (let i = 0; i < remainingWord.length; i++) {
                                 testWord = remainingWord.substring(0, i + 1);
                                 try {
@@ -94,7 +94,7 @@ class ExportService {
                                     break;
                                 }
                             }
-                            
+
                             if (charCount === 0) charCount = 1; // At least one character
                             lines.push(remainingWord.substring(0, charCount));
                             remainingWord = remainingWord.substring(charCount);
@@ -206,14 +206,14 @@ class ExportService {
 
             // Content - Clean HTML tags before processing
             const cleanContent = this.cleanHtmlTags(note.content);
-            
+
             // Split content into paragraphs and handle line breaks
             const paragraphs = cleanContent.split('\n').filter(p => p.trim());
-            
+
             for (const paragraph of paragraphs) {
                 if (paragraph.trim()) {
                     const contentLines = this.splitTextIntoLines(paragraph.trim(), pageWidth, font, 12);
-                    
+
                     for (const line of contentLines) {
                         if (yPosition < 120) {
                             // Add new page if needed
@@ -230,7 +230,7 @@ class ExportService {
                         });
                         yPosition -= 22;
                     }
-                    
+
                     // Add space between paragraphs
                     yPosition -= 8;
                 }
@@ -279,10 +279,10 @@ class ExportService {
     async exportMultipleAsPDF(notes) {
         try {
             const pdfDoc = await PDFDocument.create();
-            
+
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-            
+
             let currentPage = pdfDoc.addPage([595.28, 841.89]); // A4 size
             let yPosition = 750;
             const margin = 50;
@@ -290,7 +290,7 @@ class ExportService {
 
             for (let i = 0; i < notes.length; i++) {
                 const note = notes[i];
-                
+
                 // Check if we need a new page for the title (reserve space for title + some content)
                 if (yPosition < 150) {
                     currentPage = pdfDoc.addPage([595.28, 841.89]);
@@ -310,11 +310,11 @@ class ExportService {
                 // Note content with HTML cleaning
                 const cleanContent = this.cleanHtmlTags(note.content);
                 const paragraphs = cleanContent.split('\n').filter(p => p.trim());
-                
+
                 for (const paragraph of paragraphs) {
                     if (paragraph.trim()) {
                         const contentLines = this.splitTextIntoLines(paragraph.trim(), pageWidth, font, 11);
-                        
+
                         for (const line of contentLines) {
                             if (yPosition < 80) {
                                 currentPage = pdfDoc.addPage([595.28, 841.89]);
@@ -340,7 +340,7 @@ class ExportService {
                         currentPage = pdfDoc.addPage([595.28, 841.89]);
                         yPosition = 750;
                     }
-                    
+
                     yPosition -= 10;
                     const tagsText = `Tags: ${note.tags.map(tag => `#${tag}`).join(', ')}`;
                     currentPage.drawText(tagsText, {
@@ -359,7 +359,7 @@ class ExportService {
                         currentPage = pdfDoc.addPage([595.28, 841.89]);
                         yPosition = 750;
                     }
-                    
+
                     yPosition -= 20;
                     currentPage.drawText('─'.repeat(60), {
                         x: margin,
@@ -406,6 +406,163 @@ class ExportService {
         return lines;
     }
 
+    // Clean HTML tags from content for PDF export
+    cleanHtmlTags(html) {
+        if (!html || typeof html !== 'string') return '';
+
+        logger.info('Cleaning HTML content:', html);
+
+        // More comprehensive HTML tag removal and decoding
+        let cleaned = html
+            // Remove script and style contents completely
+            .replace(/<script[^>]*>.*?<\/script>/gi, '')
+            .replace(/<style[^>]*>.*?<\/style>/gi, '')
+            // Remove all HTML tags including self-closing ones
+            .replace(/<\/?[^>]+(>|$)/g, '')
+            // Decode common HTML entities
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&#x27;/g, "'")
+            .replace(/&apos;/g, "'")
+            // Clean up multiple spaces and line breaks
+            .replace(/\s+/g, ' ')
+            .replace(/\n\s*\n/g, '\n')
+            .trim();
+
+        logger.info('Cleaned HTML result:', cleaned);
+        return cleaned;
+    }
+
+    // Export multiple notes as PDF
+    async exportMultipleAsPDF(notes) {
+        try {
+            const pdfDoc = await PDFDocument.create();
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+            let currentPage = pdfDoc.addPage([595.28, 841.89]); // A4 size
+            let yPosition = 750;
+            const margin = 50;
+            const pageWidth = currentPage.getWidth() - 2 * margin;
+
+            // Title Page
+            currentPage.drawText('Notes Export', {
+                x: margin,
+                y: yPosition,
+                size: 24,
+                font: boldFont,
+                color: rgb(0.15, 0.38, 0.91),
+            });
+            yPosition -= 40;
+
+            currentPage.drawText(`Total Notes: ${notes.length}`, {
+                x: margin,
+                y: yPosition,
+                size: 14,
+                font: font,
+                color: rgb(0.4, 0.4, 0.4),
+            });
+            yPosition -= 30;
+
+            currentPage.drawText(`Exported on: ${new Date().toLocaleString()}`, {
+                x: margin,
+                y: yPosition,
+                size: 12,
+                font: font,
+                color: rgb(0.4, 0.4, 0.4),
+            });
+            yPosition -= 60;
+
+            // Process each note
+            for (let i = 0; i < notes.length; i++) {
+                const note = notes[i];
+
+                // Check if we need a new page for the note
+                if (yPosition < 200) {
+                    currentPage = pdfDoc.addPage([595.28, 841.89]);
+                    yPosition = 750;
+                }
+
+                // Note separator (except for first note)
+                if (i > 0) {
+                    currentPage.drawLine({
+                        start: { x: margin, y: yPosition + 10 },
+                        end: { x: pageWidth + margin, y: yPosition + 10 },
+                        thickness: 1,
+                        color: rgb(0.8, 0.8, 0.8),
+                    });
+                    yPosition -= 30;
+                }
+
+                // Note title
+                currentPage.drawText(note.title, {
+                    x: margin,
+                    y: yPosition,
+                    size: 16,
+                    font: boldFont,
+                    color: rgb(0.15, 0.38, 0.91),
+                });
+                yPosition -= 25;
+
+                // Note metadata
+                const createdText = `Created: ${new Date(note.createdAt).toLocaleString()}`;
+                currentPage.drawText(createdText, {
+                    x: margin,
+                    y: yPosition,
+                    size: 9,
+                    font: font,
+                    color: rgb(0.4, 0.4, 0.4),
+                });
+                yPosition -= 20;
+
+                // Note content
+                const cleanContent = this.cleanHtmlTags(note.content);
+                const contentLines = this.splitTextIntoLines(cleanContent, pageWidth, font, 11);
+
+                for (const line of contentLines) {
+                    if (yPosition < 100) {
+                        currentPage = pdfDoc.addPage([595.28, 841.89]);
+                        yPosition = 750;
+                    }
+
+                    currentPage.drawText(line, {
+                        x: margin,
+                        y: yPosition,
+                        size: 11,
+                        font: font,
+                        color: rgb(0, 0, 0),
+                    });
+                    yPosition -= 16;
+                }
+
+                // Note tags
+                if (note.tags && note.tags.length > 0) {
+                    yPosition -= 10;
+                    const tagsText = `Tags: ${note.tags.map(tag => `#${tag}`).join(', ')}`;
+                    currentPage.drawText(tagsText, {
+                        x: margin,
+                        y: yPosition,
+                        size: 9,
+                        font: font,
+                        color: rgb(0.15, 0.38, 0.91),
+                    });
+                    yPosition -= 30;
+                }
+
+                yPosition -= 20; // Space between notes
+            }
+
+            return await pdfDoc.save();
+        } catch (error) {
+            logger.error('Export multiple notes as PDF error:', error);
+            throw error;
+        }
+    }
+
     // Export multiple notes as JSON
     exportMultipleAsJSON(notes) {
         try {
@@ -425,17 +582,36 @@ class ExportService {
         try {
             const parsed = typeof data === 'string' ? JSON.parse(data) : data;
 
+            let notesArray = [];
+
             // Support both single note and multiple notes format
             if (parsed.notes && Array.isArray(parsed.notes)) {
-                return parsed.notes;
+                notesArray = parsed.notes;
             } else if (Array.isArray(parsed)) {
-                return parsed;
+                notesArray = parsed;
+            } else if (parsed.title || parsed.content) {
+                notesArray = [parsed];
             } else {
-                return [parsed];
+                throw new Error('Invalid JSON structure');
             }
+
+            // Validate and normalize each note
+            return notesArray.map(note => {
+                if (!note || typeof note !== 'object') {
+                    throw new Error('Invalid note object');
+                }
+
+                return {
+                    title: note.title || 'Untitled',
+                    content: note.content || '',
+                    tags: Array.isArray(note.tags) ? note.tags : [],
+                    isPinned: note.isPinned || false,
+                    isArchived: note.isArchived || false
+                };
+            });
         } catch (error) {
             logger.error('Parse imported JSON error:', error);
-            throw new Error('Invalid JSON format');
+            throw new Error(`Invalid JSON format: ${error.message}`);
         }
     }
 
@@ -466,39 +642,71 @@ class ExportService {
     // Parse Markdown files
     parseMarkdownFormat(markdown) {
         try {
-            const lines = markdown.split('\n');
-            let title = 'Untitled';
-            let content = '';
-            let tags = [];
+            // Try different separator patterns to split notes
+            let noteSections = [];
 
-            // Extract title (first # heading)
-            const titleMatch = lines.find(line => line.startsWith('# '));
-            if (titleMatch) {
-                title = titleMatch.replace('# ', '').trim();
+            // Pattern 1: --- with blank lines on both sides
+            if (markdown.includes('\n---\n\n')) {
+                noteSections = markdown.split(/\n---\n\n/).filter(section => section.trim());
+            }
+            // Pattern 2: --- with just newlines 
+            else if (markdown.includes('\n---\n')) {
+                noteSections = markdown.split(/\n---\n/).filter(section => section.trim());
+            }
+            // Pattern 3: --- at start of line
+            else if (markdown.includes('\n---')) {
+                noteSections = markdown.split(/\n---/).filter(section => section.trim());
+            }
+            // Pattern 4: Single note (no separators)
+            else {
+                noteSections = [markdown];
             }
 
-            // Extract content (everything except metadata)
-            const contentLines = lines.filter(line =>
-                !line.startsWith('# ') &&
-                !line.startsWith('**Tags:**') &&
-                !line.startsWith('---') &&
-                !line.startsWith('Created:') &&
-                !line.startsWith('Updated:')
-            );
-            content = contentLines.join('\n').trim();
+            logger.info(`Found ${noteSections.length} note sections in markdown`);
 
-            // Extract tags
-            const tagsLine = lines.find(line => line.startsWith('**Tags:**'));
-            if (tagsLine) {
-                const tagsStr = tagsLine.replace('**Tags:**', '').trim();
-                tags = tagsStr.split(',').map(tag => tag.replace('#', '').trim()).filter(Boolean);
+            // If no valid sections found, treat whole content as single note
+            if (noteSections.length === 0) {
+                noteSections.push(markdown);
             }
 
-            return [{
-                title,
-                content,
-                tags
-            }];
+            const notes = noteSections.map(section => {
+                const lines = section.trim().split('\n');
+                let title = 'Untitled';
+                let content = '';
+                let tags = [];
+
+                // Extract title (first # heading)
+                const titleMatch = lines.find(line => line.startsWith('# '));
+                if (titleMatch) {
+                    title = titleMatch.replace('# ', '').trim();
+                }
+
+                // Extract content (everything except metadata)
+                const contentLines = lines.filter(line =>
+                    !line.startsWith('# ') &&
+                    !line.startsWith('**Tags:**') &&
+                    !line.startsWith('---') &&
+                    !line.startsWith('Created:') &&
+                    !line.startsWith('Updated:')
+                );
+                content = contentLines.join('\n').trim();
+
+                // Extract tags
+                const tagsLine = lines.find(line => line.startsWith('**Tags:**'));
+                if (tagsLine) {
+                    const tagsStr = tagsLine.replace('**Tags:**', '').trim();
+                    tags = tagsStr.split(',').map(tag => tag.replace('#', '').trim()).filter(Boolean);
+                }
+
+                return {
+                    title,
+                    content,
+                    tags
+                };
+            });
+
+            logger.info(`Parsed ${notes.length} notes from markdown`);
+            return notes;
         } catch (error) {
             logger.error('Parse Markdown format error:', error);
             throw new Error('Invalid Markdown format');

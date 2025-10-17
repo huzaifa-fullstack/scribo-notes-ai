@@ -1,5 +1,12 @@
 import { motion } from "framer-motion";
-import { Pin, Archive, Edit, Trash2, MoreVertical } from "lucide-react";
+import {
+  Pin,
+  Archive,
+  Edit,
+  Trash2,
+  MoreVertical,
+  Download,
+} from "lucide-react";
 import type { Note } from "../../types/note";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { Button } from "../ui/button";
@@ -18,6 +25,7 @@ interface NoteCardProps {
   onDelete: (id: string) => void;
   onTogglePin: (id: string) => void;
   onToggleArchive: (id: string) => void;
+  onExport: (id: string) => void;
 }
 
 const NoteCard = ({
@@ -27,6 +35,7 @@ const NoteCard = ({
   onDelete,
   onTogglePin,
   onToggleArchive,
+  onExport,
 }: NoteCardProps) => {
   const handleDropdownClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -84,6 +93,15 @@ const NoteCard = ({
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onExport(note._id);
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(e) => {
