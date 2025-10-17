@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Download } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useNotesStore } from "../store/notesStore";
 import { useAuthStore } from "../store/authStore";
@@ -7,6 +7,7 @@ import NoteCard from "../components/notes/NoteCard";
 import CreateNoteModal from "../components/notes/CreateNoteModal";
 import EditNoteModal from "../components/notes/EditNoteModal";
 import ViewNoteModal from "../components/notes/ViewNoteModal";
+import ExportImportModal from "../components/notes/ExportImportModal";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import type { Note } from "../types/note";
@@ -37,6 +38,8 @@ const DashboardPage = () => {
   const [filterArchived, setFilterArchived] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewNote, setViewNote] = useState<Note | null>(null);
+  const [exportImportModalOpen, setExportImportModalOpen] = useState(false);
+  const [exportNoteId, setExportNoteId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchNotes();
@@ -110,6 +113,20 @@ const DashboardPage = () => {
     setViewModalOpen(true);
   };
 
+  const handleExportNote = (noteId: string) => {
+    setExportNoteId(noteId);
+    setExportImportModalOpen(true);
+  };
+
+  const handleBulkExportImport = () => {
+    setExportNoteId(null);
+    setExportImportModalOpen(true);
+  };
+
+  const handleImportSuccess = () => {
+    fetchNotes(); // Refresh notes after import
+  };
+
   const filteredNotes = notes.filter((note) => {
     const matchesSearch =
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -161,6 +178,10 @@ const DashboardPage = () => {
             >
               <Filter className="h-4 w-4 mr-2" />
               {filterArchived ? "Archived" : "Active"}
+            </Button>
+            <Button variant="outline" onClick={handleBulkExportImport}>
+              <Download className="h-4 w-4 mr-2" />
+              Export/Import
             </Button>
             <Button onClick={() => setCreateModalOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
@@ -224,6 +245,7 @@ const DashboardPage = () => {
                         onDelete={handleDeleteClick}
                         onTogglePin={handleTogglePin}
                         onToggleArchive={handleToggleArchive}
+                        onExport={handleExportNote}
                       />
                     ))}
                   </AnimatePresence>
@@ -250,6 +272,7 @@ const DashboardPage = () => {
                         onDelete={handleDeleteClick}
                         onTogglePin={handleTogglePin}
                         onToggleArchive={handleToggleArchive}
+                        onExport={handleExportNote}
                       />
                     ))}
                   </AnimatePresence>
@@ -282,6 +305,16 @@ const DashboardPage = () => {
           setViewModalOpen(false);
           setViewNote(null);
         }}
+      />
+
+      <ExportImportModal
+        open={exportImportModalOpen}
+        onClose={() => {
+          setExportImportModalOpen(false);
+          setExportNoteId(null);
+        }}
+        noteId={exportNoteId}
+        onImportSuccess={handleImportSuccess}
       />
 
       {/* Delete Confirmation Dialog */}
