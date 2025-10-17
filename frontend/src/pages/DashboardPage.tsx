@@ -168,7 +168,7 @@ const DashboardPage = () => {
               onClick={() => setFilterArchived(!filterArchived)}
               className="px-3"
             >
-              <Filter className="h-4 w-4 mr-1" />
+              <Filter className="h-4 w-4 mr-1.5" />
               {filterArchived ? "Archived" : "Active"}
             </Button>
             <Button
@@ -176,11 +176,11 @@ const DashboardPage = () => {
               onClick={() => handleExport()}
               className="px-3"
             >
-              <Download className="h-4 w-4 mr-1" />
+              <Download className="h-4 w-4 mr-1.5" />
               Export/Import
             </Button>
             <Button onClick={() => setCreateModalOpen(true)} className="px-3">
-              <Plus className="h-4 w-4 mr-1" />
+              <Plus className="h-4 w-4 mr-1.5" />
               New Note
             </Button>
           </div>
