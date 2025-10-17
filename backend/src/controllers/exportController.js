@@ -47,7 +47,8 @@ const exportNote = async (req, res, next) => {
                 break;
 
             case 'pdf':
-                exportData = await exportService.exportAsPDF(note);
+                const pdfBytes = await exportService.exportAsPDF(note);
+                exportData = Buffer.from(pdfBytes);
                 contentType = 'application/pdf';
                 filename = `${note.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
                 break;
@@ -105,10 +106,17 @@ const exportAllNotes = async (req, res, next) => {
                 filename = `notes_backup_${Date.now()}.md`;
                 break;
 
+            case 'pdf':
+                const pdfBytesMultiple = await exportService.exportMultipleAsPDF(notes);
+                exportData = Buffer.from(pdfBytesMultiple);
+                contentType = 'application/pdf';
+                filename = `notes_backup_${Date.now()}.pdf`;
+                break;
+
             default:
                 return res.status(400).json({
                     success: false,
-                    error: 'Invalid format. Use json or markdown for bulk export'
+                    error: 'Invalid format. Use json, markdown, or pdf for bulk export'
                 });
         }
 
