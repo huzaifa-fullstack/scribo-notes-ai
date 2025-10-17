@@ -171,20 +171,21 @@ const DashboardPage = () => {
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <Button
               variant={filterArchived ? "default" : "outline"}
               onClick={() => setFilterArchived(!filterArchived)}
+              className="px-3"
             >
-              <Filter className="h-4 w-4 mr-2" />
+              <Filter className="h-4 w-4 mr-1" />
               {filterArchived ? "Archived" : "Active"}
             </Button>
-            <Button variant="outline" onClick={handleBulkExportImport}>
-              <Download className="h-4 w-4 mr-2" />
+            <Button variant="outline" onClick={handleBulkExportImport} className="px-3">
+              <Download className="h-4 w-4 mr-1" />
               Export/Import
             </Button>
-            <Button onClick={() => setCreateModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button onClick={() => setCreateModalOpen(true)} className="px-3">
+              <Plus className="h-4 w-4 mr-1" />
               New Note
             </Button>
           </div>

@@ -101,7 +101,7 @@ const RegisterForm = () => {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-2 text-gray-500">
-                Or continue with email
+                Or create account with email
               </span>
             </div>
           </div>
