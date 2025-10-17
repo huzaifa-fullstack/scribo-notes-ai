@@ -504,6 +504,121 @@ class ExportService {
             throw new Error('Invalid Markdown format');
         }
     }
+
+    // Export multiple notes as PDF
+    async exportMultipleAsPDF(notes) {
+        try {
+            const pdfDoc = await PDFDocument.create();
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+            for (let i = 0; i < notes.length; i++) {
+                const note = notes[i];
+                const page = pdfDoc.addPage([595.28, 841.89]); // A4 size
+                const { width, height } = page.getSize();
+
+                let yPosition = height - 50;
+                const margin = 50;
+                const maxWidth = width - 2 * margin;
+                const lineHeight = 16;
+
+                // Title
+                const titleLines = this.splitTextIntoLines(note.title, boldFont, 18, maxWidth);
+                for (const line of titleLines) {
+                    page.drawText(line, {
+                        x: margin,
+                        y: yPosition,
+                        size: 18,
+                        font: boldFont,
+                        color: rgb(0, 0, 0),
+                    });
+                    yPosition -= 22;
+                }
+
+                yPosition -= 10;
+
+                // Content
+                const cleanContent = this.cleanHtmlTags(note.content);
+                const contentLines = this.splitTextIntoLines(cleanContent, font, 12, maxWidth);
+
+                for (const line of contentLines) {
+                    if (yPosition < 50) {
+                        // Add new page if needed
+                        const newPage = pdfDoc.addPage([595.28, 841.89]);
+                        yPosition = height - 50;
+
+                        newPage.drawText(line, {
+                            x: margin,
+                            y: yPosition,
+                            size: 12,
+                            font: font,
+                            color: rgb(0, 0, 0),
+                        });
+                    } else {
+                        page.drawText(line, {
+                            x: margin,
+                            y: yPosition,
+                            size: 12,
+                            font: font,
+                            color: rgb(0, 0, 0),
+                        });
+                    }
+                    yPosition -= lineHeight;
+                }
+
+                // Tags
+                if (note.tags && note.tags.length > 0) {
+                    yPosition -= 10;
+                    const tagsText = `Tags: ${note.tags.map(tag => `#${tag}`).join(', ')}`;
+                    const tagsLines = this.splitTextIntoLines(tagsText, font, 10, maxWidth);
+
+                    for (const line of tagsLines) {
+                        if (yPosition < 50) {
+                            const newPage = pdfDoc.addPage([595.28, 841.89]);
+                            yPosition = height - 50;
+
+                            newPage.drawText(line, {
+                                x: margin,
+                                y: yPosition,
+                                size: 10,
+                                font: font,
+                                color: rgb(0.5, 0.5, 0.5),
+                            });
+                        } else {
+                            page.drawText(line, {
+                                x: margin,
+                                y: yPosition,
+                                size: 10,
+                                font: font,
+                                color: rgb(0.5, 0.5, 0.5),
+                            });
+                        }
+                        yPosition -= 12;
+                    }
+                }
+
+                // Add page separator if not the last note
+                if (i < notes.length - 1) {
+                    yPosition -= 20;
+                    if (yPosition > 50) {
+                        page.drawText('─'.repeat(50), {
+                            x: margin,
+                            y: yPosition,
+                            size: 12,
+                            font: font,
+                            color: rgb(0.7, 0.7, 0.7),
+                        });
+                    }
+                }
+            }
+
+            const pdfBytes = await pdfDoc.save();
+            return Buffer.from(pdfBytes);
+        } catch (error) {
+            logger.error('Export multiple as PDF error:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = new ExportService();
