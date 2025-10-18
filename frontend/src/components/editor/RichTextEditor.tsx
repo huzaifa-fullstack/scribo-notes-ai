@@ -9,14 +9,9 @@ import { Color } from "@tiptap/extension-color";
 import {
   Bold,
   Italic,
-  List,
-  ListOrdered,
-  Quote,
   Undo,
   Redo,
   Code,
-  Heading1,
-  Heading2,
   Strikethrough,
   Highlighter,
 } from "lucide-react";
@@ -55,6 +50,7 @@ const RichTextEditor = ({
           "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[200px] max-w-none",
       },
     },
+    immediatelyRender: false,
   });
 
   // Sync editor content when prop changes (fixes blank edit issue)
@@ -71,7 +67,13 @@ const RichTextEditor = ({
   const MenuButton = ({ onClick, active, children }: any) => (
     <button
       type="button"
-      onClick={onClick}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (editor && !editor.isDestroyed) {
+          onClick();
+        }
+      }}
       className={`p-2 rounded hover:bg-gray-200 transition-colors ${
         active ? "bg-gray-200 text-blue-600" : "text-gray-600"
       }`}
@@ -85,21 +87,33 @@ const RichTextEditor = ({
       {/* Toolbar */}
       <div className="bg-gray-50 border-b border-gray-300 p-2 flex flex-wrap gap-1">
         <MenuButton
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          onClick={() => {
+            if (editor && !editor.isDestroyed) {
+              editor.chain().focus().toggleBold().run();
+            }
+          }}
           active={editor.isActive("bold")}
         >
           <Bold className="h-4 w-4" />
         </MenuButton>
 
         <MenuButton
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          onClick={() => {
+            if (editor && !editor.isDestroyed) {
+              editor.chain().focus().toggleItalic().run();
+            }
+          }}
           active={editor.isActive("italic")}
         >
           <Italic className="h-4 w-4" />
         </MenuButton>
 
         <MenuButton
-          onClick={() => editor.chain().focus().toggleStrike().run()}
+          onClick={() => {
+            if (editor && !editor.isDestroyed) {
+              editor.chain().focus().toggleStrike().run();
+            }
+          }}
           active={editor.isActive("strike")}
         >
           <Strikethrough className="h-4 w-4" />
@@ -108,57 +122,22 @@ const RichTextEditor = ({
         <div className="w-px bg-gray-300 mx-1" />
 
         <MenuButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
-          }
-          active={editor.isActive("heading", { level: 1 })}
-        >
-          <Heading1 className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-          active={editor.isActive("heading", { level: 2 })}
-        >
-          <Heading2 className="h-4 w-4" />
-        </MenuButton>
-
-        <div className="w-px bg-gray-300 mx-1" />
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          active={editor.isActive("bulletList")}
-        >
-          <List className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          active={editor.isActive("orderedList")}
-        >
-          <ListOrdered className="h-4 w-4" />
-        </MenuButton>
-
-        <div className="w-px bg-gray-300 mx-1" />
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          active={editor.isActive("blockquote")}
-        >
-          <Quote className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          onClick={() => {
+            if (editor && !editor.isDestroyed) {
+              editor.chain().focus().toggleCodeBlock().run();
+            }
+          }}
           active={editor.isActive("codeBlock")}
         >
           <Code className="h-4 w-4" />
         </MenuButton>
 
         <MenuButton
-          onClick={() => editor.chain().focus().toggleHighlight().run()}
+          onClick={() => {
+            if (editor && !editor.isDestroyed) {
+              editor.chain().focus().toggleHighlight().run();
+            }
+          }}
           active={editor.isActive("highlight")}
         >
           <Highlighter className="h-4 w-4" />
@@ -166,11 +145,23 @@ const RichTextEditor = ({
 
         <div className="w-px bg-gray-300 mx-1" />
 
-        <MenuButton onClick={() => editor.chain().focus().undo().run()}>
+        <MenuButton
+          onClick={() => {
+            if (editor && !editor.isDestroyed) {
+              editor.chain().focus().undo().run();
+            }
+          }}
+        >
           <Undo className="h-4 w-4" />
         </MenuButton>
 
-        <MenuButton onClick={() => editor.chain().focus().redo().run()}>
+        <MenuButton
+          onClick={() => {
+            if (editor && !editor.isDestroyed) {
+              editor.chain().focus().redo().run();
+            }
+          }}
+        >
           <Redo className="h-4 w-4" />
         </MenuButton>
       </div>
