@@ -3,6 +3,8 @@ import { Download, Upload, FileJson, FileText, FileType } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { useToast } from "../ui/use-toast";
 import api from "../../services/api";
 
@@ -127,14 +129,51 @@ const ExportImportModal = ({
 
   const handleFormatChange = (format: string) => {
     setImportFormat(format);
-    setImportFile(null); // Clear file when format changes
 
-    // Clear file input
-    const fileInput = document.querySelector(
-      'input[type="file"]'
-    ) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = "";
+    // If file is selected, validate it against new format
+    if (importFile) {
+      const fileExtension = importFile.name.split(".").pop()?.toLowerCase();
+      let isValidFormat = false;
+
+      switch (format) {
+        case "json":
+          isValidFormat = fileExtension === "json";
+          break;
+        case "markdown":
+          isValidFormat =
+            fileExtension === "md" || fileExtension === "markdown";
+          break;
+      }
+
+      if (!isValidFormat) {
+        const expectedExtensions =
+          format === "json"
+            ? ".json"
+            : format === "markdown"
+            ? ".md or .markdown"
+            : "";
+        toast({
+          title: "File format mismatch",
+          description: `Selected file does not match ${format} format. Expected ${expectedExtensions}`,
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  // Check if selected file matches the import format
+  const isFileFormatValid = () => {
+    if (!importFile) return false;
+
+    const fileExtension = importFile.name.split(".").pop()?.toLowerCase();
+
+    switch (importFormat) {
+      case "json":
+        return fileExtension === "json";
+      case "markdown":
+        return fileExtension === "md" || fileExtension === "markdown";
+      default:
+        return false;
     }
   };
 
@@ -153,6 +192,34 @@ const ExportImportModal = ({
       toast({
         title: "No file selected",
         description: "Please select a file to import",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file format matches selected import format
+    const fileExtension = importFile.name.split(".").pop()?.toLowerCase();
+    let isValidFormat = false;
+
+    switch (importFormat) {
+      case "json":
+        isValidFormat = fileExtension === "json";
+        break;
+      case "markdown":
+        isValidFormat = fileExtension === "md" || fileExtension === "markdown";
+        break;
+    }
+
+    if (!isValidFormat) {
+      const expectedExtensions =
+        importFormat === "json"
+          ? ".json"
+          : importFormat === "markdown"
+          ? ".md or .markdown"
+          : "";
+      toast({
+        title: "File format mismatch",
+        description: `Please select a ${expectedExtensions} file for ${importFormat} format.`,
         variant: "destructive",
       });
       return;
@@ -200,158 +267,278 @@ const ExportImportModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>
-            {noteId ? "Export Note" : "Export & Import All Notes"}
+      <DialogContent className="sm:max-w-[550px]">
+        <DialogHeader className="mb-2">
+          <DialogTitle className="text-xl">
+            {noteId ? "Export Note" : "Export & Import Notes"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Export Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Export</h3>
+        {noteId ? (
+          // Single note export - No tabs needed
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <Label className="text-sm font-semibold text-gray-700">
+                Export Format
+              </Label>
+              <RadioGroup value={exportFormat} onValueChange={setExportFormat}>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <RadioGroupItem value="json" id="export-json" />
+                    <Label
+                      htmlFor="export-json"
+                      className="flex items-center gap-2 cursor-pointer flex-1"
+                    >
+                      <FileJson className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium">JSON</p>
+                        <p className="text-xs text-gray-500">
+                          Perfect for backup and re-import
+                        </p>
+                      </div>
+                    </Label>
+                  </div>
 
-            <div>
-              <Label className="text-base font-medium">Export Format</Label>
-              <div className="mt-2 space-y-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="exportFormat"
-                    value="json"
-                    checked={exportFormat === "json"}
-                    onChange={(e) => setExportFormat(e.target.value)}
-                    className="w-4 h-4"
-                  />
-                  <FileJson className="h-4 w-4" />
-                  <span>JSON</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="exportFormat"
-                    value="markdown"
-                    checked={exportFormat === "markdown"}
-                    onChange={(e) => setExportFormat(e.target.value)}
-                    className="w-4 h-4"
-                  />
-                  <FileText className="h-4 w-4" />
-                  <span>Markdown</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="exportFormat"
-                    value="pdf"
-                    checked={exportFormat === "pdf"}
-                    onChange={(e) => setExportFormat(e.target.value)}
-                    className="w-4 h-4"
-                  />
-                  <FileType className="h-4 w-4" />
-                  <span>PDF</span>
-                </label>
-              </div>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <RadioGroupItem value="markdown" id="export-md" />
+                    <Label
+                      htmlFor="export-md"
+                      className="flex items-center gap-2 cursor-pointer flex-1"
+                    >
+                      <FileText className="h-5 w-5 text-purple-600" />
+                      <div>
+                        <p className="font-medium">Markdown</p>
+                        <p className="text-xs text-gray-500">
+                          Readable format for other apps
+                        </p>
+                      </div>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <RadioGroupItem value="pdf" id="export-pdf" />
+                    <Label
+                      htmlFor="export-pdf"
+                      className="flex items-center gap-2 cursor-pointer flex-1"
+                    >
+                      <FileType className="h-5 w-5 text-red-600" />
+                      <div>
+                        <p className="font-medium">PDF</p>
+                        <p className="text-xs text-gray-500">
+                          All notes in one PDF
+                        </p>
+                      </div>
+                    </Label>
+                  </div>
+                </div>
+              </RadioGroup>
             </div>
 
             <Button
               onClick={handleExport}
               disabled={isLoading}
               className="w-full"
+              size="lg"
             >
-              <Download className="mr-2 h-4 w-4" />
-              {isLoading
-                ? "Exporting..."
-                : `Export ${noteId ? "Note" : "All Notes"}`}
+              <Download className="mr-0.5 h-4 w-4" />
+              {isLoading ? "Exporting..." : "Export Note"}
             </Button>
           </div>
+        ) : (
+          // Bulk operations - Use tabs for Export/Import
+          <Tabs defaultValue="export" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="export" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Export
+              </TabsTrigger>
+              <TabsTrigger value="import" className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Import
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Import Section - Only show for bulk operations */}
-          {!noteId && (
-            <div className="space-y-4 border-t pt-4">
-              <h3 className="text-lg font-medium">Import</h3>
+            <TabsContent value="export" className="space-y-6 py-4">
+              <div className="space-y-4">
+                <Label className="text-sm font-semibold text-gray-700">
+                  Export Format
+                </Label>
+                <RadioGroup
+                  value={exportFormat}
+                  onValueChange={setExportFormat}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="json" id="export-json-all" />
+                      <Label
+                        htmlFor="export-json-all"
+                        className="flex items-center gap-2 cursor-pointer flex-1"
+                      >
+                        <FileJson className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium">JSON</p>
+                          <p className="text-xs text-gray-500">
+                            Perfect for backup and re-import
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
 
-              <div>
-                <Label className="text-base font-medium">Import Format</Label>
-                <div className="mt-2 space-y-2">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="importFormat"
-                      value="json"
-                      checked={importFormat === "json"}
-                      onChange={(e) => handleFormatChange(e.target.value)}
-                      className="w-4 h-4"
-                    />
-                    <FileJson className="h-4 w-4" />
-                    <span>JSON</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="importFormat"
-                      value="markdown"
-                      checked={importFormat === "markdown"}
-                      onChange={(e) => handleFormatChange(e.target.value)}
-                      className="w-4 h-4"
-                    />
-                    <FileText className="h-4 w-4" />
-                    <span>Markdown</span>
-                  </label>
-                </div>
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="markdown" id="export-md-all" />
+                      <Label
+                        htmlFor="export-md-all"
+                        className="flex items-center gap-2 cursor-pointer flex-1"
+                      >
+                        <FileText className="h-5 w-5 text-purple-600" />
+                        <div>
+                          <p className="font-medium">Markdown</p>
+                          <p className="text-xs text-gray-500">
+                            Readable format for other apps
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="pdf" id="export-pdf-all" />
+                      <Label
+                        htmlFor="export-pdf-all"
+                        className="flex items-center gap-2 cursor-pointer flex-1"
+                      >
+                        <FileType className="h-5 w-5 text-red-600" />
+                        <div>
+                          <p className="font-medium">PDF</p>
+                          <p className="text-xs text-gray-500">
+                            All notes in one PDF
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
+                  </div>
+                </RadioGroup>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Sample Files:</Label>
+              <Button
+                onClick={handleExport}
+                disabled={isLoading}
+                className="w-full"
+                size="lg"
+              >
+                <Download className="mr-0.5 h-4 w-4" />
+                {isLoading ? "Exporting..." : "Export All Notes"}
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="import" className="space-y-6 py-4">
+              <div className="space-y-4">
+                <Label className="text-sm font-semibold text-gray-700">
+                  Import Format
+                </Label>
+                <RadioGroup
+                  value={importFormat}
+                  onValueChange={handleFormatChange}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="json" id="import-json" />
+                      <Label
+                        htmlFor="import-json"
+                        className="flex items-center gap-2 cursor-pointer flex-1"
+                      >
+                        <FileJson className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium">JSON</p>
+                          <p className="text-xs text-gray-500">
+                            Perfect for backup and re-import
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="markdown" id="import-md" />
+                      <Label
+                        htmlFor="import-md"
+                        className="flex items-center gap-2 cursor-pointer flex-1"
+                      >
+                        <FileText className="h-5 w-5 text-purple-600" />
+                        <div>
+                          <p className="font-medium">Markdown</p>
+                          <p className="text-xs text-gray-500">
+                            Readable format for other apps
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                <Label className="text-sm font-semibold text-gray-700">
+                  Sample Files
+                </Label>
+                <p className="text-xs text-gray-600">
+                  Download sample files to see the expected format
+                </p>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => downloadSampleFile("json")}
+                    className="flex-1"
                   >
-                    <Download className="mr-1 h-3 w-3" />
+                    <Download className="mr-1.5 h-3.5 w-3.5" />
                     Sample JSON
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => downloadSampleFile("markdown")}
+                    className="flex-1"
                   >
-                    <Download className="mr-1 h-3 w-3" />
+                    <Download className="mr-1.5 h-3.5 w-3.5" />
                     Sample Markdown
                   </Button>
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="import-file" className="text-base font-medium">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="import-file"
+                  className="text-sm font-semibold text-gray-700"
+                >
                   Select File
                 </Label>
-                <input
-                  id="import-file"
-                  type="file"
-                  accept={getAcceptAttribute()}
-                  onChange={handleFileChange}
-                  className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors">
+                  <input
+                    id="import-file"
+                    type="file"
+                    accept={getAcceptAttribute()}
+                    onChange={handleFileChange}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+                  />
+                </div>
                 {importFile && (
-                  <p className="mt-1 text-sm text-gray-600">
-                    Selected: {importFile.name}
+                  <p className="text-sm text-green-600 font-medium">
+                    ✓ Selected: {importFile.name}
                   </p>
                 )}
               </div>
 
               <Button
                 onClick={handleImport}
-                disabled={!importFile || isLoading}
+                disabled={!importFile || !isFileFormatValid() || isLoading}
                 className="w-full"
+                size="lg"
               >
-                <Upload className="mr-2 h-4 w-4" />
+                <Upload className="mr-0.5 h-4 w-4" />
                 {isLoading ? "Importing..." : "Import Notes"}
               </Button>
-            </div>
-          )}
-        </div>
+            </TabsContent>
+          </Tabs>
+        )}
       </DialogContent>
     </Dialog>
   );

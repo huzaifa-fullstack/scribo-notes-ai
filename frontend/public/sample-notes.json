@@ -1,7 +1,7 @@
 [
   {
     "title": "Getting Started with Notes",
-    "content": "<p>Welcome to your notes app! Here are some tips to get started:</p><ul><li><strong>Create</strong>: Click the 'New Note' button to create a new note</li><li><strong>Edit</strong>: Click on any note card to view, then use the edit button</li><li><strong>Pin</strong>: Use the pin icon to keep important notes at the top</li><li><strong>Archive</strong>: Archive old notes to keep your workspace clean</li><li><strong>Search</strong>: Use the search bar to find notes quickly</li></ul><p>Happy note-taking! 📝</p>",
+    "content": "<p>Welcome to your notes app! Here are some tips to get started:</p><ul><li><strong>Create</strong>: Click the 'New Note' button to create a new note</li><li><strong>Edit</strong>: Click on any note card to view, then use the edit button</li><li><strong>Pin</strong>: Use the pin icon to keep important notes at the top</li><li><strong>Archive</strong>: Archive old notes to keep your workspace clean</li><li><strong>Search</strong>: Use the search bar to find notes quickly</li></ul><p>Happy note-taking!</p>",
     "tags": ["tutorial", "getting-started"],
     "isPinned": true,
     "isArchived": false

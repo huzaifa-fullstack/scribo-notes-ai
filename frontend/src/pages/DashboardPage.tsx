@@ -176,11 +176,15 @@ const DashboardPage = () => {
           </div>
           <div className="flex gap-1">
             <Button
-              variant={filterArchived ? "default" : "outline"}
+              variant="outline"
               onClick={() => setFilterArchived(!filterArchived)}
-              className="px-3"
+              className={`px-3 ${
+                filterArchived
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                  : ""
+              }`}
             >
-              <Filter className="h-4 w-4 mr-1" />
+              <Filter className="h-4 w-4 mr-0.5" />
               {filterArchived ? "Archived" : "Active"}
             </Button>
             <Button
@@ -188,11 +192,15 @@ const DashboardPage = () => {
               onClick={handleBulkExportImport}
               className="px-3"
             >
-              <Download className="h-4 w-4 mr-1" />
+              <Download className="h-4 w-4 mr-0.5" />
               Export/Import
             </Button>
-            <Button onClick={() => setCreateModalOpen(true)} className="px-3">
-              <Plus className="h-4 w-4 mr-1" />
+            <Button
+              variant="outline"
+              onClick={() => setCreateModalOpen(true)}
+              className="px-3"
+            >
+              <Plus className="h-4 w-4 mr-0.5" />
               New Note
             </Button>
           </div>
@@ -225,7 +233,7 @@ const DashboardPage = () => {
             </p>
             {!searchQuery && (
               <Button onClick={() => setCreateModalOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1.5" />
                 Create Note
               </Button>
             )}
@@ -327,7 +335,7 @@ const DashboardPage = () => {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
