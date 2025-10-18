@@ -128,9 +128,12 @@ const DashboardPage = () => {
   };
 
   const filteredNotes = notes.filter((note) => {
+    const searchLower = searchQuery.toLowerCase();
     const matchesSearch =
-      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchQuery.toLowerCase());
+      note.title.toLowerCase().includes(searchLower) ||
+      note.content.toLowerCase().includes(searchLower) ||
+      (note.tags &&
+        note.tags.some((tag) => tag.toLowerCase().includes(searchLower)));
     const matchesArchived = filterArchived ? note.isArchived : !note.isArchived;
     return matchesSearch && matchesArchived;
   });
@@ -180,7 +183,11 @@ const DashboardPage = () => {
               <Filter className="h-4 w-4 mr-1" />
               {filterArchived ? "Archived" : "Active"}
             </Button>
-            <Button variant="outline" onClick={handleBulkExportImport} className="px-3">
+            <Button
+              variant="outline"
+              onClick={handleBulkExportImport}
+              className="px-3"
+            >
               <Download className="h-4 w-4 mr-1" />
               Export/Import
             </Button>
