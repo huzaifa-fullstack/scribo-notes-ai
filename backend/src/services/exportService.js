@@ -3,6 +3,16 @@ const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const logger = require('../config/logger');
 
 class ExportService {
+    // Filter out characters not supported by PDF fonts (emojis, special unicode)
+    sanitizeTextForPDF(text) {
+        if (!text) return '';
+        
+        // Remove emojis and other unicode characters that Standard PDF fonts don't support
+        // Keep only basic Latin characters, common punctuation, and symbols
+        return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '')
+            .replace(/[^\x00-\x7F\u00A0-\u00FF\u0100-\u017F]/g, ''); // Keep ASCII + Latin Extended
+    }
+
     // Parse HTML content into structured text segments with formatting
     parseHtmlFormatting(htmlContent) {
         if (!htmlContent) return [];
@@ -265,8 +275,9 @@ class ExportService {
             const margin = 50;
             const pageWidth = currentPage.getWidth() - 2 * margin;
 
-            // Title
-            currentPage.drawText(note.title, {
+            // Title (sanitize to remove emojis and unsupported characters)
+            const sanitizedTitle = this.sanitizeTextForPDF(note.title);
+            currentPage.drawText(sanitizedTitle, {
                 x: margin,
                 y: yPosition,
                 size: 18,
@@ -317,9 +328,12 @@ class ExportService {
                         yPosition = 750;
                     }
 
+                    // Sanitize text for PDF (remove emojis and unsupported characters)
+                    const sanitizedText = this.sanitizeTextForPDF(line.text);
+
                     // Draw highlight background if needed
                     if (line.highlight) {
-                        const textWidth = selectedFont.widthOfTextAtSize(line.text, 11);
+                        const textWidth = selectedFont.widthOfTextAtSize(sanitizedText, 11);
                         currentPage.drawRectangle({
                             x: margin - 2,
                             y: yPosition - 2,
@@ -336,7 +350,7 @@ class ExportService {
                         textColor = rgb(0.8, 0.2, 0.2); // Red for code
                     }
 
-                    currentPage.drawText(line.text, {
+                    currentPage.drawText(sanitizedText, {
                         x: margin,
                         y: yPosition,
                         size: 11,
@@ -346,7 +360,7 @@ class ExportService {
 
                     // Draw strikethrough if needed
                     if (line.strikethrough) {
-                        const textWidth = selectedFont.widthOfTextAtSize(line.text, 11);
+                        const textWidth = selectedFont.widthOfTextAtSize(sanitizedText, 11);
                         currentPage.drawLine({
                             start: { x: margin, y: yPosition + 4 },
                             end: { x: margin + textWidth, y: yPosition + 4 },
@@ -447,8 +461,9 @@ class ExportService {
                     yPosition -= 30;
                 }
 
-                // Note title
-                currentPage.drawText(note.title, {
+                // Note title (sanitize to remove emojis)
+                const sanitizedTitle = this.sanitizeTextForPDF(note.title);
+                currentPage.drawText(sanitizedTitle, {
                     x: margin,
                     y: yPosition,
                     size: 16,
@@ -495,8 +510,11 @@ class ExportService {
                             yPosition = 750;
                         }
 
+                        // Sanitize text for PDF
+                        const sanitizedText = this.sanitizeTextForPDF(line.text);
+
                         if (line.highlight) {
-                            const textWidth = selectedFont.widthOfTextAtSize(line.text, 11);
+                            const textWidth = selectedFont.widthOfTextAtSize(sanitizedText, 11);
                             currentPage.drawRectangle({
                                 x: margin - 2,
                                 y: yPosition - 2,
@@ -512,7 +530,7 @@ class ExportService {
                             textColor = rgb(0.8, 0.2, 0.2);
                         }
 
-                        currentPage.drawText(line.text, {
+                        currentPage.drawText(sanitizedText, {
                             x: margin,
                             y: yPosition,
                             size: 11,
@@ -521,7 +539,7 @@ class ExportService {
                         });
 
                         if (line.strikethrough) {
-                            const textWidth = selectedFont.widthOfTextAtSize(line.text, 11);
+                            const textWidth = selectedFont.widthOfTextAtSize(sanitizedText, 11);
                             currentPage.drawLine({
                                 start: { x: margin, y: yPosition + 4 },
                                 end: { x: margin + textWidth, y: yPosition + 4 },

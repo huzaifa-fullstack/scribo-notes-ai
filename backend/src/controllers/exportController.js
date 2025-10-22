@@ -207,30 +207,56 @@ const importNotes = async (req, res, next) => {
 
         // Validate parsed notes
         if (!parsedNotes || parsedNotes.length === 0) {
+            logger.warn(`No valid notes found in import file for user ${req.user.email}`);
             return res.status(400).json({
                 success: false,
                 error: 'No valid notes found in the file'
             });
         }
 
-        // Create notes
-        const createdNotes = await Promise.all(
-            parsedNotes.map(noteData =>
-                Note.create({
+        logger.info(`Attempting to import ${parsedNotes.length} notes for user ${req.user.email}`);
+
+        // Create notes with individual error handling
+        const createdNotes = [];
+        const errors = [];
+
+        for (let i = 0; i < parsedNotes.length; i++) {
+            try {
+                const noteData = parsedNotes[i];
+                const createdNote = await Note.create({
                     ...noteData,
                     user: req.user.id
-                })
-            )
-        );
+                });
+                createdNotes.push(createdNote);
+                logger.info(`Successfully created note ${i + 1}/${parsedNotes.length}: "${noteData.title}"`);
+            } catch (noteError) {
+                logger.error(`Failed to create note ${i + 1}/${parsedNotes.length}:`, noteError);
+                errors.push({
+                    index: i + 1,
+                    title: parsedNotes[i]?.title || 'Unknown',
+                    error: noteError.message
+                });
+            }
+        }
 
-        logger.info(`Imported ${createdNotes.length} notes for user ${req.user.email}`);
+        logger.info(`Import complete: ${createdNotes.length} notes created, ${errors.length} failed for user ${req.user.email}`);
 
-        res.status(201).json({
-            success: true,
-            message: `Successfully imported ${createdNotes.length} notes`,
+        // Return response with details
+        const response = {
+            success: createdNotes.length > 0,
+            message: errors.length > 0
+                ? `Imported ${createdNotes.length} of ${parsedNotes.length} notes. ${errors.length} failed.`
+                : `Successfully imported ${createdNotes.length} notes`,
             count: createdNotes.length,
             notes: createdNotes
-        });
+        };
+
+        if (errors.length > 0) {
+            response.errors = errors;
+            response.warning = 'Some notes could not be imported due to validation errors.';
+        }
+
+        res.status(createdNotes.length > 0 ? 201 : 400).json(response);
 
     } catch (error) {
         logger.error('Import notes error:', error);
