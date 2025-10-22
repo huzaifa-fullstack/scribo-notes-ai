@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -43,6 +44,7 @@ const RegisterForm = () => {
     clearError,
   } = useAuthStore();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -63,10 +65,12 @@ const RegisterForm = () => {
         password: data.password,
       });
       toast({
-        title: "Welcome to Notes App!",
-        description: "Your account has been created successfully.",
+        title: "Account created successfully!",
+        description: "Please log in with your credentials.",
         variant: "default",
       });
+      // Navigate to login page instead of auto-login
+      navigate("/login");
     } catch (error) {
       toast({
         title: "Registration failed",

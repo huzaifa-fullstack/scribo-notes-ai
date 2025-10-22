@@ -27,6 +27,14 @@ const ExportImportModal = ({
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Reset state when modal closes
+  const handleClose = () => {
+    setImportFile(null);
+    setExportFormat("json");
+    setImportFormat("json");
+    onClose();
+  };
+
   const handleExport = async () => {
     try {
       setIsLoading(true);
@@ -76,7 +84,7 @@ const ExportImportModal = ({
         } exported as ${exportFormat.toUpperCase()}`,
       });
 
-      onClose();
+      handleClose();
     } catch (error: any) {
       console.error("Export error:", error);
       toast({
@@ -240,8 +248,10 @@ const ExportImportModal = ({
         description: `Imported ${response.data.count} note(s) successfully`,
       });
 
+      // Reset file and close
+      setImportFile(null);
       onImportSuccess?.();
-      onClose();
+      handleClose();
     } catch (error: any) {
       console.error("Import error:", error);
       toast({
@@ -266,7 +276,7 @@ const ExportImportModal = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader className="mb-2">
           <DialogTitle className="text-xl">

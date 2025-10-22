@@ -1,56 +1,95 @@
-# Getting Started with Notes
+# Notes Guide Template
 
-**Welcome to your notes app!**
+<p><strong>Purpose:</strong>
+<br> <br>
+This guide helps you create and organize notes in a consistent format.
+<br> <br>
+Each note should include a 
+<strong>title</strong>, 
+<strong>HTML-styled content</strong>, 
+<strong>tags</strong>, and 
+<strong>creation/update info</strong>. 
+<br> <br>
+Use this structure for personal, study, or project notes.</p>
 
-_Happy note-taking!_
-
-**Tags:** tutorial, getting-started
-
----
-
-# Weekend Plans
-
-**Before Night:**
-
-_I have to clean my room and do everything to go to my friend house and have to also bring groceries for home._
-
-_How can I do all of this today?_
-
-**Tags:** weekend, plans, personal
+**Tags:** #guide, #template, #notes, #formatting
 
 ---
 
-# Reading List
+# Morning Routine
 
-**Books to Read:**
+<p><strong>Before 9 AM:</strong>  
+<br>  
+<br><em>Make breakfast and go for a short walk.</em>  
+<br>  
+<br><em>Start the day with energy!</em></p>
 
-_Atomic Habits_
-
-The Alchemist
-
-~~Read a chapter daily~~
-
-Page by page!
-
-**Tags:** reading, books, selfgrowth, motivation, learning, inspiration
+**Tags:** #personal, #morning, #health
 
 ---
 
-# Quick Pasta Recipe
+# Study Goals
 
-**Ingredients:**
+<p><strong>Focus Areas:</strong>  
+<br>  
+<br>- JavaScript Loops  
+<br>- React Components  
+<br>- Database Basics  
+<br><br><strong>Tip:</strong> Take small breaks after every topic.</p>
 
-- Pasta
-- Tomato sauce
-- Garlic
-- Cheese
-- Fresh basil
+**Tags:** #study, #learning, #productivity
 
-**Instructions:**
+---
 
-1. Boil pasta until al dente
-2. Heat sauce with minced garlic
-3. Combine pasta and sauce
-4. Top with cheese and basil
+# Weekend Chill Plan
 
-**Tags:** cooking, recipes, italian, quick-meals
+<p><strong>Before Night:</strong>  
+<br>  
+<br><em>Clean your room, grab snacks, and binge a favorite show.</em>  
+<br>  
+<br><em>Balance fun with some light reading!</em></p>
+
+**Tags:** #weekend, #relax, #personal
+
+---
+
+# Pasta Recipe
+
+<p><strong>Ingredients:</strong>  
+<br>  
+<br>- Pasta  
+<br>- Garlic  
+<br>- Tomato sauce  
+<br>- Cheese  
+<br><br><strong>Steps:</strong>  
+<br>  
+<br>1. Boil pasta  
+<br>2. Mix sauce and garlic  
+<br>3. Top with cheese</p>
+
+**Tags:** #cooking, #recipe, #quick-meal
+
+---
+
+# Instructions for Users
+
+<p><strong>How to Write Notes:</strong> 
+<br> <br>
+- Use HTML tags like 
+<code>&lt;p&gt;</code>, 
+<code>&lt;strong&gt;</code>, 
+<code>&lt;em&gt;</code>, 
+<code>&lt;br&gt;</code> 
+for proper formatting. 
+<br> <br>
+- Keep titles short and meaningful. 
+<br> <br>
+- Use <code>#tags</code> to categorize each note (e.g., #study, #work, #ideas). 
+<br> <br>
+- Separate each note with a horizontal line <code>---</code> for clarity. 
+<br> <br>
+- Maintain consistent indentation, spacing, and styling for clean visuals. 
+<br> <br>
+<em>Example:</em> You can look at sample notes like “Morning Routine” or “Study Goals” for reference.</p>
+
+**Tags:** #guide, #instructions, #notes, #markdown, #formatting
