@@ -22,6 +22,10 @@ const UserDropdown = () => {
   const { user } = useAuthStore();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  // Debug: Check what's in the user object
+  console.log("User object:", user);
+  console.log("User avatar:", user?.avatar);
+
   const handleProfileClick = () => {
     console.log("Navigate to profile");
     // TODO: Navigate to profile page
@@ -70,8 +74,32 @@ const UserDropdown = () => {
           variant="ghost"
           className="flex items-center gap-2 px-2 sm:px-3"
         >
-          {/* User Avatar */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+          {/* User Avatar - Show Google profile pic if available, otherwise initials */}
+          {user?.avatar ? (
+            <img
+              src={user.avatar}
+              alt={user.name || "User"}
+              referrerPolicy="no-referrer"
+              crossOrigin="anonymous"
+              className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200"
+              onError={(e) => {
+                // If image fails to load, hide it and show initials
+                console.log("Image failed to load, showing initials");
+                e.currentTarget.style.display = "none";
+                const fallback = e.currentTarget
+                  .nextElementSibling as HTMLElement;
+                if (fallback) {
+                  fallback.classList.remove("hidden");
+                }
+              }}
+            />
+          ) : null}
+          {/* Fallback to initials if no avatar or if image fails */}
+          <div
+            className={`w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-gray-200 ${
+              user?.avatar ? "hidden" : ""
+            }`}
+          >
             {user?.name ? getInitials(user.name) : "U"}
           </div>
           {/* User Name (hidden on mobile) */}
