@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Settings,
@@ -20,11 +21,11 @@ import { useAuthStore } from "../../store/authStore";
 
 const UserDropdown = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const handleProfileClick = () => {
-    console.log("Navigate to profile");
-    // TODO: Navigate to profile page
+    navigate("/profile");
   };
 
   const handleSettingsClick = () => {
