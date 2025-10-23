@@ -22,10 +22,6 @@ const UserDropdown = () => {
   const { user } = useAuthStore();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Debug: Check what's in the user object
-  console.log("User object:", user);
-  console.log("User avatar:", user?.avatar);
-
   const handleProfileClick = () => {
     console.log("Navigate to profile");
     // TODO: Navigate to profile page
