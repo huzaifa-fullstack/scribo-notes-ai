@@ -8,6 +8,7 @@ import CreateNoteModal from "../components/notes/CreateNoteModal";
 import EditNoteModal from "../components/notes/EditNoteModal";
 import ViewNoteModal from "../components/notes/ViewNoteModal";
 import ExportImportModal from "../components/notes/ExportImportModal";
+import UserDropdown from "../components/layout/UserDropdown";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import type { Note } from "../types/note";
@@ -153,9 +154,13 @@ const DashboardPage = () => {
                 Welcome back, {user?.name}!
               </p>
             </div>
-            <Button onClick={logout} variant="outline">
-              Logout
-            </Button>
+            {/* Desktop: UserDropdown + Logout */}
+            <div className="flex items-center gap-2">
+              <UserDropdown />
+              <Button onClick={logout} variant="outline">
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
