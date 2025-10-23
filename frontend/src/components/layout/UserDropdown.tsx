@@ -1,13 +1,5 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  User,
-  Settings,
-  Moon,
-  Trash2,
-  AlertTriangle,
-  ChevronDown,
-} from "lucide-react";
+import { User, Settings, Trash2, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,36 +14,18 @@ import { useAuthStore } from "../../store/authStore";
 const UserDropdown = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const handleProfileClick = () => {
     navigate("/profile");
   };
 
   const handleSettingsClick = () => {
-    console.log("Navigate to settings");
-    // TODO: Navigate to settings page
-  };
-
-  const handleDarkModeToggle = () => {
-    setIsDarkMode(!isDarkMode);
-    console.log("Toggle dark mode:", !isDarkMode);
-    // TODO: Implement dark mode
+    navigate("/settings");
   };
 
   const handleRecycleBinClick = () => {
     console.log("Navigate to recycle bin");
     // TODO: Navigate to recycle bin
-  };
-
-  const handleDeleteAllNotes = () => {
-    console.log("Delete all notes");
-    // TODO: Implement delete all notes with confirmation
-  };
-
-  const handleDeleteAccount = () => {
-    console.log("Delete account");
-    // TODO: Implement delete account with confirmation
   };
 
   // Get user initials for avatar
@@ -135,18 +109,6 @@ const UserDropdown = () => {
           <span>Settings</span>
         </DropdownMenuItem>
 
-        {/* Dark Mode Toggle */}
-        <DropdownMenuItem
-          onClick={handleDarkModeToggle}
-          className="cursor-pointer"
-        >
-          <Moon className="mr-2 h-4 w-4" />
-          <span>Dark Mode</span>
-          <span className="ml-auto text-xs text-gray-500">
-            {isDarkMode ? "On" : "Off"}
-          </span>
-        </DropdownMenuItem>
-
         {/* Recycle Bin */}
         <DropdownMenuItem
           onClick={handleRecycleBinClick}
@@ -154,29 +116,6 @@ const UserDropdown = () => {
         >
           <Trash2 className="mr-2 h-4 w-4" />
           <span>Recycle Bin</span>
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-
-        {/* Danger Zone */}
-        <DropdownMenuLabel className="text-xs text-gray-500">
-          Danger Zone
-        </DropdownMenuLabel>
-
-        <DropdownMenuItem
-          onClick={handleDeleteAllNotes}
-          className="cursor-pointer text-orange-600 focus:text-orange-600"
-        >
-          <AlertTriangle className="mr-2 h-4 w-4" />
-          <span>Delete All Notes</span>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          onClick={handleDeleteAccount}
-          className="cursor-pointer text-red-600 focus:text-red-600"
-        >
-          <AlertTriangle className="mr-2 h-4 w-4" />
-          <span>Delete Account</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
