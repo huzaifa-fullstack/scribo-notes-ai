@@ -1,0 +1,341 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Trash2,
+  RotateCcw,
+  Trash,
+  ArrowLeft,
+  AlertTriangle,
+} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useNotesStore } from "../store/notesStore";
+import { useAuthStore } from "../store/authStore";
+import UserDropdown from "../components/layout/UserDropdown";
+import { Button } from "../components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
+import { useToast } from "../components/ui/use-toast";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { formatDistanceToNow, differenceInDays } from "date-fns";
+
+const RECYCLE_BIN_RETENTION_DAYS = 30;
+
+const RecycleBinPage = () => {
+  const navigate = useNavigate();
+  const { notes, restoreNote, permanentlyDeleteNote, emptyRecycleBin } =
+    useNotesStore();
+  const { logout } = useAuthStore();
+  const { toast } = useToast();
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
+  const [emptyBinDialogOpen, setEmptyBinDialogOpen] = useState(false);
+
+  // Filter deleted notes and auto-delete expired ones
+  const deletedNotes = notes.filter((note) => {
+    if (!note.isDeleted || !note.deletedAt) return false;
+
+    const deletedDate = new Date(note.deletedAt);
+    const daysInBin = differenceInDays(new Date(), deletedDate);
+
+    // Auto-delete notes older than retention period
+    if (daysInBin >= RECYCLE_BIN_RETENTION_DAYS) {
+      permanentlyDeleteNote(note._id).catch(console.error);
+      return false;
+    }
+
+    return true;
+  });
+
+  const handleRestore = async (id: string) => {
+    try {
+      await restoreNote(id);
+      toast({
+        title: "Success!",
+        description: "Note restored successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to restore note.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setNoteToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!noteToDelete) return;
+
+    try {
+      await permanentlyDeleteNote(noteToDelete);
+      toast({
+        title: "Success!",
+        description: "Note permanently deleted.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete note.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setNoteToDelete(null);
+    }
+  };
+
+  const handleEmptyBinClick = () => {
+    setEmptyBinDialogOpen(true);
+  };
+
+  const handleEmptyBinConfirm = async () => {
+    try {
+      await emptyRecycleBin();
+      toast({
+        title: "Success!",
+        description: "Recycle bin emptied successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to empty recycle bin.",
+        variant: "destructive",
+      });
+    } finally {
+      setEmptyBinDialogOpen(false);
+    }
+  };
+
+  const getDaysRemaining = (deletedAt: string) => {
+    const deletedDate = new Date(deletedAt);
+    const daysInBin = differenceInDays(new Date(), deletedDate);
+    return RECYCLE_BIN_RETENTION_DAYS - daysInBin;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/dashboard")}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Recycle Bin
+                </h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Auto-deleted after {RECYCLE_BIN_RETENTION_DAYS} days
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <UserDropdown />
+              <Button onClick={logout} variant="outline">
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Actions Bar */}
+        {deletedNotes.length > 0 && (
+          <div className="mb-6 flex justify-between items-center">
+            <div className="text-sm text-gray-600">
+              {deletedNotes.length}{" "}
+              {deletedNotes.length === 1 ? "note" : "notes"} in recycle bin
+            </div>
+            <Button
+              variant="destructive"
+              onClick={handleEmptyBinClick}
+              className="gap-2"
+            >
+              <Trash className="h-4 w-4" />
+              Empty Recycle Bin
+            </Button>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {deletedNotes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <Trash2 className="h-24 w-24 text-gray-300 mb-4" />
+            <h2 className="text-2xl font-semibold text-gray-400 mb-2">
+              Recycle Bin is Empty
+            </h2>
+            <p className="text-gray-500 text-center max-w-md">
+              Deleted notes will appear here and will be automatically removed
+              after {RECYCLE_BIN_RETENTION_DAYS} days.
+            </p>
+          </div>
+        ) : (
+          /* Notes Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence mode="popLayout">
+              {deletedNotes.map((note) => (
+                <motion.div
+                  key={note._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                  className="h-full"
+                >
+                  <Card className="h-full flex flex-col hover:shadow-lg transition-shadow border-red-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-lg text-gray-900 truncate">
+                            {note.title}
+                          </h3>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Deleted{" "}
+                            {note.deletedAt &&
+                              formatDistanceToNow(new Date(note.deletedAt), {
+                                addSuffix: true,
+                              })}
+                          </p>
+                          {note.deletedAt && (
+                            <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                              <AlertTriangle className="h-3 w-3" />
+                              {getDaysRemaining(note.deletedAt)}{" "}
+                              {getDaysRemaining(note.deletedAt) === 1
+                                ? "day"
+                                : "days"}{" "}
+                              remaining
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="pb-4 flex-1 flex flex-col">
+                      <div className="flex-1 min-h-[80px] max-h-[80px] overflow-hidden mb-4">
+                        <div
+                          className="text-sm text-gray-600 prose prose-sm max-w-none line-clamp-3"
+                          dangerouslySetInnerHTML={{ __html: note.content }}
+                        />
+                      </div>
+
+                      {note.tags && note.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {note.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {note.tags.length > 3 && (
+                            <span className="px-2 py-1 text-gray-500 text-xs">
+                              +{note.tags.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 mt-auto">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRestore(note._id)}
+                          className="flex-1 gap-1"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Restore
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteClick(note._id)}
+                          className="flex-1 gap-1"
+                        >
+                          <Trash className="h-3 w-3" />
+                          Delete Forever
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </main>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Permanently Delete Note?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This note will be permanently
+              deleted and cannot be restored.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Forever
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Empty Bin Confirmation Dialog */}
+      <AlertDialog
+        open={emptyBinDialogOpen}
+        onOpenChange={setEmptyBinDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Empty Recycle Bin?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all {deletedNotes.length} notes in
+              the recycle bin. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleEmptyBinConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Empty Recycle Bin
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
+export default RecycleBinPage;

@@ -63,7 +63,8 @@ const DashboardPage = () => {
       await deleteNote(noteToDelete);
       toast({
         title: "Success!",
-        description: "Note deleted successfully.",
+        description:
+          "Note moved to recycle bin. It will be automatically deleted after 30 days.",
       });
     } catch (error) {
       toast({
@@ -129,6 +130,9 @@ const DashboardPage = () => {
   };
 
   const filteredNotes = notes.filter((note) => {
+    // Exclude deleted notes from dashboard
+    if (note.isDeleted) return false;
+
     const searchLower = searchQuery.toLowerCase();
     const matchesSearch =
       note.title.toLowerCase().includes(searchLower) ||
@@ -342,10 +346,11 @@ const DashboardPage = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Move to Recycle Bin?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              note.
+              This note will be moved to the recycle bin and automatically
+              deleted after 30 days. You can restore it from the recycle bin
+              before then.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -356,7 +361,7 @@ const DashboardPage = () => {
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              Move to Recycle Bin
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
