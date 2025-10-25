@@ -20,7 +20,10 @@ import { useToast } from "../ui/use-toast";
 import RichTextEditor from "../editor/RichTextEditor";
 
 const noteSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100, "Title too long"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(40, "Title must be 40 characters or less"),
   content: z
     .string()
     .min(1, "Content is required")
@@ -110,10 +113,16 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
                     <Input
                       placeholder="Enter note title"
                       className="h-11"
+                      maxLength={40}
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <div className="flex justify-between items-center">
+                    <FormMessage />
+                    <span className="text-xs text-gray-500">
+                      {field.value?.length || 0}/40
+                    </span>
+                  </div>
                 </FormItem>
               )}
             />
