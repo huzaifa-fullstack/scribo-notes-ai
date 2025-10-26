@@ -6,8 +6,7 @@ import {
 } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuthStore } from "./store/authStore";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import SlidingAuthPage from "./components/auth/SlidingAuthPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
@@ -28,7 +27,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/auth" replace />;
 };
 
 // Public Route Component (redirect if already authenticated)
@@ -70,23 +69,19 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Routes>
-          {/* Public Routes */}
+          {/* Single Auth Route for both Login and Register */}
           <Route
-            path="/login"
+            path="/auth"
             element={
               <PublicRoute>
-                <LoginPage />
+                <SlidingAuthPage />
               </PublicRoute>
             }
           />
-          <Route
-            path="/register"
-            element={
-              <PublicRoute>
-                <RegisterPage />
-              </PublicRoute>
-            }
-          />
+
+          {/* Keep old routes for backward compatibility - redirect to /auth */}
+          <Route path="/login" element={<Navigate to="/auth" replace />} />
+          <Route path="/register" element={<Navigate to="/auth" replace />} />
 
           {/* Auth Callback Route */}
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
@@ -130,7 +125,19 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
 
-        <Toaster />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            style: {
+              background: "#ffffff",
+              color: "#1f2937",
+              border: "2px solid #10b981",
+              fontSize: "16px",
+              fontWeight: "600",
+              boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
+            },
+          }}
+        />
       </div>
     </Router>
   );

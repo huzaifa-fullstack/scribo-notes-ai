@@ -10,7 +10,7 @@ const GoogleSignInButton = () => {
     <Button
       type="button"
       variant="outline"
-      className="w-full"
+      className="w-full rounded-full py-3 font-semibold hover:bg-gray-50 transition-colors duration-200"
       onClick={handleGoogleSignIn}
     >
       <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">

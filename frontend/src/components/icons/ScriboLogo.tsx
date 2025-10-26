@@ -12,147 +12,60 @@ const ScriboLogo = ({ className = "", size = 48 }: ScriboLogoProps) => {
       height={size}
       className={className}
     >
-      <defs>
-        {/* Vibrant teal to cyan gradient */}
-        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#06b6d4", stopOpacity: 1 }} />
-          <stop
-            offset="100%"
-            style={{ stopColor: "#0891b2", stopOpacity: 1 }}
-          />
-        </linearGradient>
-
-        {/* Accent gradient for pen */}
-        <linearGradient id="penGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#f97316", stopOpacity: 1 }} />
-          <stop
-            offset="100%"
-            style={{ stopColor: "#ea580c", stopOpacity: 1 }}
-          />
-        </linearGradient>
-
-        {/* Shadow */}
-        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-          <feOffset dx="0" dy="4" result="offsetblur" />
-          <feComponentTransfer>
-            <feFuncA type="linear" slope="0.25" />
-          </feComponentTransfer>
-          <feMerge>
-            <feMergeNode />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-
-      {/* Background rounded square */}
+      {/* Clean white logo for teal background */}
       <rect
         x="10"
         y="10"
         width="180"
         height="180"
         rx="45"
-        fill="url(#bgGradient)"
-        filter="url(#shadow)"
+        fill="#14b8a6" // matches from-teal-500 background
       />
 
-      {/* Creative "S" letter formed by a flowing writing path */}
+      {/* "S" shape in white */}
       <g transform="translate(100, 100)">
-        {/* Main flowing S shape with pen trail effect */}
         <path
           d="M -30,-40 Q -40,-25 -30,-10 Q -20,5 0,5 Q 20,5 30,20 Q 40,35 30,50"
           fill="none"
-          stroke="white"
+          stroke="#ffffff"
           strokeWidth="14"
           strokeLinecap="round"
-          opacity="0.95"
         />
 
-        {/* Inner highlight on the S */}
+        {/* Subtle highlight for depth */}
         <path
           d="M -30,-40 Q -40,-25 -30,-10 Q -20,5 0,5 Q 20,5 30,20 Q 40,35 30,50"
           fill="none"
-          stroke="rgba(255,255,255,0.4)"
+          stroke="rgba(255,255,255,0.6)"
           strokeWidth="6"
           strokeLinecap="round"
         />
 
-        {/* Decorative dots following the curve */}
-        <circle cx="-35" cy="-45" r="4" fill="white" opacity="0.8" />
-        <circle cx="-25" cy="-35" r="3" fill="white" opacity="0.6" />
-        <circle cx="-18" cy="-25" r="2.5" fill="white" opacity="0.5" />
+        {/* Dots accent */}
+        <circle cx="-35" cy="-45" r="4" fill="#ffffff" opacity="0.8" />
+        <circle cx="-25" cy="-35" r="3" fill="#ffffff" opacity="0.6" />
+        <circle cx="-18" cy="-25" r="2.5" fill="#ffffff" opacity="0.5" />
       </g>
 
-      {/* Modern stylized pen positioned at the end of the S - BIGGER AND MORE VISIBLE */}
+      {/* Enhanced pen with better visibility */}
       <g transform="translate(130, 140) rotate(25)">
-        {/* Pen body with gradient - increased size */}
-        <rect
-          x="0"
-          y="0"
-          width="16"
-          height="60"
-          rx="3"
-          fill="url(#penGradient)"
-        />
-
-        {/* Pen grip texture */}
-        <line
-          x1="2"
-          y1="20"
-          x2="14"
-          y2="20"
-          stroke="rgba(0,0,0,0.2)"
-          strokeWidth="1.5"
-        />
-        <line
-          x1="2"
-          y1="27"
-          x2="14"
-          y2="27"
-          stroke="rgba(0,0,0,0.2)"
-          strokeWidth="1.5"
-        />
-        <line
-          x1="2"
-          y1="34"
-          x2="14"
-          y2="34"
-          stroke="rgba(0,0,0,0.2)"
-          strokeWidth="1.5"
-        />
-
-        {/* Pen tip - bigger */}
-        <polygon points="0,60 16,60 8,75" fill="#1f2937" />
-        <polygon points="4,60 12,60 8,68" fill="#4b5563" />
-
+        {/* Pen body - darker for contrast */}
+        <rect x="0" y="0" width="10" height="45" rx="2" fill="#f97316" />
+        
+        {/* Pen grip lines */}
+        <line x1="1" y1="15" x2="9" y2="15" stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
+        <line x1="1" y1="20" x2="9" y2="20" stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
+        <line x1="1" y1="25" x2="9" y2="25" stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
+        
+        {/* Pen tip */}
+        <polygon points="0,45 10,45 5,55" fill="#1f2937" />
+        <polygon points="3,45 7,45 5,50" fill="#4b5563" />
+        
         {/* Shine on pen */}
-        <rect
-          x="11"
-          y="5"
-          width="3"
-          height="48"
-          rx="1.5"
-          fill="white"
-          opacity="0.5"
-        />
-
+        <rect x="7" y="3" width="2" height="35" rx="1" fill="white" opacity="0.5" />
+        
         {/* Pen cap detail */}
-        <rect
-          x="0"
-          y="0"
-          width="16"
-          height="8"
-          rx="3"
-          fill="#dc2626"
-          opacity="0.8"
-        />
-      </g>
-
-      {/* Subtle sparkle effects */}
-      <g opacity="0.7">
-        <circle cx="60" cy="60" r="2" fill="white" />
-        <circle cx="145" cy="70" r="1.5" fill="white" />
-        <circle cx="70" cy="140" r="2.5" fill="white" />
+        <rect x="0" y="0" width="10" height="5" rx="2" fill="#dc2626" opacity="0.8" />
       </g>
     </svg>
   );

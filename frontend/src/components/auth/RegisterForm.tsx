@@ -86,9 +86,9 @@ const RegisterForm = () => {
         description: "Please log in with your credentials.",
         variant: "default",
       });
-      // Navigate to login page instead of auto-login
-      navigate("/login");
-    } catch (error) {
+      // Navigate to auth page instead of auto-login
+      navigate("/auth");
+    } catch {
       toast({
         title: "Registration failed",
         description: "Please check your information and try again.",
