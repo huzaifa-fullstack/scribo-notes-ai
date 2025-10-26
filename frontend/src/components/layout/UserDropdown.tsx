@@ -96,7 +96,7 @@ const UserDropdown = () => {
           onClick={handleProfileClick}
           className="cursor-pointer"
         >
-          <User className="mr-2 h-4 w-4" />
+          <User className="mr-0.5 h-4 w-4" />
           <span>View Profile</span>
         </DropdownMenuItem>
 
@@ -104,7 +104,7 @@ const UserDropdown = () => {
           onClick={handleSettingsClick}
           className="cursor-pointer"
         >
-          <Settings className="mr-2 h-4 w-4" />
+          <Settings className="mr-0.5 h-4 w-4" />
           <span>Settings</span>
         </DropdownMenuItem>
 
@@ -113,7 +113,7 @@ const UserDropdown = () => {
           onClick={handleRecycleBinClick}
           className="cursor-pointer"
         >
-          <Trash2 className="mr-2 h-4 w-4" />
+          <Trash2 className="mr-0.5 h-4 w-4" />
           <span>Recycle Bin</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

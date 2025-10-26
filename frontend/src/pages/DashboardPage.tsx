@@ -389,7 +389,7 @@ const DashboardPage = () => {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-white">
+        <AlertDialogContent >
           <AlertDialogHeader>
             <AlertDialogTitle>Move to Recycle Bin?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -404,7 +404,7 @@ const DashboardPage = () => {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Move to Recycle Bin
             </AlertDialogAction>
