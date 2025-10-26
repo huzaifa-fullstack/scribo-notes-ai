@@ -30,10 +30,25 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+    const status = error.response?.status;
+    const url: string = error.config?.url || "";
+
+    if (status === 401) {
+      // Do NOT hard-redirect for auth endpoints; let the caller show errors
+      const isAuthRoute =
+        url.includes("/auth/login") ||
+        url.includes("/auth/register") ||
+        url.includes("/auth/google") ||
+        url.includes("/auth/callback");
+
+      if (!isAuthRoute) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        // Use client-side navigation fallback – avoid reload loops on /login
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
+      }
     }
     return Promise.reject(error);
   }
