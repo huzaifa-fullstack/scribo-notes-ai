@@ -1,4 +1,4 @@
-import * as React from "react";
+import { toast as sonnerToast } from "sonner";
 
 interface ToastProps {
   title?: string;
@@ -6,37 +6,38 @@ interface ToastProps {
   variant?: "default" | "destructive";
 }
 
-// Simple toast context for basic functionality
-const ToastContext = React.createContext<{
-  toast: (props: ToastProps) => void;
-}>({
-  toast: () => {},
-});
-
 export const useToast = () => {
-  const context = React.useContext(ToastContext);
-  if (!context) {
-    // Return a simple fallback that uses browser alert for now
-    return {
-      toast: ({ title, description }: ToastProps) => {
-        alert(`${title}${description ? ": " + description : ""}`);
-      },
-    };
-  }
-  return context;
-};
+  const toast = ({ title, description, variant }: ToastProps) => {
+    const styledDescription = description ? (
+      <span style={{ color: "#9ca3af", fontWeight: "400" }}>{description}</span>
+    ) : undefined;
 
-export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
-  const toast = React.useCallback(({ title, description }: ToastProps) => {
-    // Simple implementation - in a real app you'd show a proper toast
-    console.log("Toast:", { title, description });
-    // For now, just use a simple notification
-    if (title) {
-      alert(`${title}${description ? ": " + description : ""}`);
+    if (variant === "destructive") {
+      sonnerToast.error(title || "Error", {
+        description: styledDescription,
+        style: {
+          background: "#ffffff",
+          color: "#1f2937",
+          border: "2px solid #ef4444",
+          fontSize: "16px",
+          fontWeight: "600",
+          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
+        },
+      });
+    } else {
+      sonnerToast.success(title || "Success", {
+        description: styledDescription,
+        style: {
+          background: "#ffffff",
+          color: "#1f2937",
+          border: "2px solid #10b981",
+          fontSize: "16px",
+          fontWeight: "600",
+          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
+        },
+      });
     }
-  }, []);
+  };
 
-  return (
-    <ToastContext.Provider value={{ toast }}>{children}</ToastContext.Provider>
-  );
+  return { toast };
 };
