@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,6 +38,16 @@ const LoginForm = () => {
       password: "",
     },
   });
+
+  // Clear error when user starts typing
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (error) {
+        clearError();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, error, clearError]);
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -82,7 +92,7 @@ const LoginForm = () => {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-2 text-gray-500">
-                Or continue with email
+                Or sign in with email
               </span>
             </div>
           </div>

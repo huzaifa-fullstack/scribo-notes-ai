@@ -25,7 +25,7 @@ interface NoteCardProps {
   onDelete: (id: string) => void;
   onTogglePin: (id: string) => void;
   onToggleArchive: (id: string) => void;
-  onExport: (id: string) => void;
+  onExport: (noteId: string) => void;
 }
 
 const NoteCard = ({
@@ -57,9 +57,18 @@ const NoteCard = ({
         onClick={() => onView(note)}
       >
         <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg text-gray-900 truncate">
+              <h3
+                className="font-semibold text-lg text-gray-900 overflow-hidden text-ellipsis line-clamp-1"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 1,
+                  WebkitBoxOrient: "vertical",
+                  wordBreak: "break-all",
+                }}
+                title={note.title}
+              >
                 {note.title}
               </h3>
               <p className="text-xs text-gray-500 mt-1">
@@ -91,7 +100,7 @@ const NoteCard = ({
                       onEdit(note);
                     }}
                   >
-                    <Edit className="h-4 w-4 mr-2" />
+                    <Edit className="h-4 w-4 mr-0.5" />
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -100,7 +109,7 @@ const NoteCard = ({
                       onExport(note._id);
                     }}
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4 mr-0.5" />
                     Export
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -109,7 +118,7 @@ const NoteCard = ({
                       onTogglePin(note._id);
                     }}
                   >
-                    <Pin className="h-4 w-4 mr-2" />
+                    <Pin className="h-4 w-4 mr-0.5" />
                     {note.isPinned ? "Unpin" : "Pin"}
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -118,7 +127,7 @@ const NoteCard = ({
                       onToggleArchive(note._id);
                     }}
                   >
-                    <Archive className="h-4 w-4 mr-2" />
+                    <Archive className="h-4 w-4 mr-0.5" />
                     {note.isArchived ? "Unarchive" : "Archive"}
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -128,7 +137,7 @@ const NoteCard = ({
                     }}
                     className="text-red-600 focus:text-red-600"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4 mr-0.5" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>

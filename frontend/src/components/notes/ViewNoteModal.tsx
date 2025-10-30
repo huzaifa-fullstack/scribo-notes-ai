@@ -45,12 +45,10 @@ const ViewNoteModal = ({ open, note, onClose }: ViewNoteModalProps) => {
 
         <div className="mt-6 space-y-6">
           {/* Note Content */}
-          <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-em:text-gray-600">
-            <div
-              className="text-gray-700 leading-7 text-base"
-              dangerouslySetInnerHTML={{ __html: note.content }}
-            />
-          </div>
+          <div
+            className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-em:text-gray-600 [&_p]:min-h-[1.5em]"
+            dangerouslySetInnerHTML={{ __html: note.content }}
+          />
 
           {/* Tags Section */}
           {note.tags && note.tags.length > 0 && (

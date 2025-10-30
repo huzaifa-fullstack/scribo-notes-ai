@@ -47,7 +47,8 @@ const exportNote = async (req, res, next) => {
                 break;
 
             case 'pdf':
-                exportData = await exportService.exportAsPDF(note);
+                const pdfBytes = await exportService.exportAsPDF(note);
+                exportData = Buffer.from(pdfBytes);
                 contentType = 'application/pdf';
                 filename = `${note.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
                 break;
@@ -105,10 +106,17 @@ const exportAllNotes = async (req, res, next) => {
                 filename = `notes_backup_${Date.now()}.md`;
                 break;
 
+            case 'pdf':
+                const pdfBytesMultiple = await exportService.exportMultipleAsPDF(notes);
+                exportData = Buffer.from(pdfBytesMultiple);
+                contentType = 'application/pdf';
+                filename = `notes_backup_${Date.now()}.pdf`;
+                break;
+
             default:
                 return res.status(400).json({
                     success: false,
-                    error: 'Invalid format. Use json or markdown for bulk export'
+                    error: 'Invalid format. Use json, markdown, or pdf for bulk export'
                 });
         }
 
@@ -140,18 +148,54 @@ const importNotes = async (req, res, next) => {
 
         let parsedNotes;
 
+        // Validate and parse based on format
         switch (format.toLowerCase()) {
             case 'json':
-                parsedNotes = exportService.parseImportedJSON(data);
+                // Validate JSON structure
+                try {
+                    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                    if (!parsed || typeof parsed !== 'object') {
+                        throw new Error('Invalid JSON structure');
+                    }
+                    parsedNotes = exportService.parseImportedJSON(data);
+                } catch (parseError) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid JSON file. Please ensure the file is in correct JSON format.'
+                    });
+                }
                 break;
 
             case 'notion':
-                parsedNotes = exportService.parseNotionFormat(data);
+                // Validate Notion format
+                try {
+                    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                    parsedNotes = exportService.parseNotionFormat(data);
+                } catch (parseError) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid Notion file. Please ensure the file is exported from Notion.'
+                    });
+                }
                 break;
 
             case 'markdown':
             case 'md':
-                parsedNotes = exportService.parseMarkdownFormat(data);
+                // Validate markdown format
+                if (typeof data !== 'string' || !data.trim()) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid Markdown file. Please ensure the file is in text format.'
+                    });
+                }
+                try {
+                    parsedNotes = exportService.parseMarkdownFormat(data);
+                } catch (parseError) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid Markdown format. Please check the file structure.'
+                    });
+                }
                 break;
 
             default:
@@ -161,24 +205,58 @@ const importNotes = async (req, res, next) => {
                 });
         }
 
-        // Create notes
-        const createdNotes = await Promise.all(
-            parsedNotes.map(noteData =>
-                Note.create({
+        // Validate parsed notes
+        if (!parsedNotes || parsedNotes.length === 0) {
+            logger.warn(`No valid notes found in import file for user ${req.user.email}`);
+            return res.status(400).json({
+                success: false,
+                error: 'No valid notes found in the file'
+            });
+        }
+
+        logger.info(`Attempting to import ${parsedNotes.length} notes for user ${req.user.email}`);
+
+        // Create notes with individual error handling
+        const createdNotes = [];
+        const errors = [];
+
+        for (let i = 0; i < parsedNotes.length; i++) {
+            try {
+                const noteData = parsedNotes[i];
+                const createdNote = await Note.create({
                     ...noteData,
                     user: req.user.id
-                })
-            )
-        );
+                });
+                createdNotes.push(createdNote);
+                logger.info(`Successfully created note ${i + 1}/${parsedNotes.length}: "${noteData.title}"`);
+            } catch (noteError) {
+                logger.error(`Failed to create note ${i + 1}/${parsedNotes.length}:`, noteError);
+                errors.push({
+                    index: i + 1,
+                    title: parsedNotes[i]?.title || 'Unknown',
+                    error: noteError.message
+                });
+            }
+        }
 
-        logger.info(`Imported ${createdNotes.length} notes for user ${req.user.email}`);
+        logger.info(`Import complete: ${createdNotes.length} notes created, ${errors.length} failed for user ${req.user.email}`);
 
-        res.status(201).json({
-            success: true,
-            message: `Successfully imported ${createdNotes.length} notes`,
+        // Return response with details
+        const response = {
+            success: createdNotes.length > 0,
+            message: errors.length > 0
+                ? `Imported ${createdNotes.length} of ${parsedNotes.length} notes. ${errors.length} failed.`
+                : `Successfully imported ${createdNotes.length} notes`,
             count: createdNotes.length,
             notes: createdNotes
-        });
+        };
+
+        if (errors.length > 0) {
+            response.errors = errors;
+            response.warning = 'Some notes could not be imported due to validation errors.';
+        }
+
+        res.status(createdNotes.length > 0 ? 201 : 400).json(response);
 
     } catch (error) {
         logger.error('Import notes error:', error);

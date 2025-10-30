@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter, Download } from "lucide-react";
+import { Plus, Search, Filter, Download, Pin } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useNotesStore } from "../store/notesStore";
 import { useAuthStore } from "../store/authStore";
+import { usePagination } from "../hooks/usePagination";
 import NoteCard from "../components/notes/NoteCard";
 import CreateNoteModal from "../components/notes/CreateNoteModal";
 import EditNoteModal from "../components/notes/EditNoteModal";
 import ViewNoteModal from "../components/notes/ViewNoteModal";
 import ExportImportModal from "../components/notes/ExportImportModal";
+import UserDropdown from "../components/layout/UserDropdown";
+import Pagination from "../components/ui/pagination";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import type { Note } from "../types/note";
@@ -40,6 +43,7 @@ const DashboardPage = () => {
   const [viewNote, setViewNote] = useState<Note | null>(null);
   const [exportImportModalOpen, setExportImportModalOpen] = useState(false);
   const [exportNoteId, setExportNoteId] = useState<string | null>(null);
+  const [pinLimitDialogOpen, setPinLimitDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchNotes();
@@ -62,7 +66,8 @@ const DashboardPage = () => {
       await deleteNote(noteToDelete);
       toast({
         title: "Success!",
-        description: "Note deleted successfully.",
+        description:
+          "Note moved to recycle bin. It will be automatically deleted after 30 days.",
       });
     } catch (error) {
       toast({
@@ -77,11 +82,26 @@ const DashboardPage = () => {
   };
 
   const handleTogglePin = async (id: string) => {
+    const note = notes.find((n) => n._id === id);
+    if (!note) return;
+
+    // Check if trying to pin and already have 6 pinned notes
+    if (!note.isPinned) {
+      const currentPinnedCount = notes.filter(
+        (n) => n.isPinned && !n.isDeleted && !n.isArchived
+      ).length;
+
+      if (currentPinnedCount >= 6) {
+        setPinLimitDialogOpen(true);
+        return;
+      }
+    }
+
     try {
       await togglePin(id);
       toast({
         title: "Success!",
-        description: "Note pin status updated.",
+        description: note.isPinned ? "Note unpinned." : "Note pinned.",
       });
     } catch (error) {
       toast({
@@ -113,21 +133,50 @@ const DashboardPage = () => {
     setViewModalOpen(true);
   };
 
-  const handleExport = (noteId?: string) => {
-    setExportNoteId(noteId || null);
+  const handleExportNote = (noteId: string) => {
+    setExportNoteId(noteId);
     setExportImportModalOpen(true);
   };
 
+  const handleBulkExportImport = () => {
+    setExportNoteId(null);
+    setExportImportModalOpen(true);
+  };
+
+  const handleImportSuccess = () => {
+    fetchNotes(); // Refresh notes after import
+  };
+
   const filteredNotes = notes.filter((note) => {
+    // Exclude deleted notes from dashboard
+    if (note.isDeleted) return false;
+
+    const searchLower = searchQuery.toLowerCase();
     const matchesSearch =
-      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchQuery.toLowerCase());
+      note.title.toLowerCase().includes(searchLower) ||
+      note.content.toLowerCase().includes(searchLower) ||
+      (note.tags &&
+        note.tags.some((tag) => tag.toLowerCase().includes(searchLower)));
     const matchesArchived = filterArchived ? note.isArchived : !note.isArchived;
     return matchesSearch && matchesArchived;
   });
 
-  const pinnedNotes = filteredNotes.filter((note) => note.isPinned);
-  const regularNotes = filteredNotes.filter((note) => !note.isPinned);
+  // Use pagination hook - shows ALL pinned notes, then paginated regular notes
+  const {
+    currentPage,
+    totalPages,
+    pinnedNotes,
+    regularNotes,
+    goToPage,
+    resetPage,
+  } = usePagination({
+    notes: filteredNotes,
+  });
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    resetPage();
+  }, [searchQuery, filterArchived, resetPage]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -141,9 +190,13 @@ const DashboardPage = () => {
                 Welcome back, {user?.name}!
               </p>
             </div>
-            <Button onClick={logout} variant="outline">
-              Logout
-            </Button>
+            {/* Desktop: UserDropdown + Logout */}
+            <div className="flex items-center gap-2">
+              <UserDropdown />
+              <Button onClick={logout} variant="outline">
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -162,22 +215,37 @@ const DashboardPage = () => {
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <Button
-              variant={filterArchived ? "default" : "outline"}
+              variant="outline"
               onClick={() => setFilterArchived(!filterArchived)}
+              className={`px-3 ${
+                filterArchived
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                  : ""
+              }`}
             >
-              <Filter className="h-4 w-4 mr-2" />
+              <Filter className="h-4 w-4 mr-0.5" />
               {filterArchived ? "Archived" : "Active"}
             </Button>
-            <Button variant="outline" onClick={() => handleExport()}>
-              <Download className="h-4 w-4 mr-2" />
+            <Button
+              variant="outline"
+              onClick={handleBulkExportImport}
+              className="px-3"
+            >
+              <Download className="h-4 w-4 mr-0.5" />
               Export/Import
             </Button>
-            <Button onClick={() => setCreateModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Note
-            </Button>
+            {!filterArchived && (
+              <Button
+                variant="outline"
+                onClick={() => setCreateModalOpen(true)}
+                className="px-3"
+              >
+                <Plus className="h-4 w-4 mr-0.5" />
+                New Note
+              </Button>
+            )}
           </div>
         </div>
 
@@ -204,11 +272,13 @@ const DashboardPage = () => {
             <p className="text-gray-500 mb-4">
               {searchQuery
                 ? "Try a different search term"
+                : filterArchived
+                ? "Archive notes to see them here"
                 : "Create your first note to get started"}
             </p>
-            {!searchQuery && (
+            {!searchQuery && !filterArchived && (
               <Button onClick={() => setCreateModalOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1.5" />
                 Create Note
               </Button>
             )}
@@ -218,7 +288,7 @@ const DashboardPage = () => {
         {/* Notes Grid */}
         {!isLoading && filteredNotes.length > 0 && (
           <div className="space-y-8">
-            {/* Pinned Notes */}
+            {/* Pinned Notes - Always show ALL pinned notes */}
             {pinnedNotes.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -226,7 +296,7 @@ const DashboardPage = () => {
                   Pinned Notes
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <AnimatePresence>
+                  <AnimatePresence mode="popLayout">
                     {pinnedNotes.map((note) => (
                       <NoteCard
                         key={note._id}
@@ -236,7 +306,7 @@ const DashboardPage = () => {
                         onDelete={handleDeleteClick}
                         onTogglePin={handleTogglePin}
                         onToggleArchive={handleToggleArchive}
-                        onExport={handleExport}
+                        onExport={handleExportNote}
                       />
                     ))}
                   </AnimatePresence>
@@ -244,7 +314,7 @@ const DashboardPage = () => {
               </div>
             )}
 
-            {/* Regular Notes */}
+            {/* Regular Notes - Paginated */}
             {regularNotes.length > 0 && (
               <div>
                 {pinnedNotes.length > 0 && (
@@ -253,7 +323,7 @@ const DashboardPage = () => {
                   </h2>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <AnimatePresence>
+                  <AnimatePresence mode="popLayout">
                     {regularNotes.map((note) => (
                       <NoteCard
                         key={note._id}
@@ -263,7 +333,7 @@ const DashboardPage = () => {
                         onDelete={handleDeleteClick}
                         onTogglePin={handleTogglePin}
                         onToggleArchive={handleToggleArchive}
-                        onExport={handleExport}
+                        onExport={handleExportNote}
                       />
                     ))}
                   </AnimatePresence>
@@ -271,6 +341,15 @@ const DashboardPage = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* Pagination - Only show for regular notes */}
+        {!isLoading && regularNotes.length > 0 && totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+          />
         )}
       </main>
 
@@ -299,14 +378,25 @@ const DashboardPage = () => {
         }}
       />
 
+      <ExportImportModal
+        open={exportImportModalOpen}
+        onClose={() => {
+          setExportImportModalOpen(false);
+          setExportNoteId(null);
+        }}
+        noteId={exportNoteId}
+        onImportSuccess={handleImportSuccess}
+      />
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent >
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Move to Recycle Bin?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              note.
+              This note will be moved to the recycle bin and automatically
+              deleted after 30 days. You can restore it from the recycle bin
+              before then.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -315,24 +405,55 @@ const DashboardPage = () => {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
-              Delete
+              Move to Recycle Bin
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Export/Import Modal */}
-      <ExportImportModal
-        open={exportImportModalOpen}
-        noteId={exportNoteId}
-        onClose={() => {
-          setExportImportModalOpen(false);
-          setExportNoteId(null);
-        }}
-        onImportSuccess={() => fetchNotes()}
-      />
+      {/* Pin Limit Dialog */}
+      <AlertDialog
+        open={pinLimitDialogOpen}
+        onOpenChange={setPinLimitDialogOpen}
+      >
+        <AlertDialogContent className="bg-white max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 bg-yellow-100 rounded-full">
+                <Pin className="h-6 w-6 text-yellow-600" />
+              </div>
+              <AlertDialogTitle className="text-xl">
+                Pin Limit Reached!
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base leading-relaxed pt-2">
+              <div className="space-y-2">
+                <p className="text-gray-700">
+                  You've reached the maximum of{" "}
+                  <span className="font-semibold text-yellow-600">
+                    6 pinned notes
+                  </span>
+                  .
+                </p>
+                <p className="text-gray-600">
+                  Please unpin a note first to pin this one. Pinned notes appear
+                  at the top for quick access.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setPinLimitDialogOpen(false)}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white font-medium px-6"
+            >
+              Got it!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

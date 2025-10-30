@@ -20,7 +20,10 @@ import { useToast } from "../ui/use-toast";
 import RichTextEditor from "../editor/RichTextEditor";
 
 const noteSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100, "Title too long"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(40, "Title must be 40 characters or less"),
   content: z
     .string()
     .min(1, "Content is required")
@@ -93,23 +96,33 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Edit Note</DialogTitle>
+      <DialogContent className="sm:max-w-[600px] p-6">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="text-xl font-semibold">Edit Note</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel className="text-sm font-medium">Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter note title" {...field} />
+                    <Input
+                      placeholder="Enter note title"
+                      className="h-11"
+                      maxLength={40}
+                      {...field}
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <div className="flex justify-between items-center">
+                    <FormMessage />
+                    <span className="text-xs text-gray-500">
+                      {field.value?.length || 0}/40
+                    </span>
+                  </div>
                 </FormItem>
               )}
             />
@@ -119,7 +132,7 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
               name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Content</FormLabel>
+                  <FormLabel className="text-sm font-medium">Content</FormLabel>
                   <FormControl>
                     <RichTextEditor
                       content={field.value}
@@ -137,10 +150,13 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
               name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tags (optional)</FormLabel>
+                  <FormLabel className="text-sm font-medium">
+                    Tags (optional)
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="work, ideas, personal (comma separated)"
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -149,7 +165,7 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
               )}
             />
 
-            <div className="flex justify-end space-x-2 pt-4">
+            <div className="flex justify-end space-x-2 pt-2">
               <Button
                 type="button"
                 variant="outline"

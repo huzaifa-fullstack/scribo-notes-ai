@@ -1,0 +1,37 @@
+[
+  {
+    "title": "Notes Guide Template",
+    "content": "<h2>Notes Guide Template</h2><p>Use this format to create and organize your notes effectively.</p><p>Each note should include a <strong>title</strong>, <strong>HTML-styled content</strong>, <strong>tags</strong>, and <strong>creation/update</strong> info.</p><p>Separate notes using a clear structure for readability and consistency.</p>",
+    "tags": ["guide", "template", "instructions"],
+    "isPinned": true,
+    "isArchived": false
+  },
+  {
+    "title": "Instructions for Users",
+    "content": "<ul><li>Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt; tags for formatting content.</li><li>Keep titles short and meaningful.</li><li>Use <code>#tags</code> to categorize each note.</li><li>Maintain consistent indentation and spacing.</li><li>Separate notes clearly for better readability.</li></ul>",
+    "tags": ["instructions", "guide", "formatting"],
+    "isPinned": false,
+    "isArchived": false
+  },
+  {
+    "title": "Getting Started with Notes",
+    "content": "<p>Welcome to your notes app! Here are some tips to get started:</p><ul><li><strong>Create</strong>: Click the 'New Note' button to create a new note</li><li><strong>Edit</strong>: Click on any note card to view, then use the edit button</li><li><strong>Pin</strong>: Use the pin icon to keep important notes at the top</li><li><strong>Archive</strong>: Archive old notes to keep your workspace clean</li><li><strong>Search</strong>: Use the search bar to find notes quickly</li></ul><p>Happy note-taking!</p>",
+    "tags": ["tutorial", "getting-started"],
+    "isPinned": true,
+    "isArchived": false
+  },
+  {
+    "title": "Sample Meeting Notes",
+    "content": "<h3>Team Meeting - Project Planning</h3><p><strong>Date:</strong> Today</p><p><strong>Attendees:</strong> Team members</p><h4>Agenda:</h4><ul><li>Review project timeline</li><li>Discuss resource allocation</li><li>Plan next sprint</li></ul><h4>Action Items:</h4><ul><li>Complete feature specifications by Friday</li><li>Schedule client demo for next week</li><li>Update project documentation</li></ul>",
+    "tags": ["meeting", "planning", "work"],
+    "isPinned": false,
+    "isArchived": false
+  },
+  {
+    "title": "Recipe Ideas",
+    "content": "<h3>Delicious Pasta Recipe</h3><p><strong>Ingredients:</strong></p><ul><li>2 cups pasta</li><li>1 cup marinara sauce</li><li>1/2 cup parmesan cheese</li><li>2 cloves garlic</li><li>Fresh basil</li></ul><p><strong>Instructions:</strong></p><ol><li>Boil pasta according to package directions</li><li>Heat sauce with minced garlic</li><li>Combine pasta and sauce</li><li>Top with cheese and basil</li></ol>",
+    "tags": ["recipe", "cooking", "pasta"],
+    "isPinned": false,
+    "isArchived": false
+  }
+]

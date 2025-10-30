@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -23,7 +24,14 @@ const registerSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Please enter a valid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .regex(/[A-Z]/, "Password must contain at least one capital letter")
+      .regex(
+        /[!@#$%^&*(),.?":{}|<>]/,
+        "Password must contain at least one special character"
+      ),
     confirmPassword: z.string().min(6, "Please confirm your password"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -43,6 +51,7 @@ const RegisterForm = () => {
     clearError,
   } = useAuthStore();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -54,6 +63,16 @@ const RegisterForm = () => {
     },
   });
 
+  // Clear error when user starts typing
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (error) {
+        clearError();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, error, clearError]);
+
   const onSubmit = async (data: RegisterFormData) => {
     try {
       clearError();
@@ -63,11 +82,13 @@ const RegisterForm = () => {
         password: data.password,
       });
       toast({
-        title: "Welcome to Notes App!",
-        description: "Your account has been created successfully.",
+        title: "Account created successfully!",
+        description: "Please log in with your credentials.",
         variant: "default",
       });
-    } catch (error) {
+      // Navigate to auth page instead of auto-login
+      navigate("/auth");
+    } catch {
       toast({
         title: "Registration failed",
         description: "Please check your information and try again.",
@@ -101,7 +122,7 @@ const RegisterForm = () => {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-2 text-gray-500">
-                Or continue with email
+                Or create account with email
               </span>
             </div>
           </div>
