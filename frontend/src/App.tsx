@@ -136,6 +136,7 @@ function App() {
               fontWeight: "600",
               boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
             },
+            descriptionClassName: "text-black",
           }}
         />
       </div>
