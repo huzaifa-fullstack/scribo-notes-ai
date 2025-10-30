@@ -100,7 +100,7 @@ const NoteCard = ({
                       onEdit(note);
                     }}
                   >
-                    <Edit className="h-4 w-4 mr-2" />
+                    <Edit className="h-4 w-4 mr-0.5" />
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -109,7 +109,7 @@ const NoteCard = ({
                       onExport(note._id);
                     }}
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4 mr-0.5" />
                     Export
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -118,7 +118,7 @@ const NoteCard = ({
                       onTogglePin(note._id);
                     }}
                   >
-                    <Pin className="h-4 w-4 mr-2" />
+                    <Pin className="h-4 w-4 mr-0.5" />
                     {note.isPinned ? "Unpin" : "Pin"}
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -127,7 +127,7 @@ const NoteCard = ({
                       onToggleArchive(note._id);
                     }}
                   >
-                    <Archive className="h-4 w-4 mr-2" />
+                    <Archive className="h-4 w-4 mr-0.5" />
                     {note.isArchived ? "Unarchive" : "Archive"}
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -137,7 +137,7 @@ const NoteCard = ({
                     }}
                     className="text-red-600 focus:text-red-600"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4 mr-0.5" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
