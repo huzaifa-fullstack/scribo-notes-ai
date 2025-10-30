@@ -57,9 +57,18 @@ const NoteCard = ({
         onClick={() => onView(note)}
       >
         <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg text-gray-900 truncate">
+              <h3
+                className="font-semibold text-lg text-gray-900 overflow-hidden text-ellipsis line-clamp-1"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 1,
+                  WebkitBoxOrient: "vertical",
+                  wordBreak: "break-all",
+                }}
+                title={note.title}
+              >
                 {note.title}
               </h3>
               <p className="text-xs text-gray-500 mt-1">

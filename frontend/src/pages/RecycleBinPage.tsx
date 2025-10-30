@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Trash2,
@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useNotesStore } from "../store/notesStore";
 import { useAuthStore } from "../store/authStore";
 import UserDropdown from "../components/layout/UserDropdown";
+import Pagination from "../components/ui/pagination";
 import { Button } from "../components/ui/button";
 import {
   AlertDialog,
@@ -54,6 +55,29 @@ const RecycleBinPage = () => {
 
     return true;
   });
+
+  // Simple pagination for recycle bin (no pinned/unpinned separation)
+  const ITEMS_PER_PAGE = 9;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(deletedNotes.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentPageNotes = deletedNotes.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // Reset to page 1 when notes change
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [deletedNotes.length, currentPage, totalPages]);
 
   const handleRestore = async (id: string) => {
     try {
@@ -194,97 +218,106 @@ const RecycleBinPage = () => {
           </div>
         ) : (
           /* Notes Grid */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <AnimatePresence mode="popLayout">
-              {deletedNotes.map((note) => (
-                <motion.div
-                  key={note._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
-                  className="h-full"
-                >
-                  <Card className="h-full flex flex-col hover:shadow-lg transition-shadow border-red-200">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg text-gray-900 truncate">
-                            {note.title}
-                          </h3>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Deleted{" "}
-                            {note.deletedAt &&
-                              formatDistanceToNow(new Date(note.deletedAt), {
-                                addSuffix: true,
-                              })}
-                          </p>
-                          {note.deletedAt && (
-                            <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                              <AlertTriangle className="h-3 w-3" />
-                              {getDaysRemaining(note.deletedAt)}{" "}
-                              {getDaysRemaining(note.deletedAt) === 1
-                                ? "day"
-                                : "days"}{" "}
-                              remaining
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <AnimatePresence mode="popLayout">
+                {currentPageNotes.map((note) => (
+                  <motion.div
+                    key={note._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full"
+                  >
+                    <Card className="h-full flex flex-col hover:shadow-lg transition-shadow border-red-200">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-lg text-gray-900 truncate">
+                              {note.title}
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Deleted{" "}
+                              {note.deletedAt &&
+                                formatDistanceToNow(new Date(note.deletedAt), {
+                                  addSuffix: true,
+                                })}
                             </p>
-                          )}
+                            {note.deletedAt && (
+                              <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                                <AlertTriangle className="h-3 w-3" />
+                                {getDaysRemaining(note.deletedAt)}{" "}
+                                {getDaysRemaining(note.deletedAt) === 1
+                                  ? "day"
+                                  : "days"}{" "}
+                                remaining
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardHeader>
+                      </CardHeader>
 
-                    <CardContent className="pb-4 flex-1 flex flex-col">
-                      <div className="flex-1 min-h-[80px] max-h-[80px] overflow-hidden mb-4">
-                        <div
-                          className="text-sm text-gray-600 prose prose-sm max-w-none line-clamp-3"
-                          dangerouslySetInnerHTML={{ __html: note.content }}
-                        />
-                      </div>
-
-                      {note.tags && note.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-4">
-                          {note.tags.slice(0, 3).map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {note.tags.length > 3 && (
-                            <span className="px-2 py-1 text-gray-500 text-xs">
-                              +{note.tags.length - 3} more
-                            </span>
-                          )}
+                      <CardContent className="pb-4 flex-1 flex flex-col">
+                        <div className="flex-1 min-h-[80px] max-h-[80px] overflow-hidden mb-4">
+                          <div
+                            className="text-sm text-gray-600 prose prose-sm max-w-none line-clamp-3"
+                            dangerouslySetInnerHTML={{ __html: note.content }}
+                          />
                         </div>
-                      )}
 
-                      <div className="flex gap-2 mt-auto">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleRestore(note._id)}
-                          className="flex-1 gap-1"
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                          Restore
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteClick(note._id)}
-                          className="flex-1 gap-1"
-                        >
-                          <Trash className="h-3 w-3" />
-                          Delete Forever
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+                        {note.tags && note.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-4">
+                            {note.tags.slice(0, 3).map((tag) => (
+                              <span
+                                key={tag}
+                                className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {note.tags.length > 3 && (
+                              <span className="px-2 py-1 text-gray-500 text-xs">
+                                +{note.tags.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 mt-auto">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRestore(note._id)}
+                            className="flex-1 gap-1"
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            Restore
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteClick(note._id)}
+                            className="flex-1 gap-1"
+                          >
+                            <Trash className="h-3 w-3" />
+                            Delete Forever
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={goToPage}
+            />
+          </>
         )}
       </main>
 

@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter, Download } from "lucide-react";
+import { Plus, Search, Filter, Download, Pin } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useNotesStore } from "../store/notesStore";
 import { useAuthStore } from "../store/authStore";
+import { usePagination } from "../hooks/usePagination";
 import NoteCard from "../components/notes/NoteCard";
 import CreateNoteModal from "../components/notes/CreateNoteModal";
 import EditNoteModal from "../components/notes/EditNoteModal";
 import ViewNoteModal from "../components/notes/ViewNoteModal";
 import ExportImportModal from "../components/notes/ExportImportModal";
 import UserDropdown from "../components/layout/UserDropdown";
+import Pagination from "../components/ui/pagination";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import type { Note } from "../types/note";
@@ -41,6 +43,7 @@ const DashboardPage = () => {
   const [viewNote, setViewNote] = useState<Note | null>(null);
   const [exportImportModalOpen, setExportImportModalOpen] = useState(false);
   const [exportNoteId, setExportNoteId] = useState<string | null>(null);
+  const [pinLimitDialogOpen, setPinLimitDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchNotes();
@@ -79,11 +82,26 @@ const DashboardPage = () => {
   };
 
   const handleTogglePin = async (id: string) => {
+    const note = notes.find((n) => n._id === id);
+    if (!note) return;
+
+    // Check if trying to pin and already have 6 pinned notes
+    if (!note.isPinned) {
+      const currentPinnedCount = notes.filter(
+        (n) => n.isPinned && !n.isDeleted && !n.isArchived
+      ).length;
+
+      if (currentPinnedCount >= 6) {
+        setPinLimitDialogOpen(true);
+        return;
+      }
+    }
+
     try {
       await togglePin(id);
       toast({
         title: "Success!",
-        description: "Note pin status updated.",
+        description: note.isPinned ? "Note unpinned." : "Note pinned.",
       });
     } catch (error) {
       toast({
@@ -143,8 +161,22 @@ const DashboardPage = () => {
     return matchesSearch && matchesArchived;
   });
 
-  const pinnedNotes = filteredNotes.filter((note) => note.isPinned);
-  const regularNotes = filteredNotes.filter((note) => !note.isPinned);
+  // Use pagination hook - shows ALL pinned notes, then paginated regular notes
+  const {
+    currentPage,
+    totalPages,
+    pinnedNotes,
+    regularNotes,
+    goToPage,
+    resetPage,
+  } = usePagination({
+    notes: filteredNotes,
+  });
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    resetPage();
+  }, [searchQuery, filterArchived, resetPage]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -252,7 +284,7 @@ const DashboardPage = () => {
         {/* Notes Grid */}
         {!isLoading && filteredNotes.length > 0 && (
           <div className="space-y-8">
-            {/* Pinned Notes */}
+            {/* Pinned Notes - Always show ALL pinned notes */}
             {pinnedNotes.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -260,7 +292,7 @@ const DashboardPage = () => {
                   Pinned Notes
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <AnimatePresence>
+                  <AnimatePresence mode="popLayout">
                     {pinnedNotes.map((note) => (
                       <NoteCard
                         key={note._id}
@@ -278,7 +310,7 @@ const DashboardPage = () => {
               </div>
             )}
 
-            {/* Regular Notes */}
+            {/* Regular Notes - Paginated */}
             {regularNotes.length > 0 && (
               <div>
                 {pinnedNotes.length > 0 && (
@@ -287,7 +319,7 @@ const DashboardPage = () => {
                   </h2>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <AnimatePresence>
+                  <AnimatePresence mode="popLayout">
                     {regularNotes.map((note) => (
                       <NoteCard
                         key={note._id}
@@ -305,6 +337,15 @@ const DashboardPage = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* Pagination - Only show for regular notes */}
+        {!isLoading && regularNotes.length > 0 && totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+          />
         )}
       </main>
 
@@ -362,6 +403,48 @@ const DashboardPage = () => {
               className="bg-red-600 hover:bg-red-700"
             >
               Move to Recycle Bin
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Pin Limit Dialog */}
+      <AlertDialog
+        open={pinLimitDialogOpen}
+        onOpenChange={setPinLimitDialogOpen}
+      >
+        <AlertDialogContent className="bg-white max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 bg-yellow-100 rounded-full">
+                <Pin className="h-6 w-6 text-yellow-600" />
+              </div>
+              <AlertDialogTitle className="text-xl">
+                Pin Limit Reached!
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base leading-relaxed pt-2">
+              <div className="space-y-2">
+                <p className="text-gray-700">
+                  You've reached the maximum of{" "}
+                  <span className="font-semibold text-yellow-600">
+                    6 pinned notes
+                  </span>
+                  .
+                </p>
+                <p className="text-gray-600">
+                  Please unpin a note first to pin this one. Pinned notes appear
+                  at the top for quick access.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setPinLimitDialogOpen(false)}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white font-medium px-6"
+            >
+              Got it!
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
