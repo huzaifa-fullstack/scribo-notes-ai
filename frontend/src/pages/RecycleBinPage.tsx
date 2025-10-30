@@ -150,33 +150,36 @@ const RecycleBinPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-teal-50/20">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+      <header className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-teal-100/50 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-shrink min-w-0 max-w-[65%] sm:max-w-none">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="gap-2"
+                className="flex-shrink-0 hover:bg-teal-50 hover:text-teal-700 transition-all duration-300 -ml-2"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                   Recycle Bin
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-xs sm:text-sm mt-1.5 text-gray-600">
                   Auto-deleted after {RECYCLE_BIN_RETENTION_DAYS} days
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <UserDropdown />
-              <Button onClick={logout} variant="outline">
+              <Button
+                onClick={logout}
+                variant="outline"
+                className="bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4"
+              >
                 Logout
               </Button>
             </div>
@@ -194,9 +197,9 @@ const RecycleBinPage = () => {
               {deletedNotes.length === 1 ? "note" : "notes"} in recycle bin
             </div>
             <Button
-              variant="destructive"
+              variant="outline"
               onClick={handleEmptyBinClick}
-              className="gap-2"
+              className="gap-2 bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 transition-all duration-300"
             >
               <Trash className="h-4 w-4" />
               Empty Recycle Bin
@@ -230,7 +233,7 @@ const RecycleBinPage = () => {
                     transition={{ duration: 0.2 }}
                     className="h-full"
                   >
-                    <Card className="h-full flex flex-col hover:shadow-lg transition-shadow border-red-200">
+                    <Card className="h-full flex flex-col bg-white hover:shadow-lg transition-shadow border-red-200">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
@@ -289,16 +292,16 @@ const RecycleBinPage = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleRestore(note._id)}
-                            className="flex-1 gap-1"
+                            className="flex-1 gap-1 bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 transition-all duration-300"
                           >
                             <RotateCcw className="h-3 w-3" />
                             Restore
                           </Button>
                           <Button
-                            variant="destructive"
+                            variant="outline"
                             size="sm"
                             onClick={() => handleDeleteClick(note._id)}
-                            className="flex-1 gap-1"
+                            className="flex-1 gap-1 bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 transition-all duration-300"
                           >
                             <Trash className="h-3 w-3" />
                             Delete Forever
@@ -332,10 +335,12 @@ const RecycleBinPage = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900 transition-all duration-300">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white transition-all duration-300"
             >
               Delete Forever
             </AlertDialogAction>
@@ -357,10 +362,12 @@ const RecycleBinPage = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900 transition-all duration-300">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleEmptyBinConfirm}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white transition-all duration-300"
             >
               Empty Recycle Bin
             </AlertDialogAction>

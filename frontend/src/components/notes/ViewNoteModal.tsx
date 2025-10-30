@@ -29,8 +29,8 @@ const ViewNoteModal = ({ open, note, onClose }: ViewNoteModalProps) => {
               </span>
             </div>
             {note.isPinned && (
-              <div className="flex items-center gap-1.5 text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full">
-                <Pin className="h-3.5 w-3.5 fill-yellow-600" />
+              <div className="flex items-center gap-1.5 text-teal-600 bg-teal-50 px-2 py-1 rounded-full">
+                <Pin className="h-3.5 w-3.5 fill-teal-600" />
                 <span className="text-xs font-medium">Pinned</span>
               </div>
             )}
@@ -61,7 +61,7 @@ const ViewNoteModal = ({ open, note, onClose }: ViewNoteModalProps) => {
                 {note.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-sm px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full border border-blue-200 font-medium"
+                    className="text-sm px-3 py-1.5 bg-teal-50 text-teal-700 rounded-full border border-teal-200 font-medium"
                   >
                     #{tag}
                   </span>

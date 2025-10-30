@@ -89,7 +89,7 @@ const ExportImportModal = ({
       console.error("Export error:", error);
       toast({
         title: "Export failed",
-        description: error.response?.data?.error || "Failed to export note(s)",
+        description: error.response?.data?.error || "Failed to export note",
         variant: "destructive",
       });
     } finally {
@@ -335,7 +335,7 @@ const ExportImportModal = ({
                       <div>
                         <p className="font-medium">PDF</p>
                         <p className="text-xs text-gray-500">
-                          All notes in one PDF
+                          Save this note as PDF
                         </p>
                       </div>
                     </Label>
@@ -347,7 +347,7 @@ const ExportImportModal = ({
             <Button
               onClick={handleExport}
               disabled={isLoading}
-              className="w-full"
+              className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               size="lg"
             >
               <Download className="mr-0.5 h-4 w-4" />
@@ -357,12 +357,18 @@ const ExportImportModal = ({
         ) : (
           // Bulk operations - Use tabs for Export/Import
           <Tabs defaultValue="export" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="export" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+              <TabsTrigger
+                value="export"
+                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-50 data-[state=active]:to-cyan-50 data-[state=active]:text-teal-700 hover:bg-teal-50/50 transition-all duration-300"
+              >
                 <Download className="h-4 w-4" />
                 Export
               </TabsTrigger>
-              <TabsTrigger value="import" className="flex items-center gap-2">
+              <TabsTrigger
+                value="import"
+                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-50 data-[state=active]:to-cyan-50 data-[state=active]:text-teal-700 hover:bg-teal-50/50 transition-all duration-300"
+              >
                 <Upload className="h-4 w-4" />
                 Import
               </TabsTrigger>
@@ -432,7 +438,7 @@ const ExportImportModal = ({
               <Button
                 onClick={handleExport}
                 disabled={isLoading}
-                className="w-full"
+                className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 size="lg"
               >
                 <Download className="mr-0.5 h-4 w-4" />
@@ -485,7 +491,7 @@ const ExportImportModal = ({
                 </RadioGroup>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+              <div className="bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-200 rounded-lg p-4 space-y-3">
                 <Label className="text-sm font-semibold text-gray-700">
                   Sample Files
                 </Label>
@@ -497,7 +503,7 @@ const ExportImportModal = ({
                     variant="outline"
                     size="sm"
                     onClick={() => downloadSampleFile("json")}
-                    className="flex-1"
+                    className="flex-1 bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 transition-all duration-300"
                   >
                     <Download className="mr-1.5 h-3.5 w-3.5" />
                     Sample JSON
@@ -506,7 +512,7 @@ const ExportImportModal = ({
                     variant="outline"
                     size="sm"
                     onClick={() => downloadSampleFile("markdown")}
-                    className="flex-1"
+                    className="flex-1 bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 transition-all duration-300"
                   >
                     <Download className="mr-1.5 h-3.5 w-3.5" />
                     Sample Markdown
@@ -521,13 +527,13 @@ const ExportImportModal = ({
                 >
                   Select File
                 </Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors">
+                <div className="border-2 border-dashed border-teal-300 rounded-lg p-4 hover:border-teal-500 transition-colors bg-teal-50/30">
                   <input
                     id="import-file"
                     type="file"
                     accept={getAcceptAttribute()}
                     onChange={handleFileChange}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-teal-600 file:to-cyan-600 file:text-white hover:file:from-teal-700 hover:file:to-cyan-700 cursor-pointer transition-all duration-300"
                   />
                 </div>
                 {importFile && (
@@ -540,7 +546,7 @@ const ExportImportModal = ({
               <Button
                 onClick={handleImport}
                 disabled={!importFile || !isFileFormatValid() || isLoading}
-                className="w-full"
+                className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 size="lg"
               >
                 <Upload className="mr-0.5 h-4 w-4" />

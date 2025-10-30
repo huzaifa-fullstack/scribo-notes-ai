@@ -3,6 +3,8 @@ import { ArrowLeft, Moon, Sun, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
+import { useAuthStore } from "../store/authStore";
+import UserDropdown from "../components/layout/UserDropdown";
 import {
   Card,
   CardContent,
@@ -27,6 +29,7 @@ import {
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { logout } = useAuthStore();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const handleDarkModeToggle = (checked: boolean) => {
@@ -57,23 +60,38 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-teal-50/20">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/dashboard")}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Manage your app preferences
-              </p>
+      <header className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-teal-100/50 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-shrink min-w-0 max-w-[65%] sm:max-w-none">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/dashboard")}
+                className="flex-shrink-0 hover:bg-teal-50 hover:text-teal-700 transition-all duration-300 -ml-2"
+              >
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                  Settings
+                </h1>
+                <p className="text-xs sm:text-sm mt-1.5 text-gray-600">
+                  Manage your app preferences
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <UserDropdown />
+              <Button
+                onClick={logout}
+                variant="outline"
+                className="bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4"
+              >
+                Logout
+              </Button>
             </div>
           </div>
         </div>

@@ -5,4 +5,132 @@
   :root {
     --radius: 0.5rem;
   }
+
+  /* Custom scrollbar with teal theme */
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #14b8a6, #06b6d4);
+    border-radius: 10px;
+    border: 2px solid #f1f5f9;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #0d9488, #0891b2);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #14b8a6 #f1f5f9;
+  }
+}
+
+/* Ocean Background Animations */
+@keyframes ocean-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+@keyframes ocean-float-delayed {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 30px) scale(1.05);
+  }
+  66% {
+    transform: translate(25px, -25px) scale(0.95);
+  }
+}
+
+@keyframes ocean-pulse-slow {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.25;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes ocean-sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ocean-wave {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(20px) translateY(-20px);
+  }
+}
+
+.ocean-float {
+  animation: ocean-float 20s ease-in-out infinite;
+}
+
+.ocean-float-delayed {
+  animation: ocean-float-delayed 25s ease-in-out infinite;
+}
+
+.ocean-pulse-slow {
+  animation: ocean-pulse-slow 8s ease-in-out infinite;
+}
+
+/* Soft pulse for subtle UI accents (less intense than ping) */
+.soft-pulse {
+  animation: ocean-pulse-slow 6s ease-in-out infinite;
+  opacity: 0.45; /* keep it subtle */
+  filter: blur(6px);
+  transform-origin: center;
+}
+
+/* Subtle hover glow used for buttons */
+.subtle-glow {
+  box-shadow: 0 6px 18px rgba(0, 169, 157, 0.06);
+}
+
+.ocean-sparkle {
+  animation: ocean-sparkle 3s ease-in-out infinite;
+}
+
+.ocean-wave-dark {
+  animation: ocean-wave 15s ease-in-out infinite;
+}
+
+.ocean-wave-light {
+  animation: ocean-wave 20s ease-in-out infinite;
+}
+
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
 }
