@@ -236,14 +236,16 @@ const DashboardPage = () => {
               <Download className="h-4 w-4 mr-0.5" />
               Export/Import
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => setCreateModalOpen(true)}
-              className="px-3"
-            >
-              <Plus className="h-4 w-4 mr-0.5" />
-              New Note
-            </Button>
+            {!filterArchived && (
+              <Button
+                variant="outline"
+                onClick={() => setCreateModalOpen(true)}
+                className="px-3"
+              >
+                <Plus className="h-4 w-4 mr-0.5" />
+                New Note
+              </Button>
+            )}
           </div>
         </div>
 
@@ -270,9 +272,11 @@ const DashboardPage = () => {
             <p className="text-gray-500 mb-4">
               {searchQuery
                 ? "Try a different search term"
+                : filterArchived
+                ? "Archive notes to see them here"
                 : "Create your first note to get started"}
             </p>
-            {!searchQuery && (
+            {!searchQuery && !filterArchived && (
               <Button onClick={() => setCreateModalOpen(true)}>
                 <Plus className="h-4 w-4 mr-1.5" />
                 Create Note
