@@ -6,6 +6,8 @@ export interface Note {
   tags?: string[];
   isPinned: boolean;
   isArchived: boolean;
+  isDeleted?: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -32,6 +34,9 @@ export interface NotesStore {
   createNote: (data: CreateNoteData) => Promise<Note>;
   updateNote: (id: string, data: UpdateNoteData) => Promise<Note>;
   deleteNote: (id: string) => Promise<void>;
+  restoreNote: (id: string) => Promise<void>;
+  permanentlyDeleteNote: (id: string) => Promise<void>;
+  emptyRecycleBin: () => Promise<void>;
   togglePin: (id: string) => Promise<void>;
   toggleArchive: (id: string) => Promise<void>;
   clearError: () => void;

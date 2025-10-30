@@ -24,8 +24,7 @@ const UserDropdown = () => {
   };
 
   const handleRecycleBinClick = () => {
-    console.log("Navigate to recycle bin");
-    // TODO: Navigate to recycle bin
+    navigate("/recycle-bin");
   };
 
   // Get user initials for avatar
