@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText } from "lucide-react";
+import { Sparkles, Clock } from "lucide-react";
 import LoginForm from "../components/auth/LoginForm";
+import ScriboLogo from "../components/icons/ScriboLogo";
 
 const LoginPage = () => {
   return (
@@ -16,17 +17,15 @@ const LoginPage = () => {
         >
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-blue-600 rounded-xl">
-                <FileText className="h-8 w-8 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900">Notes App</h1>
+              <ScriboLogo size={48} />
+              <h1 className="text-3xl font-bold text-gray-900">Scribo Notes</h1>
             </div>
 
             <div className="space-y-4">
               <h2 className="text-4xl font-bold text-gray-900 leading-tight">
                 Organize your thoughts,
                 <br />
-                <span className="text-blue-600">simplify your life</span>
+                <span className="text-cyan-600">simplify your life</span>
               </h2>
 
               <p className="text-lg text-gray-600 leading-relaxed">
@@ -38,16 +37,26 @@ const LoginPage = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-white rounded-lg border border-gray-200">
-                <div className="text-2xl font-bold text-blue-600 mb-1">
-                  500+
+                <div className="flex items-center justify-center mb-3">
+                  <Sparkles className="h-6 w-6 text-cyan-600" />
                 </div>
-                <div className="text-sm text-gray-600">Active Users</div>
+                <div className="text-sm font-semibold text-gray-900 mb-1 text-center">
+                  Rich Text Editor
+                </div>
+                <div className="text-xs text-gray-600 text-center">
+                  Format your notes beautifully
+                </div>
               </div>
               <div className="p-4 bg-white rounded-lg border border-gray-200">
-                <div className="text-2xl font-bold text-purple-600 mb-1">
-                  10K+
+                <div className="flex items-center justify-center mb-3">
+                  <Clock className="h-6 w-6 text-cyan-600" />
                 </div>
-                <div className="text-sm text-gray-600">Notes Created</div>
+                <div className="text-sm font-semibold text-gray-900 mb-1 text-center">
+                  Auto-Save
+                </div>
+                <div className="text-xs text-gray-600 text-center">
+                  Never lose your work
+                </div>
               </div>
             </div>
           </div>
@@ -67,7 +76,7 @@ const LoginPage = () => {
               Don't have an account?{" "}
               <Link
                 to="/register"
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+                className="font-medium text-cyan-600 hover:text-cyan-500 transition-colors"
               >
                 Sign up
               </Link>
