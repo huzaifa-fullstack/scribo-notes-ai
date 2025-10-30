@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Download } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useNotesStore } from "../store/notesStore";
 import { useAuthStore } from "../store/authStore";
@@ -7,6 +7,8 @@ import NoteCard from "../components/notes/NoteCard";
 import CreateNoteModal from "../components/notes/CreateNoteModal";
 import EditNoteModal from "../components/notes/EditNoteModal";
 import ViewNoteModal from "../components/notes/ViewNoteModal";
+import ExportImportModal from "../components/notes/ExportImportModal";
+import UserDropdown from "../components/layout/UserDropdown";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import type { Note } from "../types/note";
@@ -37,6 +39,8 @@ const DashboardPage = () => {
   const [filterArchived, setFilterArchived] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewNote, setViewNote] = useState<Note | null>(null);
+  const [exportImportModalOpen, setExportImportModalOpen] = useState(false);
+  const [exportNoteId, setExportNoteId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchNotes();
@@ -110,10 +114,27 @@ const DashboardPage = () => {
     setViewModalOpen(true);
   };
 
+  const handleExportNote = (noteId: string) => {
+    setExportNoteId(noteId);
+    setExportImportModalOpen(true);
+  };
+
+  const handleBulkExportImport = () => {
+    setExportNoteId(null);
+    setExportImportModalOpen(true);
+  };
+
+  const handleImportSuccess = () => {
+    fetchNotes(); // Refresh notes after import
+  };
+
   const filteredNotes = notes.filter((note) => {
+    const searchLower = searchQuery.toLowerCase();
     const matchesSearch =
-      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchQuery.toLowerCase());
+      note.title.toLowerCase().includes(searchLower) ||
+      note.content.toLowerCase().includes(searchLower) ||
+      (note.tags &&
+        note.tags.some((tag) => tag.toLowerCase().includes(searchLower)));
     const matchesArchived = filterArchived ? note.isArchived : !note.isArchived;
     return matchesSearch && matchesArchived;
   });
@@ -133,9 +154,13 @@ const DashboardPage = () => {
                 Welcome back, {user?.name}!
               </p>
             </div>
-            <Button onClick={logout} variant="outline">
-              Logout
-            </Button>
+            {/* Desktop: UserDropdown + Logout */}
+            <div className="flex items-center gap-2">
+              <UserDropdown />
+              <Button onClick={logout} variant="outline">
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -154,16 +179,33 @@ const DashboardPage = () => {
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <Button
-              variant={filterArchived ? "default" : "outline"}
+              variant="outline"
               onClick={() => setFilterArchived(!filterArchived)}
+              className={`px-3 ${
+                filterArchived
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                  : ""
+              }`}
             >
-              <Filter className="h-4 w-4 mr-2" />
+              <Filter className="h-4 w-4 mr-0.5" />
               {filterArchived ? "Archived" : "Active"}
             </Button>
-            <Button onClick={() => setCreateModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button
+              variant="outline"
+              onClick={handleBulkExportImport}
+              className="px-3"
+            >
+              <Download className="h-4 w-4 mr-0.5" />
+              Export/Import
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setCreateModalOpen(true)}
+              className="px-3"
+            >
+              <Plus className="h-4 w-4 mr-0.5" />
               New Note
             </Button>
           </div>
@@ -196,7 +238,7 @@ const DashboardPage = () => {
             </p>
             {!searchQuery && (
               <Button onClick={() => setCreateModalOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1.5" />
                 Create Note
               </Button>
             )}
@@ -224,6 +266,7 @@ const DashboardPage = () => {
                         onDelete={handleDeleteClick}
                         onTogglePin={handleTogglePin}
                         onToggleArchive={handleToggleArchive}
+                        onExport={handleExportNote}
                       />
                     ))}
                   </AnimatePresence>
@@ -250,6 +293,7 @@ const DashboardPage = () => {
                         onDelete={handleDeleteClick}
                         onTogglePin={handleTogglePin}
                         onToggleArchive={handleToggleArchive}
+                        onExport={handleExportNote}
                       />
                     ))}
                   </AnimatePresence>
@@ -284,9 +328,19 @@ const DashboardPage = () => {
         }}
       />
 
+      <ExportImportModal
+        open={exportImportModalOpen}
+        onClose={() => {
+          setExportImportModalOpen(false);
+          setExportNoteId(null);
+        }}
+        noteId={exportNoteId}
+        onImportSuccess={handleImportSuccess}
+      />
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
