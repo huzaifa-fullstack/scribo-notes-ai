@@ -46,6 +46,7 @@ const getNotes = async (req, res, next) => {
                 { user: req.user.id },
                 { 'sharedWith.user': req.user.id }
             ],
+            isDeleted: false,
             ...(archived === 'true' ? {} : { isArchived: false })
         });
 

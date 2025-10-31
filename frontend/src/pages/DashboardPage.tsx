@@ -190,6 +190,18 @@ const DashboardPage = () => {
     }
   }, [searchQuery, filterArchived, resetPage]);
 
+  // Reset to page 1 when pinned notes count changes (pin/unpin operations)
+  // This ensures user doesn't stay on a page that might be empty after pin/unpin
+  useEffect(() => {
+    if (!isInitialMount.current && pinnedNotes.length !== 0) {
+      // Only reset if we're not on page 1 and notes have been loaded
+      if (currentPage > 1 && filteredNotes.length > 0) {
+        resetPage();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pinnedNotes.length]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-teal-50/20 relative">
       <OceanBackground isDark={false} />
