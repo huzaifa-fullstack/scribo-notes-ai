@@ -7,6 +7,7 @@ export const useNotesStore = create<NotesStore>()(
   persist(
     (set) => ({
       notes: [],
+      recycleNotes: [],
       isLoading: false,
       error: null,
 
@@ -26,6 +27,24 @@ export const useNotesStore = create<NotesStore>()(
             error: errorMessage,
             isLoading: false,
           });
+          throw error;
+        }
+      },
+
+      // Fetch deleted notes (recycle bin)
+      fetchRecycleBin: async (page = 1, limit = 100) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await api.get(
+            `/notes/recycle-bin?page=${page}&limit=${limit}`
+          );
+          const deleted = response.data.data || response.data.notes || [];
+          set({ recycleNotes: deleted, isLoading: false });
+        } catch (error: any) {
+          const errorMessage =
+            error.response?.data?.error || "Failed to fetch recycle bin";
+          set({ error: errorMessage, isLoading: false });
           throw error;
         }
       },
@@ -84,18 +103,19 @@ export const useNotesStore = create<NotesStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          // For now, mark as deleted locally (soft delete)
-          // This will be synced with backend later
+          // Soft delete - move to recycle bin
+          const response = await api.delete(`/notes/${id}`);
+          const deletedNote = response.data.data || response.data.note;
+
           set((state) => ({
             notes: state.notes.map((note) =>
-              note._id === id
-                ? {
-                    ...note,
-                    isDeleted: true,
-                    deletedAt: new Date().toISOString(),
-                  }
-                : note
+              note._id === id ? deletedNote : note
             ),
+            // add to recycleNotes if not present
+            recycleNotes: [
+              deletedNote,
+              ...state.recycleNotes.filter((n) => n._id !== id),
+            ],
             isLoading: false,
           }));
         } catch (error: any) {
@@ -114,12 +134,18 @@ export const useNotesStore = create<NotesStore>()(
 
         try {
           // Restore note from recycle bin
+          const response = await api.put(`/notes/${id}/restore`);
+          const restoredNote = response.data.data || response.data.note;
+
           set((state) => ({
-            notes: state.notes.map((note) =>
-              note._id === id
-                ? { ...note, isDeleted: false, deletedAt: undefined }
-                : note
-            ),
+            // if note exists in notes list, update it; otherwise prepend
+            notes: state.notes.some((n) => n._id === id)
+              ? state.notes.map((note) =>
+                  note._id === id ? restoredNote : note
+                )
+              : [restoredNote, ...state.notes],
+            // remove from recycleNotes
+            recycleNotes: state.recycleNotes.filter((note) => note._id !== id),
             isLoading: false,
           }));
         } catch (error: any) {
@@ -137,10 +163,11 @@ export const useNotesStore = create<NotesStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          await api.delete(`/notes/${id}`);
+          await api.delete(`/notes/${id}/permanent`);
 
           set((state) => ({
             notes: state.notes.filter((note) => note._id !== id),
+            recycleNotes: state.recycleNotes.filter((note) => note._id !== id),
             isLoading: false,
           }));
         } catch (error: any) {
@@ -158,17 +185,12 @@ export const useNotesStore = create<NotesStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          const deletedNotes = useNotesStore
-            .getState()
-            .notes.filter((note) => note.isDeleted);
-
-          // Delete all notes that are in recycle bin
-          await Promise.all(
-            deletedNotes.map((note) => api.delete(`/notes/${note._id}`))
-          );
+          // Call backend endpoint to empty recycle bin
+          await api.delete("/notes/recycle-bin/empty");
 
           set((state) => ({
             notes: state.notes.filter((note) => !note.isDeleted),
+            recycleNotes: [],
             isLoading: false,
           }));
         } catch (error: any) {
@@ -223,7 +245,7 @@ export const useNotesStore = create<NotesStore>()(
       },
 
       clearNotes: () => {
-        set({ notes: [], error: null });
+        set({ notes: [], recycleNotes: [], error: null });
       },
     }),
     {
@@ -231,6 +253,7 @@ export const useNotesStore = create<NotesStore>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         notes: state.notes,
+        recycleNotes: state.recycleNotes,
       }),
     }
   )

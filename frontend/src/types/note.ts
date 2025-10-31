@@ -26,11 +26,13 @@ export interface UpdateNoteData {
 
 export interface NotesStore {
   notes: Note[];
+  recycleNotes: Note[];
   isLoading: boolean;
   error: string | null;
 
   // Actions
   fetchNotes: () => Promise<void>;
+  fetchRecycleBin: (page?: number, limit?: number) => Promise<void>;
   createNote: (data: CreateNoteData) => Promise<Note>;
   updateNote: (id: string, data: UpdateNoteData) => Promise<Note>;
   deleteNote: (id: string) => Promise<void>;

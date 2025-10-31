@@ -32,6 +32,14 @@ const NoteSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    deletedAt: {
+        type: Date,
+        default: null
+    },
     color: {
         type: String,
         enum: ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'],
@@ -170,6 +178,7 @@ NoteSchema.statics.findByUser = function (userId, options = {}) {
     const {
         includeArchived = false,
         includeShared = true,
+        includeDeleted = false,
         category = null,
         tags = null,
         search = null,
@@ -194,6 +203,11 @@ NoteSchema.statics.findByUser = function (userId, options = {}) {
     // Filter archived notes
     if (!includeArchived) {
         query.isArchived = false;
+    }
+
+    // Filter deleted notes
+    if (!includeDeleted) {
+        query.isDeleted = false;
     }
 
     // Filter by category
@@ -251,7 +265,8 @@ NoteSchema.statics.getUserStats = async function (userId) {
                 $or: [
                     { user: new mongoose.Types.ObjectId(userId) },
                     { 'sharedWith.user': new mongoose.Types.ObjectId(userId) }
-                ]
+                ],
+                isDeleted: false  // Exclude deleted notes from stats
             }
         },
         {

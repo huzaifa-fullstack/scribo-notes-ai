@@ -200,7 +200,7 @@ const updateNote = async (req, res, next) => {
     }
 };
 
-// @desc    Delete note
+// @desc    Delete note (soft delete - move to recycle bin)
 // @route   DELETE /api/notes/:id
 // @access  Private
 const deleteNote = async (req, res, next) => {
@@ -223,14 +223,17 @@ const deleteNote = async (req, res, next) => {
             });
         }
 
-        await Note.findByIdAndDelete(req.params.id);
+        // Soft delete - mark as deleted instead of removing from database
+        note.isDeleted = true;
+        note.deletedAt = new Date();
+        await note.save();
 
-        logger.info(`User ${req.user.email} deleted note ${req.params.id}`);
+        logger.info(`User ${req.user.email} moved note ${req.params.id} to recycle bin`);
 
         res.status(200).json({
             success: true,
-            message: 'Note deleted successfully',
-            data: {}
+            message: 'Note moved to recycle bin successfully',
+            data: note
         });
 
     } catch (error) {
@@ -440,6 +443,171 @@ const getNoteStats = async (req, res, next) => {
     }
 };
 
+// @desc    Restore note from recycle bin
+// @route   PUT /api/notes/:id/restore
+// @access  Private
+const restoreNote = async (req, res, next) => {
+    try {
+        const note = await Note.findById(req.params.id);
+
+        if (!note) {
+            return res.status(404).json({
+                success: false,
+                error: 'Note not found'
+            });
+        }
+
+        // Only owner can restore note
+        if (note.user.toString() !== req.user.id.toString()) {
+            logger.warn(`User ${req.user.email} attempted to restore unauthorized note ${req.params.id}`);
+            return res.status(403).json({
+                success: false,
+                error: 'Not authorized to restore this note'
+            });
+        }
+
+        // Check if note is actually deleted
+        if (!note.isDeleted) {
+            return res.status(400).json({
+                success: false,
+                error: 'Note is not in recycle bin'
+            });
+        }
+
+        // Restore the note
+        note.isDeleted = false;
+        note.deletedAt = null;
+        await note.save();
+
+        logger.info(`User ${req.user.email} restored note ${req.params.id} from recycle bin`);
+
+        res.status(200).json({
+            success: true,
+            message: 'Note restored successfully',
+            data: note
+        });
+
+    } catch (error) {
+        logger.error('Restore note error:', error);
+        next(error);
+    }
+};
+
+// @desc    Permanently delete note
+// @route   DELETE /api/notes/:id/permanent
+// @access  Private
+const permanentlyDeleteNote = async (req, res, next) => {
+    try {
+        const note = await Note.findById(req.params.id);
+
+        if (!note) {
+            return res.status(404).json({
+                success: false,
+                error: 'Note not found'
+            });
+        }
+
+        // Only owner can permanently delete note
+        if (note.user.toString() !== req.user.id.toString()) {
+            logger.warn(`User ${req.user.email} attempted to permanently delete unauthorized note ${req.params.id}`);
+            return res.status(403).json({
+                success: false,
+                error: 'Not authorized to delete this note'
+            });
+        }
+
+        // Permanently delete from database
+        await Note.findByIdAndDelete(req.params.id);
+
+        logger.info(`User ${req.user.email} permanently deleted note ${req.params.id}`);
+
+        res.status(200).json({
+            success: true,
+            message: 'Note permanently deleted successfully',
+            data: {}
+        });
+
+    } catch (error) {
+        logger.error('Permanently delete note error:', error);
+        next(error);
+    }
+};
+
+// @desc    Empty recycle bin (permanently delete all deleted notes)
+// @route   DELETE /api/notes/recycle-bin/empty
+// @access  Private
+const emptyRecycleBin = async (req, res, next) => {
+    try {
+        // Find all deleted notes belonging to the user
+        const deletedNotes = await Note.find({
+            user: req.user.id,
+            isDeleted: true
+        });
+
+        // Permanently delete all notes in recycle bin
+        const result = await Note.deleteMany({
+            user: req.user.id,
+            isDeleted: true
+        });
+
+        logger.info(`User ${req.user.email} emptied recycle bin - ${result.deletedCount} notes permanently deleted`);
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} notes permanently deleted`,
+            data: {
+                deletedCount: result.deletedCount
+            }
+        });
+
+    } catch (error) {
+        logger.error('Empty recycle bin error:', error);
+        next(error);
+    }
+};
+
+// @desc    Get deleted notes (recycle bin)
+// @route   GET /api/notes/recycle-bin
+// @access  Private
+const getRecycleBin = async (req, res, next) => {
+    try {
+        const {
+            page = 1,
+            limit = 10
+        } = req.query;
+
+        // Find all deleted notes belonging to the user
+        const deletedNotes = await Note.find({
+            user: req.user.id,
+            isDeleted: true
+        })
+            .populate('user', 'name email avatar')
+            .sort({ deletedAt: -1 })
+            .limit(parseInt(limit))
+            .skip((parseInt(page) - 1) * parseInt(limit));
+
+        const total = await Note.countDocuments({
+            user: req.user.id,
+            isDeleted: true
+        });
+
+        logger.info(`User ${req.user.email} retrieved ${deletedNotes.length} deleted notes`);
+
+        res.status(200).json({
+            success: true,
+            count: deletedNotes.length,
+            total,
+            page: parseInt(page),
+            pages: Math.ceil(total / limit),
+            data: deletedNotes
+        });
+
+    } catch (error) {
+        logger.error('Get recycle bin error:', error);
+        next(error);
+    }
+};
+
 module.exports = {
     getNotes,
     getNote,
@@ -450,5 +618,9 @@ module.exports = {
     toggleArchive,
     shareNote,
     unshareNote,
-    getNoteStats
+    getNoteStats,
+    restoreNote,
+    permanentlyDeleteNote,
+    emptyRecycleBin,
+    getRecycleBin
 };
