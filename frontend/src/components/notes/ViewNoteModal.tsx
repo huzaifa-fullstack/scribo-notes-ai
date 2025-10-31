@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import type { Note } from "../../types/note";
 import { formatDistanceToNow } from "date-fns";
 import { Pin, Archive, Calendar, Tag } from "lucide-react";
+import { getNoteColorScheme } from "../../utils/noteColors";
 
 interface ViewNoteModalProps {
   open: boolean;
@@ -12,9 +13,14 @@ interface ViewNoteModalProps {
 const ViewNoteModal = ({ open, note, onClose }: ViewNoteModalProps) => {
   if (!note) return null;
 
+  // Get color scheme based on tags
+  const colorScheme = getNoteColorScheme(note.tags, note._id);
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto bg-white">
+      <DialogContent
+        className={`sm:max-w-[700px] max-h-[85vh] overflow-y-auto ${colorScheme.background}`}
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-900 pr-8">
             {note.title}
@@ -61,7 +67,7 @@ const ViewNoteModal = ({ open, note, onClose }: ViewNoteModalProps) => {
                 {note.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-sm px-3 py-1.5 bg-teal-50 text-teal-700 rounded-full border border-teal-200 font-medium"
+                    className={`text-sm px-3 py-1.5 ${colorScheme.tagBackground} ${colorScheme.tagText} rounded-full border ${colorScheme.border} font-medium`}
                   >
                     #{tag}
                   </span>

@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
+import { getNoteColorScheme } from "../../utils/noteColors";
 
 interface NoteCardProps {
   note: Note;
@@ -43,6 +44,14 @@ const NoteCard = ({
     e.stopPropagation();
   };
 
+  // Get color scheme based on tags
+  const colorScheme = getNoteColorScheme(note.tags, note._id);
+
+  // For pinned notes, we'll use a special yellow border but keep the tag-based background
+  const pinnedBorderClass = note.isPinned
+    ? "border-2 border-yellow-400 shadow-lg shadow-yellow-100"
+    : `border ${colorScheme.border} ${colorScheme.borderHover} shadow-md ${colorScheme.shadow} ${colorScheme.shadowHover}`;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -53,14 +62,10 @@ const NoteCard = ({
       className="h-full"
     >
       <Card
-        className={`h-full flex flex-col hover:shadow-xl transition-all cursor-pointer group ${
-          note.isPinned
-            ? "border-2 border-yellow-400 shadow-lg shadow-yellow-100"
-            : "border border-gray-200 hover:border-teal-300 shadow-md hover:shadow-teal-100"
-        } ${
+        className={`h-full flex flex-col hover:shadow-xl transition-all cursor-pointer group ${pinnedBorderClass} ${
           isDark
             ? "bg-slate-800/80 hover:bg-slate-800/90 border-slate-700 backdrop-blur-sm"
-            : "bg-white/95 backdrop-blur-sm hover:bg-white"
+            : `${colorScheme.background} ${colorScheme.backgroundHover} backdrop-blur-sm`
         }`}
         onClick={() => onView(note)}
       >
@@ -193,7 +198,7 @@ const NoteCard = ({
                     className={`text-xs px-2 py-0.5 rounded-full truncate max-w-[80px] font-medium transition-colors ${
                       isDark
                         ? "bg-teal-900/50 text-teal-300"
-                        : "bg-gradient-to-r from-teal-50 to-cyan-50 text-teal-700 group-hover:from-teal-100 group-hover:to-cyan-100"
+                        : `${colorScheme.tagBackground} ${colorScheme.tagText}`
                     }`}
                   >
                     #{tag}
