@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useNotesStore } from "../store/notesStore";
+import { useTheme } from "../context/ThemeContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import UserDropdown from "../components/layout/UserDropdown";
@@ -73,6 +74,7 @@ const ProfilePage = () => {
   const { user, logout } = useAuthStore();
   const { notes } = useNotesStore();
   const { toast } = useToast();
+  const { theme } = useTheme();
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || "");
@@ -84,6 +86,8 @@ const ProfilePage = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const isDarkMode = theme === "dark";
 
   // React Hook Form for password change
   const passwordForm = useForm<PasswordChangeData>({
@@ -239,10 +243,54 @@ const ProfilePage = () => {
     });
   };
 
+  // Dynamic theme classes
+  const themeClasses = {
+    bg: isDarkMode
+      ? "bg-slate-950"
+      : "bg-gradient-to-br from-gray-50 via-blue-50/30 to-teal-50/20",
+    header: isDarkMode
+      ? "bg-gray-900/80 border-teal-600/30"
+      : "bg-white/80 border-teal-100/50",
+    headerText: isDarkMode ? "text-white" : "text-gray-900",
+    headerSubtext: isDarkMode ? "text-gray-400" : "text-gray-600",
+    headerGradient: isDarkMode
+      ? "from-teal-400 to-cyan-400"
+      : "from-teal-600 to-cyan-600",
+    card: isDarkMode
+      ? "bg-gray-900 border-gray-700"
+      : "bg-white border-teal-100/50",
+    cardTitle: isDarkMode ? "text-teal-400" : "text-teal-700",
+    cardText: isDarkMode ? "text-white" : "text-gray-900",
+    cardSubtext: isDarkMode ? "text-gray-400" : "text-gray-500",
+    statBox: isDarkMode
+      ? "bg-gray-800 border-gray-700"
+      : "bg-teal-50 border-teal-100",
+    statText: isDarkMode ? "text-gray-100" : "text-gray-900",
+    statSubtext: isDarkMode ? "text-gray-400" : "text-gray-600",
+    statIcon: isDarkMode ? "text-teal-400" : "text-teal-600",
+    input: isDarkMode
+      ? "bg-gray-800 border-gray-600 text-white"
+      : "bg-white border-gray-200",
+    inputDisabled: isDarkMode
+      ? "bg-gray-800/50 text-gray-300"
+      : "bg-gray-50 text-gray-500",
+    button: isDarkMode
+      ? "border-gray-600 text-teal-400 hover:bg-gray-800"
+      : "border-teal-300 text-teal-600 hover:bg-teal-50",
+    buttonHover: isDarkMode
+      ? "hover:text-teal-300 hover:border-teal-500"
+      : "hover:text-teal-700 hover:border-teal-400",
+    avatarRing: isDarkMode ? "ring-teal-600/50" : "ring-teal-200",
+    labelText: isDarkMode ? "text-teal-400" : "text-teal-700",
+    iconColor: isDarkMode ? "text-teal-400" : "text-teal-500",
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-teal-50/20">
+    <div className={`min-h-screen ${themeClasses.bg}`}>
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-teal-100/50 sticky top-0 z-50">
+      <header
+        className={`${themeClasses.header} backdrop-blur-xl shadow-sm border-b sticky top-0 z-50`}
+      >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-shrink min-w-0 max-w-[65%] sm:max-w-none">
@@ -250,15 +298,25 @@ const ProfilePage = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="flex-shrink-0 hover:bg-teal-50 hover:text-teal-700 transition-all duration-300 -ml-2"
+                className={`flex-shrink-0 ${
+                  isDarkMode
+                    ? "hover:bg-gray-800 text-white"
+                    : "hover:bg-teal-50 text-gray-900"
+                } hover:text-teal-700 transition-all duration-300 -ml-2`}
               >
                 <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
               <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                <h1
+                  className={`text-2xl sm:text-3xl font-bold ${
+                    isDarkMode ? "text-teal-400" : "text-teal-600"
+                  }`}
+                >
                   Profile
                 </h1>
-                <p className="text-xs sm:text-sm mt-1.5 text-gray-600">
+                <p
+                  className={`text-xs sm:text-sm mt-1.5 ${themeClasses.headerSubtext}`}
+                >
                   Manage your account settings
                 </p>
               </div>
@@ -268,7 +326,11 @@ const ProfilePage = () => {
               <Button
                 onClick={logout}
                 variant="outline"
-                className="bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4"
+                className={`${
+                  isDarkMode
+                    ? "bg-red-600/20 border-red-600 text-red-500 hover:bg-red-600 hover:text-white"
+                    : "bg-white/90 border-red-200 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600"
+                } backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4`}
               >
                 Logout
               </Button>
@@ -287,9 +349,17 @@ const ProfilePage = () => {
         >
           {/* Left Column - Profile Info */}
           <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
+            <Card
+              className={`${themeClasses.card} shadow-lg hover:shadow-xl transition-shadow duration-300 border`}
+            >
+              <CardHeader
+                className={`border-b ${
+                  isDarkMode ? "border-gray-700" : "border-teal-100/30"
+                }`}
+              >
+                <CardTitle className={`text-lg ${themeClasses.cardTitle}`}>
+                  Profile Information
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Avatar Section */}
@@ -300,10 +370,12 @@ const ProfilePage = () => {
                         src={avatarUrl}
                         alt={name}
                         referrerPolicy="no-referrer"
-                        className="w-24 h-24 rounded-full object-cover ring-4 ring-gray-200"
+                        className={`w-24 h-24 rounded-full object-cover ring-4 ${themeClasses.avatarRing}`}
                       />
                     ) : (
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-2xl ring-4 ring-gray-200">
+                      <div
+                        className={`w-24 h-24 rounded-full bg-gradient-to-br from-teal-600 to-teal-400 flex items-center justify-center text-white font-bold text-2xl ring-4 ${themeClasses.avatarRing}`}
+                      >
                         {getInitials(name)}
                       </div>
                     )}
@@ -311,7 +383,7 @@ const ProfilePage = () => {
                     {isEditing && (
                       <label
                         htmlFor="avatar-upload"
-                        className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors shadow-lg"
+                        className="absolute bottom-0 right-0 bg-teal-600 text-white p-2 rounded-full cursor-pointer hover:bg-teal-700 transition-colors shadow-lg"
                       >
                         <Camera className="h-4 w-4" />
                         <input
@@ -327,15 +399,19 @@ const ProfilePage = () => {
                   </div>
 
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3
+                      className={`text-lg font-semibold ${themeClasses.cardText}`}
+                    >
                       {user?.name}
                     </h3>
-                    <p className="text-sm text-gray-500">{user?.email}</p>
+                    <p className={`text-sm ${themeClasses.cardSubtext}`}>
+                      {user?.email}
+                    </p>
                     {!isEditing && (
                       <Button
                         variant="outline"
                         size="sm"
-                        className="mt-3"
+                        className={`mt-3 ${themeClasses.button} ${themeClasses.buttonHover} transition-colors duration-300`}
                         onClick={() => setIsEditing(true)}
                       >
                         Edit Profile
@@ -348,8 +424,13 @@ const ProfilePage = () => {
                 <div className="space-y-4">
                   {/* Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="flex items-center gap-2">
-                      <UserIcon className="h-4 w-4 text-gray-500" />
+                    <Label
+                      htmlFor="name"
+                      className={`flex items-center gap-2 ${themeClasses.labelText} font-semibold`}
+                    >
+                      <UserIcon
+                        className={`h-4 w-4 ${themeClasses.iconColor}`}
+                      />
                       Full Name
                     </Label>
                     <Input
@@ -357,16 +438,31 @@ const ProfilePage = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       disabled={!isEditing}
-                      className={!isEditing ? "bg-gray-50" : ""}
+                      className={
+                        !isEditing
+                          ? themeClasses.inputDisabled
+                          : `${themeClasses.input} ${
+                              isDarkMode
+                                ? "focus:ring-teal-500 focus:border-teal-500"
+                                : "border-teal-200 focus:ring-teal-500 focus:border-teal-500"
+                            }`
+                      }
                     />
                   </div>
 
                   {/* Email - Read Only */}
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-gray-500" />
+                    <Label
+                      htmlFor="email"
+                      className={`flex items-center gap-2 ${themeClasses.labelText} font-semibold`}
+                    >
+                      <Mail className={`h-4 w-4 ${themeClasses.iconColor}`} />
                       Email Address
-                      <span className="text-xs text-gray-400">
+                      <span
+                        className={`text-xs ${
+                          isDarkMode ? "text-gray-500" : "text-gray-400"
+                        }`}
+                      >
                         (Cannot be changed)
                       </span>
                     </Label>
@@ -375,7 +471,11 @@ const ProfilePage = () => {
                       type="email"
                       value={user?.email || ""}
                       disabled
-                      className="bg-gray-100 cursor-not-allowed"
+                      className={`${
+                        isDarkMode
+                          ? "bg-gray-800/50 text-gray-300"
+                          : "bg-gray-100 text-gray-500"
+                      } cursor-not-allowed`}
                     />
                   </div>
                 </div>
@@ -383,7 +483,10 @@ const ProfilePage = () => {
                 {/* Action Buttons */}
                 {isEditing && (
                   <div className="flex gap-3 pt-4">
-                    <Button onClick={handleSave} className="flex-1">
+                    <Button
+                      onClick={handleSave}
+                      className="flex-1 bg-teal-600 hover:bg-teal-700 text-white transition-colors duration-300"
+                    >
                       <Save className="h-4 w-4 mr-0.5" />
                       Save Changes
                     </Button>
@@ -394,6 +497,7 @@ const ProfilePage = () => {
                         setName(user?.name || "");
                         setAvatarUrl(user?.avatar || "");
                       }}
+                      className={`${themeClasses.button} ${themeClasses.buttonHover} transition-colors duration-300`}
                     >
                       Cancel
                     </Button>
@@ -403,65 +507,133 @@ const ProfilePage = () => {
             </Card>
 
             {/* Your Notes Statistics */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Your Notes</CardTitle>
+            <Card
+              className={`${themeClasses.card} shadow-lg hover:shadow-xl transition-shadow duration-300 border`}
+            >
+              <CardHeader
+                className={`border-b ${
+                  isDarkMode ? "border-gray-700" : "border-teal-100/30"
+                }`}
+              >
+                <CardTitle className={`text-lg ${themeClasses.cardTitle}`}>
+                  Your Notes
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   {/* Total Notes */}
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 text-blue-700 mb-2">
+                  <div
+                    className={`${themeClasses.statBox} rounded-lg p-4 border ${
+                      isDarkMode
+                        ? "hover:border-teal-500"
+                        : "hover:border-teal-300"
+                    } transition-colors duration-300`}
+                  >
+                    <div
+                      className={`flex items-center gap-2 ${themeClasses.statIcon} mb-2`}
+                    >
                       <FileText className="h-4 w-4" />
                       <span className="text-sm font-medium">Total</span>
                     </div>
-                    <p className="text-3xl font-bold text-blue-700">
+                    <p
+                      className={`text-3xl font-bold ${themeClasses.statIcon}`}
+                    >
                       {totalNotes}
                     </p>
                   </div>
 
                   {/* Active Notes */}
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 text-green-700 mb-2">
+                  <div
+                    className={`${
+                      isDarkMode
+                        ? "bg-cyan-900/30 border-cyan-700/50 hover:border-cyan-500"
+                        : "bg-cyan-50 border-cyan-200/50 hover:border-cyan-300"
+                    } rounded-lg p-4 border transition-colors duration-300`}
+                  >
+                    <div
+                      className={`flex items-center gap-2 ${
+                        isDarkMode ? "text-cyan-400" : "text-cyan-700"
+                      } mb-2`}
+                    >
                       <FileText className="h-4 w-4" />
                       <span className="text-sm font-medium">Active</span>
                     </div>
-                    <p className="text-3xl font-bold text-green-700">
+                    <p
+                      className={`text-3xl font-bold ${
+                        isDarkMode ? "text-cyan-400" : "text-cyan-700"
+                      }`}
+                    >
                       {activeNotes}
                     </p>
                   </div>
 
                   {/* Pinned Notes */}
-                  <div className="bg-yellow-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 text-yellow-700 mb-2">
+                  <div
+                    className={`${
+                      isDarkMode
+                        ? "bg-amber-900/30 border-amber-700/50 hover:border-amber-500"
+                        : "bg-amber-50 border-amber-200/50 hover:border-amber-300"
+                    } rounded-lg p-4 border transition-colors duration-300`}
+                  >
+                    <div
+                      className={`flex items-center gap-2 ${
+                        isDarkMode ? "text-amber-400" : "text-amber-700"
+                      } mb-2`}
+                    >
                       <Pin className="h-4 w-4" />
                       <span className="text-sm font-medium">Pinned</span>
                     </div>
-                    <p className="text-3xl font-bold text-yellow-700">
+                    <p
+                      className={`text-3xl font-bold ${
+                        isDarkMode ? "text-amber-400" : "text-amber-700"
+                      }`}
+                    >
                       {pinnedNotes}
                     </p>
                   </div>
 
                   {/* Archived Notes */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <div
+                    className={`${
+                      isDarkMode
+                        ? "bg-purple-900/30 border-purple-700/50 hover:border-purple-500"
+                        : "bg-purple-50 border-purple-200/50 hover:border-purple-300"
+                    } rounded-lg p-4 border transition-colors duration-300`}
+                  >
+                    <div
+                      className={`flex items-center gap-2 ${
+                        isDarkMode ? "text-purple-400" : "text-purple-700"
+                      } mb-2`}
+                    >
                       <Archive className="h-4 w-4" />
                       <span className="text-sm font-medium">Archived</span>
                     </div>
-                    <p className="text-3xl font-bold text-gray-700">
+                    <p
+                      className={`text-3xl font-bold ${
+                        isDarkMode ? "text-purple-400" : "text-purple-700"
+                      }`}
+                    >
                       {archivedNotes}
                     </p>
                   </div>
                 </div>
 
                 {/* Unique Tags */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div
+                  className={`mt-4 pt-4 border-t ${
+                    isDarkMode ? "border-gray-700" : "border-teal-200/50"
+                  }`}
+                >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-purple-700">
+                    <div
+                      className={`flex items-center gap-2 ${themeClasses.statIcon}`}
+                    >
                       <Tag className="h-4 w-4" />
                       <span className="text-sm font-medium">Unique Tags</span>
                     </div>
-                    <span className="text-2xl font-bold text-purple-700">
+                    <span
+                      className={`text-2xl font-bold ${themeClasses.statIcon}`}
+                    >
                       {uniqueTags}
                     </span>
                   </div>
@@ -473,50 +645,76 @@ const ProfilePage = () => {
           {/* Right Column - Account Stats & Info */}
           <div className="space-y-6">
             {/* Account Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Account Information</CardTitle>
+            <Card
+              className={`${themeClasses.card} shadow-lg hover:shadow-xl transition-shadow duration-300 border`}
+            >
+              <CardHeader
+                className={`border-b ${
+                  isDarkMode ? "border-gray-700" : "border-teal-100/30"
+                }`}
+              >
+                <CardTitle className={`text-lg ${themeClasses.cardTitle}`}>
+                  Account Information
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-7">
+              <CardContent className="space-y-8 flex-1">
                 <div className="flex items-start gap-3">
-                  <Calendar className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <Calendar
+                    className={`h-5 w-5 ${themeClasses.statIcon} mt-0.5`}
+                  />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Joined</p>
-                    <p className="text-sm text-gray-500">
+                    <p
+                      className={`text-sm font-medium ${themeClasses.cardText}`}
+                    >
+                      Joined
+                    </p>
+                    <p className={`text-sm ${themeClasses.cardSubtext}`}>
                       {user?.createdAt ? formatDate(user.createdAt) : "N/A"}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Clock className="h-5 w-5 text-green-600 mt-0.5" />
+                  <Clock
+                    className={`h-5 w-5 ${themeClasses.statIcon} mt-0.5`}
+                  />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p
+                      className={`text-sm font-medium ${themeClasses.cardText}`}
+                    >
                       Last Login
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className={`text-sm ${themeClasses.cardSubtext}`}>
                       {user?.lastLogin ? formatDate(user.lastLogin) : "N/A"}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Shield className="h-5 w-5 text-purple-600 mt-0.5" />
+                  <Shield
+                    className={`h-5 w-5 ${themeClasses.statIcon} mt-0.5`}
+                  />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p
+                      className={`text-sm font-medium ${themeClasses.cardText}`}
+                    >
                       Account Type
                     </p>
-                    <p className="text-sm text-gray-500">Personal</p>
+                    <p className={`text-sm ${themeClasses.cardSubtext}`}>
+                      Personal
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-orange-600 mt-0.5" />
+                  <Mail className={`h-5 w-5 ${themeClasses.statIcon} mt-0.5`} />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p
+                      className={`text-sm font-medium ${themeClasses.cardText}`}
+                    >
                       Email Status
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className={`text-sm ${themeClasses.cardSubtext}`}>
                       {user?.isEmailVerified ? "Verified" : "Not Verified"}
                     </p>
                   </div>
@@ -525,25 +723,51 @@ const ProfilePage = () => {
             </Card>
 
             {/* Security Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Security</CardTitle>
+            <Card
+              className={`${themeClasses.card} shadow-lg hover:shadow-xl transition-shadow duration-300 border`}
+            >
+              <CardHeader
+                className={`border-b ${
+                  isDarkMode ? "border-gray-700" : "border-teal-100/30"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <CardTitle className={`text-lg ${themeClasses.cardTitle}`}>
+                    Security
+                  </CardTitle>
+                  {user?.googleId && (
+                    <span
+                      className={`text-xs ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
+                      (Not available for Google sign-ins)
+                    </span>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 {!isChangingPassword ? (
                   <Button
                     variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => setIsChangingPassword(true)}
+                    className={`w-full justify-start ${themeClasses.button} ${
+                      themeClasses.buttonHover
+                    } transition-colors duration-300 ${
+                      user?.googleId ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    onClick={() =>
+                      !user?.googleId && setIsChangingPassword(true)
+                    }
+                    disabled={!!user?.googleId}
                   >
-                    <Shield className="h-4 w-4 mr-2" />
+                    <Shield className="h-4 w-4 mr-1" />
                     Change Password
                   </Button>
                 ) : (
                   <Form {...passwordForm}>
                     <form
                       onSubmit={passwordForm.handleSubmit(handleChangePassword)}
-                      className="space-y-4"
+                      className="space-y-[1.150rem]"
                     >
                       {/* Current Password */}
                       <FormField
@@ -551,7 +775,9 @@ const ProfilePage = () => {
                         name="currentPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Current Password</FormLabel>
+                            <FormLabel className={themeClasses.labelText}>
+                              Current Password
+                            </FormLabel>
                             <FormControl>
                               <div className="relative">
                                 <Input
@@ -560,7 +786,11 @@ const ProfilePage = () => {
                                     showCurrentPassword ? "text" : "password"
                                   }
                                   placeholder="Enter current password"
-                                  className="pr-10"
+                                  className={`pr-10 ${themeClasses.input} ${
+                                    isDarkMode
+                                      ? "focus:ring-teal-500 focus:border-teal-500"
+                                      : "border-teal-200 focus:ring-teal-500 focus:border-teal-500"
+                                  }`}
                                 />
                                 <button
                                   type="button"
@@ -570,9 +800,21 @@ const ProfilePage = () => {
                                   }
                                 >
                                   {showCurrentPassword ? (
-                                    <EyeOff className="h-4 w-4 text-gray-400" />
+                                    <EyeOff
+                                      className={`h-4 w-4 ${
+                                        isDarkMode
+                                          ? "text-gray-500"
+                                          : "text-gray-400"
+                                      }`}
+                                    />
                                   ) : (
-                                    <Eye className="h-4 w-4 text-gray-400" />
+                                    <Eye
+                                      className={`h-4 w-4 ${
+                                        isDarkMode
+                                          ? "text-gray-500"
+                                          : "text-gray-400"
+                                      }`}
+                                    />
                                   )}
                                 </button>
                               </div>
@@ -588,14 +830,20 @@ const ProfilePage = () => {
                         name="newPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>New Password</FormLabel>
+                            <FormLabel className={themeClasses.labelText}>
+                              New Password
+                            </FormLabel>
                             <FormControl>
                               <div className="relative">
                                 <Input
                                   {...field}
                                   type={showNewPassword ? "text" : "password"}
                                   placeholder="Enter new password"
-                                  className="pr-10"
+                                  className={`pr-10 ${themeClasses.input} ${
+                                    isDarkMode
+                                      ? "focus:ring-teal-500 focus:border-teal-500"
+                                      : "border-teal-200 focus:ring-teal-500 focus:border-teal-500"
+                                  }`}
                                 />
                                 <button
                                   type="button"
@@ -605,9 +853,21 @@ const ProfilePage = () => {
                                   }
                                 >
                                   {showNewPassword ? (
-                                    <EyeOff className="h-4 w-4 text-gray-400" />
+                                    <EyeOff
+                                      className={`h-4 w-4 ${
+                                        isDarkMode
+                                          ? "text-gray-500"
+                                          : "text-gray-400"
+                                      }`}
+                                    />
                                   ) : (
-                                    <Eye className="h-4 w-4 text-gray-400" />
+                                    <Eye
+                                      className={`h-4 w-4 ${
+                                        isDarkMode
+                                          ? "text-gray-500"
+                                          : "text-gray-400"
+                                      }`}
+                                    />
                                   )}
                                 </button>
                               </div>
@@ -623,7 +883,9 @@ const ProfilePage = () => {
                         name="confirmPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
+                            <FormLabel className={themeClasses.labelText}>
+                              Confirm Password
+                            </FormLabel>
                             <FormControl>
                               <div className="relative">
                                 <Input
@@ -632,7 +894,11 @@ const ProfilePage = () => {
                                     showConfirmPassword ? "text" : "password"
                                   }
                                   placeholder="Confirm new password"
-                                  className="pr-10"
+                                  className={`pr-10 ${themeClasses.input} ${
+                                    isDarkMode
+                                      ? "focus:ring-teal-500 focus:border-teal-500"
+                                      : "border-teal-200 focus:ring-teal-500 focus:border-teal-500"
+                                  }`}
                                 />
                                 <button
                                   type="button"
@@ -642,9 +908,21 @@ const ProfilePage = () => {
                                   }
                                 >
                                   {showConfirmPassword ? (
-                                    <EyeOff className="h-4 w-4 text-gray-400" />
+                                    <EyeOff
+                                      className={`h-4 w-4 ${
+                                        isDarkMode
+                                          ? "text-gray-500"
+                                          : "text-gray-400"
+                                      }`}
+                                    />
                                   ) : (
-                                    <Eye className="h-4 w-4 text-gray-400" />
+                                    <Eye
+                                      className={`h-4 w-4 ${
+                                        isDarkMode
+                                          ? "text-gray-500"
+                                          : "text-gray-400"
+                                      }`}
+                                    />
                                   )}
                                 </button>
                               </div>
@@ -656,7 +934,10 @@ const ProfilePage = () => {
 
                       {/* Action Buttons */}
                       <div className="flex gap-2 pt-2">
-                        <Button type="submit" className="flex-1">
+                        <Button
+                          type="submit"
+                          className="flex-1 bg-teal-600 hover:bg-teal-700 text-white transition-colors duration-300"
+                        >
                           <Save className="h-4 w-4 mr-0.5" />
                           Save Password
                         </Button>
@@ -667,6 +948,7 @@ const ProfilePage = () => {
                             setIsChangingPassword(false);
                             passwordForm.reset();
                           }}
+                          className={`${themeClasses.button} ${themeClasses.buttonHover} transition-colors duration-300`}
                         >
                           Cancel
                         </Button>

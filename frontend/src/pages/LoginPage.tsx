@@ -6,7 +6,13 @@ import ScriboLogo from "../components/icons/ScriboLogo";
 
 const LoginPage = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4"
+    >
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
         {/* Left side - Brand and Description */}
         <motion.div
@@ -84,7 +90,7 @@ const LoginPage = () => {
           </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

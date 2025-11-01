@@ -10,6 +10,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { useNotesStore } from "../store/notesStore";
 import { useAuthStore } from "../store/authStore";
+import { useTheme } from "../context/ThemeContext";
 import UserDropdown from "../components/layout/UserDropdown";
 import Pagination from "../components/ui/pagination";
 import { Button } from "../components/ui/button";
@@ -40,6 +41,8 @@ const RecycleBinPage = () => {
   } = useNotesStore();
   const { logout } = useAuthStore();
   const { toast } = useToast();
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
@@ -161,9 +164,17 @@ const RecycleBinPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-teal-50/20">
+    <div
+      className={`min-h-screen ${isDarkMode ? "bg-slate-950" : "bg-gray-50"}`}
+    >
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-teal-100/50 sticky top-0 z-50">
+      <header
+        className={`${
+          isDarkMode
+            ? "bg-gray-900/80 border-red-600/30"
+            : "bg-white border-gray-200"
+        } backdrop-blur-xl shadow-sm border-b sticky top-0 z-50`}
+      >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-shrink min-w-0 max-w-[65%] sm:max-w-none">
@@ -171,15 +182,27 @@ const RecycleBinPage = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="flex-shrink-0 hover:bg-teal-50 hover:text-teal-700 transition-all duration-300 -ml-2"
+                className={`flex-shrink-0 ${
+                  isDarkMode
+                    ? "hover:bg-gray-800 text-white"
+                    : "hover:bg-gray-100 text-gray-900"
+                } transition-all duration-300 -ml-2`}
               >
                 <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
               <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                <h1
+                  className={`text-2xl sm:text-3xl font-bold ${
+                    isDarkMode ? "text-teal-400" : "text-teal-600"
+                  }`}
+                >
                   Recycle Bin
                 </h1>
-                <p className="text-xs sm:text-sm mt-1.5 text-gray-600">
+                <p
+                  className={`text-xs sm:text-sm mt-1.5 ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   Auto-deleted after {RECYCLE_BIN_RETENTION_DAYS} days
                 </p>
               </div>
@@ -189,7 +212,11 @@ const RecycleBinPage = () => {
               <Button
                 onClick={logout}
                 variant="outline"
-                className="bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4"
+                className={`${
+                  isDarkMode
+                    ? "bg-red-600/20 border-red-600 text-red-500 hover:bg-red-600 hover:text-white"
+                    : "bg-white/90 border-red-200 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600"
+                } backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4`}
               >
                 Logout
               </Button>
@@ -203,14 +230,22 @@ const RecycleBinPage = () => {
         {/* Actions Bar */}
         {deletedNotes.length > 0 && (
           <div className="mb-6 flex justify-between items-center">
-            <div className="text-sm text-gray-600">
+            <div
+              className={`text-sm ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
               {deletedNotes.length}{" "}
               {deletedNotes.length === 1 ? "note" : "notes"} in recycle bin
             </div>
             <Button
               variant="outline"
               onClick={handleEmptyBinClick}
-              className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 transition-all duration-300"
+              className={`gap-2 ${
+                isDarkMode
+                  ? "bg-red-600/20 border-red-600 text-red-500 hover:bg-red-600/30"
+                  : "bg-red-50 hover:bg-red-100 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300"
+              } transition-all duration-300`}
             >
               <Trash className="h-4 w-4" />
               Empty Recycle Bin
@@ -221,8 +256,16 @@ const RecycleBinPage = () => {
         {/* Empty State */}
         {deletedNotes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <Trash2 className="h-24 w-24 text-gray-300 mb-4" />
-            <h2 className="text-2xl font-semibold text-gray-400 mb-2">
+            <Trash2
+              className={`h-24 w-24 ${
+                isDarkMode ? "text-gray-700" : "text-gray-300"
+              } mb-4`}
+            />
+            <h2
+              className={`text-2xl font-semibold ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              } mb-2`}
+            >
               Recycle Bin is Empty
             </h2>
             <p className="text-gray-500 text-center max-w-md">
@@ -244,14 +287,28 @@ const RecycleBinPage = () => {
                     transition={{ duration: 0.2 }}
                     className="h-full"
                   >
-                    <Card className="h-full flex flex-col bg-white hover:shadow-lg transition-shadow border-red-200">
+                    <Card
+                      className={`h-full flex flex-col ${
+                        isDarkMode
+                          ? "bg-gray-900 border-red-900/50 hover:shadow-lg hover:shadow-red-900/20"
+                          : "bg-white border-red-200 hover:shadow-lg"
+                      } transition-shadow`}
+                    >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-lg text-gray-900 truncate">
+                            <h3
+                              className={`font-semibold text-lg ${
+                                isDarkMode ? "text-white" : "text-gray-900"
+                              } truncate`}
+                            >
                               {note.title}
                             </h3>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p
+                              className={`text-xs ${
+                                isDarkMode ? "text-gray-400" : "text-gray-500"
+                              } mt-1`}
+                            >
                               Deleted{" "}
                               {note.deletedAt &&
                                 formatDistanceToNow(new Date(note.deletedAt), {
@@ -259,7 +316,11 @@ const RecycleBinPage = () => {
                                 })}
                             </p>
                             {note.deletedAt && (
-                              <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                              <p
+                                className={`text-xs ${
+                                  isDarkMode ? "text-red-500" : "text-red-600"
+                                } mt-1 flex items-center gap-1`}
+                              >
                                 <AlertTriangle className="h-3 w-3" />
                                 {getDaysRemaining(note.deletedAt)}{" "}
                                 {getDaysRemaining(note.deletedAt) === 1
@@ -275,7 +336,9 @@ const RecycleBinPage = () => {
                       <CardContent className="pb-4 flex-1 flex flex-col">
                         <div className="flex-1 min-h-[80px] max-h-[80px] overflow-hidden mb-4">
                           <div
-                            className="text-sm text-gray-600 prose prose-sm max-w-none line-clamp-3"
+                            className={`text-sm ${
+                              isDarkMode ? "text-gray-400" : "text-gray-600"
+                            } prose prose-sm max-w-none line-clamp-3`}
                             dangerouslySetInnerHTML={{ __html: note.content }}
                           />
                         </div>
@@ -285,13 +348,21 @@ const RecycleBinPage = () => {
                             {note.tags.slice(0, 3).map((tag) => (
                               <span
                                 key={tag}
-                                className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
+                                className={`px-2 py-1 ${
+                                  isDarkMode
+                                    ? "bg-gray-800 text-gray-300"
+                                    : "bg-gray-100 text-gray-600"
+                                } rounded-full text-xs`}
                               >
                                 {tag}
                               </span>
                             ))}
                             {note.tags.length > 3 && (
-                              <span className="px-2 py-1 text-gray-500 text-xs">
+                              <span
+                                className={`px-2 py-1 ${
+                                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                                } text-xs`}
+                              >
                                 +{note.tags.length - 3} more
                               </span>
                             )}
@@ -303,7 +374,11 @@ const RecycleBinPage = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleRestore(note._id)}
-                            className="flex-1 gap-1 bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 transition-all duration-300"
+                            className={`flex-1 gap-1 ${
+                              isDarkMode
+                                ? "bg-teal-600/20 border-teal-600 text-teal-400 hover:bg-teal-600/30"
+                                : "bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800"
+                            } transition-all duration-300`}
                           >
                             <RotateCcw className="h-3 w-3" />
                             Restore
@@ -312,7 +387,11 @@ const RecycleBinPage = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDeleteClick(note._id)}
-                            className="flex-1 gap-1 bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 transition-all duration-300"
+                            className={`flex-1 gap-1 ${
+                              isDarkMode
+                                ? "bg-red-600/20 border-red-600 text-red-500 hover:bg-red-600/30"
+                                : "bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300"
+                            } transition-all duration-300`}
                           >
                             <Trash className="h-3 w-3" />
                             Delete Forever
@@ -337,16 +416,34 @@ const RecycleBinPage = () => {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          className={
+            isDarkMode
+              ? "bg-gray-900 border-gray-700"
+              : "bg-white border-gray-200"
+          }
+        >
           <AlertDialogHeader>
-            <AlertDialogTitle>Permanently Delete Note?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle
+              className={isDarkMode ? "text-white" : "text-gray-900"}
+            >
+              Permanently Delete Note?
+            </AlertDialogTitle>
+            <AlertDialogDescription
+              className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+            >
               This action cannot be undone. This note will be permanently
               deleted and cannot be restored.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900 transition-all duration-300">
+            <AlertDialogCancel
+              className={
+                isDarkMode
+                  ? "bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
+                  : "bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900"
+              }
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
@@ -364,16 +461,34 @@ const RecycleBinPage = () => {
         open={emptyBinDialogOpen}
         onOpenChange={setEmptyBinDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent
+          className={
+            isDarkMode
+              ? "bg-gray-900 border-gray-700"
+              : "bg-white border-gray-200"
+          }
+        >
           <AlertDialogHeader>
-            <AlertDialogTitle>Empty Recycle Bin?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle
+              className={isDarkMode ? "text-white" : "text-gray-900"}
+            >
+              Empty Recycle Bin?
+            </AlertDialogTitle>
+            <AlertDialogDescription
+              className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+            >
               This will permanently delete all {deletedNotes.length} notes in
               the recycle bin. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900 transition-all duration-300">
+            <AlertDialogCancel
+              className={
+                isDarkMode
+                  ? "bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
+                  : "bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900"
+              }
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { useToast } from "../ui/use-toast";
 import api from "../../services/api";
+import { useTheme } from "../../context/ThemeContext";
 
 interface ExportImportModalProps {
   open: boolean;
@@ -22,6 +23,8 @@ const ExportImportModal = ({
   onImportSuccess,
 }: ExportImportModalProps) => {
   const { toast } = useToast();
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
   const [exportFormat, setExportFormat] = useState("json");
   const [importFormat, setImportFormat] = useState("json");
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -277,9 +280,17 @@ const ExportImportModal = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent
+        className={`sm:max-w-[550px] ${
+          isDarkMode
+            ? "bg-gray-900 border-gray-700"
+            : "bg-white border-gray-200"
+        }`}
+      >
         <DialogHeader className="mb-2">
-          <DialogTitle className="text-xl">
+          <DialogTitle
+            className={`text-xl ${isDarkMode ? "text-white" : "text-gray-900"}`}
+          >
             {noteId ? "Export Note" : "Export & Import Notes"}
           </DialogTitle>
         </DialogHeader>
@@ -288,12 +299,22 @@ const ExportImportModal = ({
           // Single note export - No tabs needed
           <div className="space-y-6 py-4">
             <div className="space-y-4">
-              <Label className="text-sm font-semibold text-gray-700">
+              <Label
+                className={`text-sm font-semibold ${
+                  isDarkMode ? "text-gray-200" : "text-gray-700"
+                }`}
+              >
                 Export Format
               </Label>
               <RadioGroup value={exportFormat} onValueChange={setExportFormat}>
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                  <div
+                    className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer ${
+                      isDarkMode
+                        ? "border-gray-600 hover:bg-gray-800"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
                     <RadioGroupItem value="json" id="export-json" />
                     <Label
                       htmlFor="export-json"
@@ -301,15 +322,31 @@ const ExportImportModal = ({
                     >
                       <FileJson className="h-5 w-5 text-blue-600" />
                       <div>
-                        <p className="font-medium">JSON</p>
-                        <p className="text-xs text-gray-500">
+                        <p
+                          className={`font-medium ${
+                            isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                        >
+                          JSON
+                        </p>
+                        <p
+                          className={`text-xs ${
+                            isDarkMode ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
                           Perfect for backup and re-import
                         </p>
                       </div>
                     </Label>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                  <div
+                    className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer ${
+                      isDarkMode
+                        ? "border-gray-600 hover:bg-gray-800"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
                     <RadioGroupItem value="markdown" id="export-md" />
                     <Label
                       htmlFor="export-md"
@@ -317,15 +354,31 @@ const ExportImportModal = ({
                     >
                       <FileText className="h-5 w-5 text-purple-600" />
                       <div>
-                        <p className="font-medium">Markdown</p>
-                        <p className="text-xs text-gray-500">
+                        <p
+                          className={`font-medium ${
+                            isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                        >
+                          Markdown
+                        </p>
+                        <p
+                          className={`text-xs ${
+                            isDarkMode ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
                           Readable format for other apps
                         </p>
                       </div>
                     </Label>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                  <div
+                    className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer ${
+                      isDarkMode
+                        ? "border-gray-600 hover:bg-gray-800"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
                     <RadioGroupItem value="pdf" id="export-pdf" />
                     <Label
                       htmlFor="export-pdf"
@@ -333,8 +386,18 @@ const ExportImportModal = ({
                     >
                       <FileType className="h-5 w-5 text-red-600" />
                       <div>
-                        <p className="font-medium">PDF</p>
-                        <p className="text-xs text-gray-500">
+                        <p
+                          className={`font-medium ${
+                            isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                        >
+                          PDF
+                        </p>
+                        <p
+                          className={`text-xs ${
+                            isDarkMode ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
                           Save this note as PDF
                         </p>
                       </div>
@@ -357,17 +420,29 @@ const ExportImportModal = ({
         ) : (
           // Bulk operations - Use tabs for Export/Import
           <Tabs defaultValue="export" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+            <TabsList
+              className={`grid w-full grid-cols-2 ${
+                isDarkMode ? "bg-gray-800" : "bg-gray-100"
+              }`}
+            >
               <TabsTrigger
                 value="export"
-                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-50 data-[state=active]:to-cyan-50 data-[state=active]:text-teal-700 hover:bg-teal-50/50 transition-all duration-300"
+                className={`flex items-center gap-2 transition-all duration-300 ${
+                  isDarkMode
+                    ? "text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-teal-400 hover:bg-gray-700/50 hover:text-gray-300"
+                    : "text-gray-600 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-50 data-[state=active]:to-cyan-50 data-[state=active]:text-teal-700 hover:bg-teal-50/50"
+                }`}
               >
                 <Download className="h-4 w-4" />
                 Export
               </TabsTrigger>
               <TabsTrigger
                 value="import"
-                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-50 data-[state=active]:to-cyan-50 data-[state=active]:text-teal-700 hover:bg-teal-50/50 transition-all duration-300"
+                className={`flex items-center gap-2 transition-all duration-300 ${
+                  isDarkMode
+                    ? "text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-teal-400 hover:bg-gray-700/50 hover:text-gray-300"
+                    : "text-gray-600 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-50 data-[state=active]:to-cyan-50 data-[state=active]:text-teal-700 hover:bg-teal-50/50"
+                }`}
               >
                 <Upload className="h-4 w-4" />
                 Import
@@ -376,7 +451,11 @@ const ExportImportModal = ({
 
             <TabsContent value="export" className="space-y-6 py-4">
               <div className="space-y-4">
-                <Label className="text-sm font-semibold text-gray-700">
+                <Label
+                  className={`text-sm font-semibold ${
+                    isDarkMode ? "text-gray-200" : "text-gray-700"
+                  }`}
+                >
                   Export Format
                 </Label>
                 <RadioGroup
@@ -384,7 +463,13 @@ const ExportImportModal = ({
                   onValueChange={setExportFormat}
                 >
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div
+                      className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer ${
+                        isDarkMode
+                          ? "border-gray-600 hover:bg-gray-800"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
                       <RadioGroupItem value="json" id="export-json-all" />
                       <Label
                         htmlFor="export-json-all"
@@ -392,15 +477,31 @@ const ExportImportModal = ({
                       >
                         <FileJson className="h-5 w-5 text-blue-600" />
                         <div>
-                          <p className="font-medium">JSON</p>
-                          <p className="text-xs text-gray-500">
+                          <p
+                            className={`font-medium ${
+                              isDarkMode ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            JSON
+                          </p>
+                          <p
+                            className={`text-xs ${
+                              isDarkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          >
                             Perfect for backup and re-import
                           </p>
                         </div>
                       </Label>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div
+                      className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer ${
+                        isDarkMode
+                          ? "border-gray-600 hover:bg-gray-800"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
                       <RadioGroupItem value="markdown" id="export-md-all" />
                       <Label
                         htmlFor="export-md-all"
@@ -408,15 +509,31 @@ const ExportImportModal = ({
                       >
                         <FileText className="h-5 w-5 text-purple-600" />
                         <div>
-                          <p className="font-medium">Markdown</p>
-                          <p className="text-xs text-gray-500">
+                          <p
+                            className={`font-medium ${
+                              isDarkMode ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            Markdown
+                          </p>
+                          <p
+                            className={`text-xs ${
+                              isDarkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          >
                             Readable format for other apps
                           </p>
                         </div>
                       </Label>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div
+                      className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer ${
+                        isDarkMode
+                          ? "border-gray-600 hover:bg-gray-800"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
                       <RadioGroupItem value="pdf" id="export-pdf-all" />
                       <Label
                         htmlFor="export-pdf-all"
@@ -424,8 +541,18 @@ const ExportImportModal = ({
                       >
                         <FileType className="h-5 w-5 text-red-600" />
                         <div>
-                          <p className="font-medium">PDF</p>
-                          <p className="text-xs text-gray-500">
+                          <p
+                            className={`font-medium ${
+                              isDarkMode ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            PDF
+                          </p>
+                          <p
+                            className={`text-xs ${
+                              isDarkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          >
                             All notes in one PDF
                           </p>
                         </div>
@@ -448,7 +575,11 @@ const ExportImportModal = ({
 
             <TabsContent value="import" className="space-y-6 py-4">
               <div className="space-y-4">
-                <Label className="text-sm font-semibold text-gray-700">
+                <Label
+                  className={`text-sm font-semibold ${
+                    isDarkMode ? "text-gray-200" : "text-gray-700"
+                  }`}
+                >
                   Import Format
                 </Label>
                 <RadioGroup
@@ -456,7 +587,13 @@ const ExportImportModal = ({
                   onValueChange={handleFormatChange}
                 >
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div
+                      className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer ${
+                        isDarkMode
+                          ? "border-gray-600 hover:bg-gray-800"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
                       <RadioGroupItem value="json" id="import-json" />
                       <Label
                         htmlFor="import-json"
@@ -464,15 +601,31 @@ const ExportImportModal = ({
                       >
                         <FileJson className="h-5 w-5 text-blue-600" />
                         <div>
-                          <p className="font-medium">JSON</p>
-                          <p className="text-xs text-gray-500">
+                          <p
+                            className={`font-medium ${
+                              isDarkMode ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            JSON
+                          </p>
+                          <p
+                            className={`text-xs ${
+                              isDarkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          >
                             Perfect for backup and re-import
                           </p>
                         </div>
                       </Label>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div
+                      className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors cursor-pointer ${
+                        isDarkMode
+                          ? "border-gray-600 hover:bg-gray-800"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
                       <RadioGroupItem value="markdown" id="import-md" />
                       <Label
                         htmlFor="import-md"
@@ -480,8 +633,18 @@ const ExportImportModal = ({
                       >
                         <FileText className="h-5 w-5 text-purple-600" />
                         <div>
-                          <p className="font-medium">Markdown</p>
-                          <p className="text-xs text-gray-500">
+                          <p
+                            className={`font-medium ${
+                              isDarkMode ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            Markdown
+                          </p>
+                          <p
+                            className={`text-xs ${
+                              isDarkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          >
                             Readable format for other apps
                           </p>
                         </div>
@@ -491,19 +654,37 @@ const ExportImportModal = ({
                 </RadioGroup>
               </div>
 
-              <div className="bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-200 rounded-lg p-4 space-y-3">
-                <Label className="text-sm font-semibold text-gray-700">
+              <div
+                className={`rounded-lg p-4 space-y-3 ${
+                  isDarkMode
+                    ? "bg-gray-800 border border-gray-600"
+                    : "bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-200"
+                }`}
+              >
+                <Label
+                  className={`text-sm font-semibold ${
+                    isDarkMode ? "text-gray-200" : "text-gray-700"
+                  }`}
+                >
                   Sample Files
                 </Label>
-                <p className="text-xs text-gray-600">
+                <p
+                  className={`text-xs ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   Download sample files to see the expected format
                 </p>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => downloadSampleFile("json")}
-                    className="flex-1 bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 transition-all duration-300"
+                    className={`flex-1 transition-all duration-300 whitespace-nowrap ${
+                      isDarkMode
+                        ? "bg-gray-700 hover:bg-gray-600 border-gray-600 text-teal-400 hover:text-teal-300"
+                        : "bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800"
+                    }`}
                   >
                     <Download className="mr-1.5 h-3.5 w-3.5" />
                     Sample JSON
@@ -512,7 +693,11 @@ const ExportImportModal = ({
                     variant="outline"
                     size="sm"
                     onClick={() => downloadSampleFile("markdown")}
-                    className="flex-1 bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 transition-all duration-300"
+                    className={`flex-1 transition-all duration-300 whitespace-nowrap ${
+                      isDarkMode
+                        ? "bg-gray-700 hover:bg-gray-600 border-gray-600 text-teal-400 hover:text-teal-300"
+                        : "bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800"
+                    }`}
                   >
                     <Download className="mr-1.5 h-3.5 w-3.5" />
                     Sample Markdown
@@ -523,17 +708,27 @@ const ExportImportModal = ({
               <div className="space-y-2">
                 <Label
                   htmlFor="import-file"
-                  className="text-sm font-semibold text-gray-700"
+                  className={`text-sm font-semibold ${
+                    isDarkMode ? "text-gray-200" : "text-gray-700"
+                  }`}
                 >
                   Select File
                 </Label>
-                <div className="border-2 border-dashed border-teal-300 rounded-lg p-4 hover:border-teal-500 transition-colors bg-teal-50/30">
+                <div
+                  className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
+                    isDarkMode
+                      ? "border-teal-700 hover:border-teal-500 bg-gray-800/50"
+                      : "border-teal-300 hover:border-teal-500 bg-teal-50/30"
+                  }`}
+                >
                   <input
                     id="import-file"
                     type="file"
                     accept={getAcceptAttribute()}
                     onChange={handleFileChange}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-teal-600 file:to-cyan-600 file:text-white hover:file:from-teal-700 hover:file:to-cyan-700 cursor-pointer transition-all duration-300"
+                    className={`block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-teal-600 file:to-cyan-600 file:text-white hover:file:from-teal-700 hover:file:to-cyan-700 cursor-pointer transition-all duration-300 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-500"
+                    }`}
                   />
                 </div>
                 {importFile && (

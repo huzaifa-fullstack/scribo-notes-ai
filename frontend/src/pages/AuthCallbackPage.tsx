@@ -3,11 +3,14 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import { useToast } from "../components/ui/use-toast";
+import { useTheme } from "../context/ThemeContext";
 
 const AuthCallbackPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
   const setAuthData = useAuthStore((state) => state.setAuthData);
 
   useEffect(() => {
@@ -54,7 +57,11 @@ const AuthCallbackPage = () => {
   }, [searchParams, navigate, toast, setAuthData]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div
+      className={`min-h-screen flex items-center justify-center ${
+        isDarkMode ? "bg-gray-900" : "bg-white"
+      }`}
+    >
       <LoadingSpinner size="lg" />
     </div>
   );

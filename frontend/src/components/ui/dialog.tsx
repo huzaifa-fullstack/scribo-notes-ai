@@ -1,6 +1,7 @@
 import * as React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "../../context/ThemeContext";
 
 interface DialogProps {
   open: boolean;
@@ -59,6 +60,8 @@ function DialogContent({
   showCloseButton?: boolean;
 }) {
   const context = React.useContext(DialogContext);
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   return (
     <div
@@ -72,7 +75,11 @@ function DialogContent({
       {children}
       {showCloseButton && (
         <button
-          className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:pointer-events-none"
+          className={`absolute top-4 right-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:pointer-events-none ${
+            isDarkMode
+              ? "text-white hover:text-gray-200"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
           onClick={() => context?.onOpenChange(false)}
         >
           <X className="h-4 w-4" />

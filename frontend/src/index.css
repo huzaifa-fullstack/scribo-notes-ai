@@ -134,3 +134,92 @@
 .bg-gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-stops));
 }
+
+/* Sonner Toast Dark Mode Overrides - Maximum Specificity */
+/* Using multiple selector variations to ensure coverage */
+
+/* Primary selectors with data-theme on toaster */
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast],
+[data-sonner-toaster][data-theme="dark"] li[data-sonner-toast] {
+  background-color: rgb(31 41 55) !important;
+  border: 1px solid rgb(55 65 81) !important;
+  color: white !important;
+}
+
+[data-sonner-toaster][data-theme="light"] [data-sonner-toast],
+[data-sonner-toaster][data-theme="light"] li[data-sonner-toast] {
+  background-color: white !important;
+  border: 1px solid rgb(229 231 235) !important;
+  color: rgb(17 24 39) !important;
+}
+
+/* Direct selectors with data-theme on toast */
+[data-sonner-toast][data-theme="dark"],
+li[data-sonner-toast][data-theme="dark"] {
+  background-color: rgb(31 41 55) !important;
+  border: 1px solid rgb(55 65 81) !important;
+  color: white !important;
+}
+
+[data-sonner-toast][data-theme="light"],
+li[data-sonner-toast][data-theme="light"] {
+  background-color: white !important;
+  border: 1px solid rgb(229 231 235) !important;
+  color: rgb(17 24 39) !important;
+}
+
+/* Description text */
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-description],
+[data-sonner-toast][data-theme="dark"] [data-description],
+[data-sonner-toaster][data-theme="dark"] [data-description] {
+  color: rgb(209 213 219) !important;
+}
+
+[data-sonner-toaster][data-theme="light"]
+  [data-sonner-toast]
+  [data-description],
+[data-sonner-toast][data-theme="light"] [data-description],
+[data-sonner-toaster][data-theme="light"] [data-description] {
+  color: rgb(107 114 128) !important;
+}
+
+/* Title text */
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-title],
+[data-sonner-toast][data-theme="dark"] [data-title],
+[data-sonner-toaster][data-theme="dark"] [data-title] {
+  color: white !important;
+}
+
+[data-sonner-toaster][data-theme="light"] [data-sonner-toast] [data-title],
+[data-sonner-toast][data-theme="light"] [data-title],
+[data-sonner-toaster][data-theme="light"] [data-title] {
+  color: rgb(17 24 39) !important;
+}
+
+/* Close button */
+[data-sonner-toaster][data-theme="dark"] [data-close-button],
+[data-sonner-toast][data-theme="dark"] [data-close-button] {
+  background-color: rgb(55 65 81) !important;
+  border-color: rgb(75 85 99) !important;
+  color: rgb(229 231 235) !important;
+}
+
+[data-sonner-toaster][data-theme="light"] [data-close-button],
+[data-sonner-toast][data-theme="light"] [data-close-button] {
+  background-color: rgb(243 244 246) !important;
+  border-color: rgb(229 231 235) !important;
+  color: rgb(55 65 81) !important;
+}
+
+/* Action buttons */
+[data-sonner-toaster][data-theme="dark"] [data-button],
+[data-sonner-toast][data-theme="dark"] [data-button] {
+  background-color: rgb(13 148 136) !important;
+  color: white !important;
+}
+
+[data-sonner-toaster][data-theme="light"] [data-button],
+[data-sonner-toast][data-theme="light"] [data-button] {
+  background-color: rgb(13 148 136) !important;
+  color: white !important;
+}

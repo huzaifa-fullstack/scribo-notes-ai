@@ -6,7 +6,7 @@ class ExportService {
     // Filter out characters not supported by PDF fonts (emojis, special unicode)
     sanitizeTextForPDF(text) {
         if (!text) return '';
-        
+
         // Remove emojis and other unicode characters that Standard PDF fonts don't support
         // Keep only basic Latin characters, common punctuation, and symbols
         return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '')
@@ -282,7 +282,7 @@ class ExportService {
                 y: yPosition,
                 size: 18,
                 font: boldFont,
-                color: rgb(0.15, 0.38, 0.91),
+                color: rgb(0.08, 0.72, 0.65), // Teal color (#14b8a6)
             });
             yPosition -= 35;
 
@@ -387,7 +387,7 @@ class ExportService {
                     y: yPosition,
                     size: 9,
                     font: font,
-                    color: rgb(0.15, 0.38, 0.91),
+                    color: rgb(0.02, 0.71, 0.83), // Cyan color (#06b6d4)
                 });
             }
 
@@ -418,7 +418,7 @@ class ExportService {
                 y: yPosition,
                 size: 24,
                 font: boldFont,
-                color: rgb(0.15, 0.38, 0.91),
+                color: rgb(0.08, 0.72, 0.65), // Teal color (#14b8a6)
             });
             yPosition -= 40;
 
@@ -468,7 +468,7 @@ class ExportService {
                     y: yPosition,
                     size: 16,
                     font: boldFont,
-                    color: rgb(0.15, 0.38, 0.91),
+                    color: rgb(0.08, 0.72, 0.65), // Teal color (#14b8a6)
                 });
                 yPosition -= 25;
 
@@ -566,7 +566,7 @@ class ExportService {
                         y: yPosition,
                         size: 9,
                         font: font,
-                        color: rgb(0.15, 0.38, 0.91),
+                        color: rgb(0.02, 0.71, 0.83), // Cyan color (#06b6d4)
                     });
                     yPosition -= 20;
                 }

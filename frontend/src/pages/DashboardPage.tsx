@@ -3,6 +3,7 @@ import { Plus, Search, Filter, Download, Pin } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useNotesStore } from "../store/notesStore";
 import { useAuthStore } from "../store/authStore";
+import { useTheme } from "../context/ThemeContext";
 import { usePagination } from "../hooks/usePagination";
 import NoteCard from "../components/notes/NoteCard";
 import CreateNoteModal from "../components/notes/CreateNoteModal";
@@ -32,6 +33,7 @@ const DashboardPage = () => {
     useNotesStore();
   const { user, logout } = useAuthStore();
   const { toast } = useToast();
+  const { theme } = useTheme();
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -46,6 +48,8 @@ const DashboardPage = () => {
   const [exportNoteId, setExportNoteId] = useState<string | null>(null);
   const [pinLimitDialogOpen, setPinLimitDialogOpen] = useState(false);
   const isInitialMount = useRef(true);
+
+  const isDarkMode = theme === "dark";
 
   useEffect(() => {
     fetchNotes();
@@ -202,18 +206,51 @@ const DashboardPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pinnedNotes.length]);
 
+  // Dynamic theme classes
+  const themeClasses = {
+    bg: isDarkMode
+      ? "bg-slate-950"
+      : "bg-gradient-to-br from-gray-50 via-blue-50/30 to-teal-50/20",
+    header: isDarkMode
+      ? "bg-gray-900/80 border-teal-600/30"
+      : "bg-white/80 border-teal-100/50",
+    headerText: isDarkMode ? "text-white" : "text-gray-900",
+    headerSubtext: isDarkMode ? "text-gray-400" : "text-gray-600",
+    headerGradient: isDarkMode
+      ? "from-teal-400 to-cyan-400"
+      : "from-teal-600 to-cyan-600",
+    input: isDarkMode
+      ? "bg-gray-800/90 border-gray-600 hover:border-teal-500 focus:border-teal-400 text-white placeholder-gray-500"
+      : "bg-white/90 border-gray-200 hover:border-teal-300 focus:border-teal-400",
+    button: isDarkMode
+      ? "bg-gray-800/90 border-gray-600 text-teal-400 hover:bg-gray-700"
+      : "bg-white/90 border-teal-200 text-teal-600 hover:bg-teal-50",
+    buttonHover: isDarkMode
+      ? "hover:border-teal-500 hover:text-teal-300"
+      : "hover:border-teal-300 hover:text-teal-700",
+    noNotesText: isDarkMode ? "text-gray-400" : "text-gray-600",
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-teal-50/20 relative">
-      <OceanBackground isDark={false} />
+    <div className={`min-h-screen ${themeClasses.bg} relative`}>
+      <OceanBackground isDark={isDarkMode} />
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-teal-100/50 sticky top-0 z-50">
+      <header
+        className={`${themeClasses.header} backdrop-blur-xl shadow-sm border-b sticky top-0 z-50`}
+      >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex-shrink min-w-0 max-w-[65%] sm:max-w-none">
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              <h1
+                className={`text-2xl sm:text-3xl font-bold ${
+                  isDarkMode ? "text-teal-400" : "text-teal-600"
+                }`}
+              >
                 Dashboard
               </h1>
-              <p className="text-xs sm:text-sm mt-1.5 text-gray-600">
+              <p
+                className={`text-xs sm:text-sm mt-1.5 ${themeClasses.headerSubtext}`}
+              >
                 Welcome back, {user?.name}! 👋
               </p>
             </div>
@@ -223,7 +260,11 @@ const DashboardPage = () => {
               <Button
                 onClick={logout}
                 variant="outline"
-                className="bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4"
+                className={`${
+                  isDarkMode
+                    ? "bg-red-600/20 border-red-600 text-red-500 hover:bg-red-600 hover:text-white"
+                    : "bg-white/90 border-red-200 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600"
+                } backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4`}
               >
                 Logout
               </Button>
@@ -235,13 +276,21 @@ const DashboardPage = () => {
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search
+              className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${
+                isDarkMode ? "text-gray-500" : "text-gray-400"
+              }`}
+            />
             <Input
               type="text"
               placeholder="Search notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white/90 border-gray-200 hover:border-teal-300 focus:border-teal-400 focus:ring-teal-400/20 backdrop-blur-sm transition-all duration-300 shadow-sm"
+              className={`pl-10 ${themeClasses.input} ${
+                isDarkMode
+                  ? "placeholder:text-gray-300"
+                  : "placeholder:text-gray-400"
+              } focus:ring-teal-400/20 backdrop-blur-sm transition-all duration-300 shadow-sm`}
             />
           </div>
           <div className="flex gap-1.5 flex-shrink-0">
@@ -250,8 +299,10 @@ const DashboardPage = () => {
               onClick={() => setFilterArchived(!filterArchived)}
               className={`px-2.5 sm:px-4 text-sm ${
                 filterArchived
-                  ? "bg-teal-600 text-white hover:bg-teal-700 border-teal-600 shadow-lg shadow-teal-200"
-                  : "bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 hover:border-teal-300"
+                  ? isDarkMode
+                    ? "bg-teal-600 text-white hover:bg-teal-700 border-teal-600"
+                    : "bg-teal-600 text-white hover:bg-teal-700 border-teal-600 shadow-lg shadow-teal-200"
+                  : `${themeClasses.button} ${themeClasses.buttonHover}`
               } backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium`}
             >
               <Filter className="h-4 w-4 mr-0" />
@@ -260,7 +311,11 @@ const DashboardPage = () => {
             <Button
               variant="outline"
               onClick={handleBulkExportImport}
-              className="px-2.5 sm:px-4 text-sm bg-white/90 hover:bg-cyan-50 border-cyan-200 text-cyan-700 hover:text-cyan-800 hover:border-cyan-300 backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium whitespace-nowrap"
+              className={`px-2.5 sm:px-4 text-sm ${
+                isDarkMode
+                  ? "bg-gray-800/50 border-gray-600 text-cyan-400 hover:bg-gray-800 hover:text-cyan-300 hover:border-cyan-600"
+                  : "bg-white/90 hover:bg-cyan-50 border-cyan-200 text-cyan-700 hover:text-cyan-800 hover:border-cyan-300"
+              } backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium whitespace-nowrap`}
             >
               <Download className="h-4 w-4 mr-0" />
               Export/Import
@@ -268,7 +323,11 @@ const DashboardPage = () => {
             {!filterArchived && (
               <Button
                 onClick={() => setCreateModalOpen(true)}
-                className="px-3 sm:px-5 text-sm bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white border-0 transition-all duration-300 hover:scale-105 font-medium whitespace-nowrap"
+                className={`px-3 sm:px-5 text-sm ${
+                  isDarkMode
+                    ? "bg-teal-600 hover:bg-teal-700 text-white border-0"
+                    : "bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white border-0"
+                } transition-all duration-300 hover:scale-105 font-medium whitespace-nowrap`}
               >
                 <Plus className="h-4 w-4 mr-0" />
                 New Note
@@ -280,7 +339,11 @@ const DashboardPage = () => {
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 transition-colors duration-300"></div>
+            <div
+              className={`animate-spin rounded-full h-12 w-12 border-b-2 ${
+                isDarkMode ? "border-teal-400" : "border-teal-600"
+              } transition-colors duration-300`}
+            ></div>
           </div>
         )}
 
@@ -289,18 +352,22 @@ const DashboardPage = () => {
           <div className="text-center py-16">
             <div className="mb-6 inline-block relative">
               <Plus
-                className="h-20 w-20 text-teal-600 animate-bounce"
+                className={`h-20 w-20 ${
+                  isDarkMode ? "text-teal-400" : "text-teal-600"
+                } animate-bounce`}
                 style={{ animationDuration: "1.5s" }}
               />
             </div>
-            <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+            <h3
+              className={`text-xl font-bold mb-2 bg-gradient-to-r ${themeClasses.headerGradient} bg-clip-text text-transparent`}
+            >
               {searchQuery
                 ? "No notes found"
                 : filterArchived
                 ? "No archived notes"
                 : "No notes yet"}
             </h3>
-            <p className="mb-6 text-gray-600 max-w-md mx-auto">
+            <p className={`mb-6 ${themeClasses.noNotesText} max-w-md mx-auto`}>
               {searchQuery
                 ? "Try a different search term"
                 : filterArchived
@@ -325,8 +392,16 @@ const DashboardPage = () => {
             {/* Pinned Notes - Always show ALL pinned notes */}
             {pinnedNotes.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold mb-4 flex items-center text-gray-900 transition-colors duration-300">
-                  <span className="text-yellow-600 mr-2">📌</span>
+                <h2
+                  className={`text-lg font-semibold mb-4 flex items-center ${themeClasses.headerText} transition-colors duration-300`}
+                >
+                  <span
+                    className={`${
+                      isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                    } mr-2`}
+                  >
+                    📌
+                  </span>
                   Pinned Notes
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -341,7 +416,7 @@ const DashboardPage = () => {
                         onTogglePin={handleTogglePin}
                         onToggleArchive={handleToggleArchive}
                         onExport={handleExportNote}
-                        isDark={false}
+                        isDark={isDarkMode}
                       />
                     ))}
                   </AnimatePresence>
@@ -353,7 +428,9 @@ const DashboardPage = () => {
             {regularNotes.length > 0 && (
               <div>
                 {pinnedNotes.length > 0 && (
-                  <h2 className="text-lg font-semibold mb-4 text-gray-900 transition-colors duration-300">
+                  <h2
+                    className={`text-lg font-semibold mb-4 ${themeClasses.headerText} transition-colors duration-300`}
+                  >
                     Other Notes
                   </h2>
                 )}
@@ -369,7 +446,7 @@ const DashboardPage = () => {
                         onTogglePin={handleTogglePin}
                         onToggleArchive={handleToggleArchive}
                         onExport={handleExportNote}
-                        isDark={false}
+                        isDark={isDarkMode}
                       />
                     ))}
                   </AnimatePresence>
@@ -421,10 +498,18 @@ const DashboardPage = () => {
       />
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          className={isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white"}
+        >
           <AlertDialogHeader>
-            <AlertDialogTitle>Move to Recycle Bin?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle
+              className={isDarkMode ? "text-white" : "text-gray-900"}
+            >
+              Move to Recycle Bin?
+            </AlertDialogTitle>
+            <AlertDialogDescription
+              className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+            >
               This note will be moved to the recycle bin and automatically
               deleted after 30 days. You can restore it from the recycle bin
               before then.
@@ -433,7 +518,11 @@ const DashboardPage = () => {
           <AlertDialogFooter>
             <AlertDialogCancel
               onClick={() => setNoteToDelete(null)}
-              className="bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900 transition-all duration-300"
+              className={`${
+                isDarkMode
+                  ? "bg-gray-800 hover:bg-gray-700 border-gray-600 text-gray-200 hover:text-white"
+                  : "bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900"
+              } transition-all duration-300`}
             >
               Cancel
             </AlertDialogCancel>
@@ -451,26 +540,46 @@ const DashboardPage = () => {
         open={pinLimitDialogOpen}
         onOpenChange={setPinLimitDialogOpen}
       >
-        <AlertDialogContent className="bg-white max-w-md">
+        <AlertDialogContent
+          className={`max-w-md ${
+            isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white"
+          }`}
+        >
           <AlertDialogHeader>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-yellow-100 rounded-full">
-                <Pin className="h-6 w-6 text-yellow-600" />
+              <div
+                className={`p-3 ${
+                  isDarkMode ? "bg-yellow-900/30" : "bg-yellow-100"
+                } rounded-full`}
+              >
+                <Pin
+                  className={`h-6 w-6 ${
+                    isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                  }`}
+                />
               </div>
-              <AlertDialogTitle className="text-xl">
+              <AlertDialogTitle
+                className={`text-xl ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 Pin Limit Reached!
               </AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-base leading-relaxed pt-2">
               <div className="space-y-2">
-                <p className="text-gray-700">
+                <p className={isDarkMode ? "text-gray-300" : "text-gray-700"}>
                   You've reached the maximum of{" "}
-                  <span className="font-semibold text-yellow-600">
+                  <span
+                    className={`font-semibold ${
+                      isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                    }`}
+                  >
                     6 pinned notes
                   </span>
                   .
                 </p>
-                <p className="text-gray-600">
+                <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
                   Please unpin a note first to pin this one. Pinned notes appear
                   at the top for quick access.
                 </p>

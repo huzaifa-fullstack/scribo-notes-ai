@@ -16,6 +16,7 @@ import {
 import { useNotesStore } from "../../store/notesStore";
 import { useToast } from "../ui/use-toast";
 import RichTextEditor from "../editor/RichTextEditor";
+import { useTheme } from "../../context/ThemeContext";
 
 const noteSchema = z.object({
   title: z
@@ -39,6 +40,8 @@ interface CreateNoteModalProps {
 const CreateNoteModal = ({ open, onClose }: CreateNoteModalProps) => {
   const { createNote, isLoading } = useNotesStore();
   const { toast } = useToast();
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   const form = useForm<NoteFormData>({
     resolver: zodResolver(noteSchema),
@@ -82,9 +85,17 @@ const CreateNoteModal = ({ open, onClose }: CreateNoteModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Create New Note</DialogTitle>
+      <DialogContent
+        className={`sm:max-w-[600px] ${
+          isDarkMode
+            ? "bg-gray-900 border-gray-700"
+            : "bg-white border-gray-200"
+        }`}
+      >
+        <DialogHeader className="mb-4">
+          <DialogTitle className={isDarkMode ? "text-white" : "text-gray-900"}>
+            Create New Note
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -94,17 +105,32 @@ const CreateNoteModal = ({ open, onClose }: CreateNoteModalProps) => {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
+                    Title
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter note title"
                       maxLength={40}
+                      className={
+                        isDarkMode
+                          ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-teal-500"
+                          : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
+                      }
                       {...field}
                     />
                   </FormControl>
                   <div className="flex justify-between items-center">
                     <FormMessage />
-                    <span className="text-xs text-gray-500">
+                    <span
+                      className={`text-xs ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
                       {field.value?.length || 0}/40
                     </span>
                   </div>
@@ -117,7 +143,13 @@ const CreateNoteModal = ({ open, onClose }: CreateNoteModalProps) => {
               name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Content</FormLabel>
+                  <FormLabel
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
+                    Content
+                  </FormLabel>
                   <FormControl>
                     <RichTextEditor
                       content={field.value}
@@ -135,10 +167,21 @@ const CreateNoteModal = ({ open, onClose }: CreateNoteModalProps) => {
               name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tags (optional)</FormLabel>
+                  <FormLabel
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
+                    Tags (optional)
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="work, ideas, personal (comma separated)"
+                      className={
+                        isDarkMode
+                          ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-teal-500"
+                          : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
+                      }
                       {...field}
                     />
                   </FormControl>
@@ -153,14 +196,22 @@ const CreateNoteModal = ({ open, onClose }: CreateNoteModalProps) => {
                 variant="outline"
                 onClick={onClose}
                 disabled={isLoading}
-                className="bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900 transition-all duration-300"
+                className={
+                  isDarkMode
+                    ? "bg-gray-800 hover:bg-gray-700 border-gray-600 text-gray-300"
+                    : "bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900"
+                }
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={
+                  isDarkMode
+                    ? "bg-teal-600 hover:bg-teal-700 text-white"
+                    : "bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white"
+                }
               >
                 {isLoading ? (
                   <>
