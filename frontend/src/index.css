@@ -6,6 +6,15 @@
     --radius: 0.5rem;
   }
 
+  /* Ensure dark background applies globally to avoid white flashes */
+  .dark {
+    color-scheme: dark;
+  }
+  .dark html,
+  .dark body {
+    background-color: rgb(3 7 18); /* gray-950 */
+  }
+
   /* Custom scrollbar with teal theme */
   ::-webkit-scrollbar {
     width: 12px;
@@ -151,6 +160,41 @@
   background-color: white !important;
   border: 1px solid rgb(229 231 235) !important;
   color: rgb(17 24 39) !important;
+}
+
+/* Consistent autofill styling (light blue) in both light and dark modes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  /* Make background the same subtle light-blue as in light mode */
+  -webkit-box-shadow: 0 0 0px 1000px #e0f2fe inset; /* tailwind sky-100 */
+  box-shadow: 0 0 0px 1000px #e0f2fe inset;
+  -webkit-text-fill-color: #111827; /* gray-900 for legibility */
+  caret-color: #111827;
+  border-radius: inherit;
+  transition: background-color 9999s ease-in-out 0s; /* avoid flash */
+}
+
+/* Ensure dark mode keeps the same blue autofill, not gray */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill,
+.dark textarea:-webkit-autofill:hover,
+.dark textarea:-webkit-autofill:focus,
+.dark select:-webkit-autofill,
+.dark select:-webkit-autofill:hover,
+.dark select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #e0f2fe inset;
+  box-shadow: 0 0 0px 1000px #e0f2fe inset;
+  -webkit-text-fill-color: #111827;
+  caret-color: #111827;
 }
 
 /* Direct selectors with data-theme on toast */
