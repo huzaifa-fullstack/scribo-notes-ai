@@ -77,7 +77,11 @@ const exportAllNotes = async (req, res, next) => {
     try {
         const { format } = req.params;
 
-        const notes = await Note.find({ user: req.user.id });
+        // Only export non-deleted notes (exclude recycle bin)
+        const notes = await Note.find({ 
+            user: req.user.id,
+            isDeleted: false 
+        });
 
         if (notes.length === 0) {
             return res.status(404).json({
