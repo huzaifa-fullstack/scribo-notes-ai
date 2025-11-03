@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -12,8 +12,13 @@ const AuthCallbackPage = () => {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   const setAuthData = useAuthStore((state) => state.setAuthData);
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple executions (React Strict Mode in dev)
+    if (hasProcessed.current) return;
+    hasProcessed.current = true;
+
     const token = searchParams.get("token");
     const error = searchParams.get("error");
 
@@ -58,11 +63,22 @@ const AuthCallbackPage = () => {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center ${
-        isDarkMode ? "bg-gray-900" : "bg-white"
+      className={`min-h-screen flex items-center justify-center bg-gradient-to-br ${
+        isDarkMode
+          ? "from-gray-900 via-gray-950 to-gray-900"
+          : "from-blue-50 via-white to-purple-50"
       }`}
     >
-      <LoadingSpinner size="lg" />
+      <div className="text-center">
+        <LoadingSpinner />
+        <p
+          className={`mt-4 text-sm animate-pulse ${
+            isDarkMode ? "text-gray-300" : "text-gray-600"
+          }`}
+        >
+          Completing sign in...
+        </p>
+      </div>
     </div>
   );
 };

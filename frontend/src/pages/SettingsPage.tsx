@@ -28,6 +28,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { deleteAllNotes, deleteAccount } from "../services/profileService";
 import { useState } from "react";
+import LogoutAnimation from "../components/common/LogoutAnimation";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -36,15 +37,19 @@ const SettingsPage = () => {
   const { fetchNotes } = useNotesStore();
   const { theme, toggleTheme } = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showLogoutAnimation, setShowLogoutAnimation] = useState(false);
 
   const isDarkMode = theme === "dark";
 
   const handleDarkModeToggle = (checked: boolean) => {
     toggleTheme();
-    toast({
-      title: checked ? "Dark Mode Enabled" : "Light Mode Enabled",
-      description: "Theme updated successfully!",
-    });
+    // Delay toast to allow theme to update first
+    setTimeout(() => {
+      toast({
+        title: checked ? "Dark Mode Enabled" : "Light Mode Enabled",
+        description: "Theme updated successfully!",
+      });
+    }, 100);
   };
 
   const handleDeleteAccount = async () => {
@@ -156,7 +161,12 @@ const SettingsPage = () => {
             <div className="flex items-center gap-2 flex-shrink-0">
               <UserDropdown />
               <Button
-                onClick={logout}
+                onClick={() => {
+                  setShowLogoutAnimation(true);
+                  setTimeout(() => {
+                    logout();
+                  }, 3000);
+                }}
                 variant="outline"
                 className={`${
                   isDarkMode
@@ -434,6 +444,9 @@ const SettingsPage = () => {
           </Card>
         </div>
       </motion.main>
+
+      {/* Logout Animation */}
+      <LogoutAnimation isVisible={showLogoutAnimation} />
     </div>
   );
 };

@@ -47,6 +47,7 @@ import {
   changePassword,
   uploadAvatar,
 } from "../services/profileService";
+import LogoutAnimation from "../components/common/LogoutAnimation";
 
 // Password change validation schema
 const passwordChangeSchema = z
@@ -86,6 +87,7 @@ const ProfilePage = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showLogoutAnimation, setShowLogoutAnimation] = useState(false);
 
   const isDarkMode = theme === "dark";
 
@@ -108,6 +110,13 @@ const ProfilePage = () => {
   // Get unique tags count
   const allTags = notes.flatMap((note) => note.tags || []);
   const uniqueTags = new Set(allTags).size;
+
+  const handleLogout = () => {
+    setShowLogoutAnimation(true);
+    setTimeout(() => {
+      logout();
+    }, 3000);
+  };
 
   const handleSave = async () => {
     try {
@@ -324,7 +333,7 @@ const ProfilePage = () => {
             <div className="flex items-center gap-2 flex-shrink-0">
               <UserDropdown />
               <Button
-                onClick={logout}
+                onClick={handleLogout}
                 variant="outline"
                 className={`${
                   isDarkMode
@@ -961,6 +970,9 @@ const ProfilePage = () => {
           </div>
         </motion.div>
       </main>
+
+      {/* Logout Animation */}
+      <LogoutAnimation isVisible={showLogoutAnimation} />
     </div>
   );
 };
