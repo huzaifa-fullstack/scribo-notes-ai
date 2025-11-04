@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -142,23 +142,20 @@ const SlidingAuthPage = () => {
         password: data.password,
       });
 
-      // Registration successful - clear any errors and flags
+      // Registration successful - user is now auto-logged in
       clearError();
       setHasRegistrationError(false);
 
-      // Show success toast
+      // Show welcome toast
       toast.success(
-        "Account created successfully! Please log in with your credentials.",
+        "Welcome to Scribo! Your account has been created successfully.",
         {
-          duration: 4000,
+          duration: 3000,
         }
       );
 
-      // Reset the register form
-      registerForm.reset();
-
-      // Switch to sign-in view after successful registration
-      switchToSignIn();
+      // Note: User will be automatically redirected to dashboard by authStore
+      // No need to switch to sign-in or reset form
     } catch (error) {
       // Error is already set in the store
       setHasRegistrationError(true);
@@ -332,11 +329,21 @@ const SlidingAuthPage = () => {
                     )}
                   </button>
                 </div>
-                {loginForm.formState.errors.password && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {loginForm.formState.errors.password.message}
-                  </p>
-                )}
+                <div className="flex items-center justify-between mt-1">
+                  <div>
+                    {loginForm.formState.errors.password && (
+                      <p className="text-sm text-red-600">
+                        {loginForm.formState.errors.password.message}
+                      </p>
+                    )}
+                  </div>
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs md:text-sm text-teal-600 hover:text-teal-700 hover:underline font-medium"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
 
               {error && isSignIn && !hasRegistrationError && (

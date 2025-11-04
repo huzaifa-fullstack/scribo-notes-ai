@@ -58,3 +58,24 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+// ============================================
+// AUTH API ENDPOINTS
+// ============================================
+
+/**
+ * Send password reset email
+ * @param email - User's email address
+ */
+export const forgotPassword = async (email: string) => {
+  return api.post("/auth/forgot-password", { email });
+};
+
+/**
+ * Reset password with token
+ * @param token - Reset token from email
+ * @param password - New password
+ */
+export const resetPassword = async (token: string, password: string) => {
+  return api.post("/auth/reset-password", { token, password });
+};

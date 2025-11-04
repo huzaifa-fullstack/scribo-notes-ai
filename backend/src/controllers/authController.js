@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const logger = require('../config/logger');
+const crypto = require('crypto');
+const emailService = require('../services/emailService');
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -210,11 +212,183 @@ const googleCallback = async (req, res) => {
   }
 };
 
+// @desc    Forgot password - send reset email
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    logger.info(`Password reset requested for email: ${email}`);
+
+    // Validate email
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide an email address'
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    // Always return success to prevent email enumeration attacks
+    // Don't reveal whether the email exists in the database
+    if (!user) {
+      logger.warn(`Password reset requested for non-existent email: ${email}`);
+      return res.status(200).json({
+        success: true,
+        message: 'If an account exists with this email, a password reset link has been sent.'
+      });
+    }
+
+    // Check if user is OAuth user (Google)
+    if (user.googleId && !user.password) {
+      logger.warn(`Password reset attempted for Google OAuth user: ${email}`);
+      return res.status(400).json({
+        success: false,
+        error: 'This account uses Google sign-in. Please use Google to log in.'
+      });
+    }
+
+    // Generate reset token (32 bytes = 64 hex characters)
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    // Hash token before storing in database (security best practice)
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    // Set reset token and expiry (1 hour)
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 60 * 60 * 1000; // 1 hour from now
+    await user.save();
+
+    logger.info(`Reset token generated for user: ${email}`);
+
+    // Send email with reset link (use the unhashed token in the URL)
+    try {
+      await emailService.sendPasswordResetEmail(email, resetToken, user.name);
+
+      logger.info(`Password reset email sent successfully to: ${email}`);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Password reset email sent successfully. Please check your inbox.'
+      });
+    } catch (emailError) {
+      // If email fails, clear the reset token
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save();
+
+      logger.error(`Failed to send password reset email to: ${email}`, emailError);
+
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to send password reset email. Please try again later.'
+      });
+    }
+  } catch (error) {
+    logger.error('Forgot password error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error. Please try again later.'
+    });
+  }
+};
+
+// @desc    Reset password with token
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+
+    logger.info('Password reset attempt with token');
+
+    // Validate inputs
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide both token and new password'
+      });
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 6 characters long'
+      });
+    }
+
+    // Hash the token from URL to compare with stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with valid reset token that hasn't expired
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() } // Token must not be expired
+    });
+
+    if (!user) {
+      logger.warn('Invalid or expired reset token');
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid or expired reset token. Please request a new password reset.'
+      });
+    }
+
+    // Set new password (will be hashed by pre-save hook)
+    user.password = password;
+
+    // Clear reset token fields
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    logger.info(`Password successfully reset for user: ${user.email}`);
+
+    // Send confirmation email (don't wait for it, send in background)
+    emailService.sendPasswordResetConfirmation(user.email, user.name)
+      .catch(err => logger.error('Failed to send password reset confirmation:', err));
+
+    // Generate new JWT token for auto-login
+    const authToken = user.getSignedJwtToken();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password reset successful. You can now log in with your new password.',
+      token: authToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar
+      }
+    });
+  } catch (error) {
+    logger.error('Reset password error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error. Please try again later.'
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
   updateProfile,
   logout,
-  googleCallback  // Add this
+  googleCallback,  // Add this
+  forgotPassword,
+  resetPassword
 };
