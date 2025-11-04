@@ -66,26 +66,26 @@ function DialogContent({
   return (
     <div
       className={cn(
-        "relative bg-white rounded-lg shadow-xl border max-w-lg w-full max-h-[90vh] overflow-auto p-6",
+        "relative bg-white rounded-lg shadow-xl border max-w-lg w-full max-h-[90vh] flex flex-col",
         className
       )}
       onClick={(e) => e.stopPropagation()}
       {...props}
     >
-      {children}
       {showCloseButton && (
         <button
-          className={`absolute top-4 right-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:pointer-events-none ${
+          className={`absolute top-2 right-2 z-50 rounded-full p-1 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:pointer-events-none ${
             isDarkMode
-              ? "text-white hover:text-gray-200"
-              : "text-gray-600 hover:text-gray-900"
+              ? "text-red-400 hover:text-red-300 hover:bg-red-500/20"
+              : "text-red-600 hover:text-red-700 hover:bg-red-100"
           }`}
           onClick={() => context?.onOpenChange(false)}
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
           <span className="sr-only">Close</span>
         </button>
       )}
+      <div className="overflow-auto p-6">{children}</div>
     </div>
   );
 }

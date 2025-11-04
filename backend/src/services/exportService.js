@@ -341,14 +341,65 @@ class ExportService {
 
             // Title (sanitize to remove emojis and unsupported characters)
             const sanitizedTitle = this.sanitizeTextForPDF(note.title);
-            currentPage.drawText(sanitizedTitle, {
-                x: margin,
-                y: yPosition,
-                size: 18,
-                font: boldFont,
-                color: rgb(0.08, 0.72, 0.65), // Teal color (#14b8a6)
-            });
-            yPosition -= 35;
+
+            // Split title into multiple lines if it's too long
+            const titleFontSize = 18;
+            const titleMaxWidth = pageWidth;
+            const titleWords = sanitizedTitle.split(' ');
+            const titleLines = [];
+            let currentTitleLine = '';
+
+            for (const word of titleWords) {
+                const testLine = currentTitleLine ? `${currentTitleLine} ${word}` : word;
+                const textWidth = boldFont.widthOfTextAtSize(testLine, titleFontSize);
+
+                if (textWidth < titleMaxWidth) {
+                    currentTitleLine = testLine;
+                } else {
+                    // If current line has content, save it first
+                    if (currentTitleLine) {
+                        titleLines.push(currentTitleLine);
+                        currentTitleLine = '';
+                    }
+
+                    // Check if single word is too long - split it character by character
+                    const wordWidth = boldFont.widthOfTextAtSize(word, titleFontSize);
+                    if (wordWidth >= titleMaxWidth) {
+                        let charLine = '';
+                        for (const char of word) {
+                            const testChar = charLine + char;
+                            const charWidth = boldFont.widthOfTextAtSize(testChar, titleFontSize);
+                            if (charWidth < titleMaxWidth) {
+                                charLine += char;
+                            } else {
+                                if (charLine) titleLines.push(charLine);
+                                charLine = char;
+                            }
+                        }
+                        currentTitleLine = charLine;
+                    } else {
+                        currentTitleLine = word;
+                    }
+                }
+            }
+
+            if (currentTitleLine) {
+                titleLines.push(currentTitleLine);
+            }
+
+            // Draw title lines
+            for (const titleLine of titleLines) {
+                currentPage.drawText(titleLine, {
+                    x: margin,
+                    y: yPosition,
+                    size: titleFontSize,
+                    font: boldFont,
+                    color: rgb(0.08, 0.72, 0.65), // Teal color (#14b8a6)
+                });
+                yPosition -= 25;
+            }
+
+            yPosition -= 10; // Extra spacing after title
 
             // Metadata - Created and Last Updated
             const createdText = `Created: ${new Date(note.createdAt).toLocaleString()}`;
@@ -654,16 +705,67 @@ class ExportService {
                     yPosition -= 30;
                 }
 
-                // Note title (sanitize to remove emojis)
+                // Note title (sanitize to remove emojis and wrap if needed)
                 const sanitizedTitle = this.sanitizeTextForPDF(note.title);
-                currentPage.drawText(sanitizedTitle, {
-                    x: margin,
-                    y: yPosition,
-                    size: 16,
-                    font: boldFont,
-                    color: rgb(0.08, 0.72, 0.65), // Teal color (#14b8a6)
-                });
-                yPosition -= 25;
+
+                // Split title into multiple lines if it's too long
+                const titleFontSize = 16;
+                const titleMaxWidth = pageWidth;
+                const titleWords = sanitizedTitle.split(' ');
+                const titleLines = [];
+                let currentTitleLine = '';
+
+                for (const word of titleWords) {
+                    const testLine = currentTitleLine ? `${currentTitleLine} ${word}` : word;
+                    const textWidth = boldFont.widthOfTextAtSize(testLine, titleFontSize);
+
+                    if (textWidth < titleMaxWidth) {
+                        currentTitleLine = testLine;
+                    } else {
+                        // If current line has content, save it first
+                        if (currentTitleLine) {
+                            titleLines.push(currentTitleLine);
+                            currentTitleLine = '';
+                        }
+
+                        // Check if single word is too long - split it character by character
+                        const wordWidth = boldFont.widthOfTextAtSize(word, titleFontSize);
+                        if (wordWidth >= titleMaxWidth) {
+                            let charLine = '';
+                            for (const char of word) {
+                                const testChar = charLine + char;
+                                const charWidth = boldFont.widthOfTextAtSize(testChar, titleFontSize);
+                                if (charWidth < titleMaxWidth) {
+                                    charLine += char;
+                                } else {
+                                    if (charLine) titleLines.push(charLine);
+                                    charLine = char;
+                                }
+                            }
+                            currentTitleLine = charLine;
+                        } else {
+                            currentTitleLine = word;
+                        }
+                    }
+                }
+
+                if (currentTitleLine) {
+                    titleLines.push(currentTitleLine);
+                }
+
+                // Draw title lines
+                for (const titleLine of titleLines) {
+                    currentPage.drawText(titleLine, {
+                        x: margin,
+                        y: yPosition,
+                        size: titleFontSize,
+                        font: boldFont,
+                        color: rgb(0.08, 0.72, 0.65), // Teal color (#14b8a6)
+                    });
+                    yPosition -= 22;
+                }
+
+                yPosition -= 3; // Extra spacing after title
 
                 // Metadata - Created and Last Updated
                 const createdText = `Created: ${new Date(note.createdAt).toLocaleString()}`;

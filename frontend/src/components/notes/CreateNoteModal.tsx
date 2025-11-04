@@ -22,7 +22,7 @@ const noteSchema = z.object({
   title: z
     .string()
     .min(1, "Title is required")
-    .max(40, "Title must be 40 characters or less"),
+    .max(60, "Title must be 60 characters or less"),
   content: z
     .string()
     .min(1, "Content is required")
@@ -115,7 +115,7 @@ const CreateNoteModal = ({ open, onClose }: CreateNoteModalProps) => {
                   <FormControl>
                     <Input
                       placeholder="Enter note title"
-                      maxLength={40}
+                      maxLength={60}
                       className={
                         isDarkMode
                           ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-teal-500"
@@ -131,7 +131,7 @@ const CreateNoteModal = ({ open, onClose }: CreateNoteModalProps) => {
                         isDarkMode ? "text-gray-400" : "text-gray-500"
                       }`}
                     >
-                      {field.value?.length || 0}/40
+                      {field.value?.length || 0}/60
                     </span>
                   </div>
                 </FormItem>

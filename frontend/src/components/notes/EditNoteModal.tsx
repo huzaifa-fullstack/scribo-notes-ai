@@ -24,7 +24,7 @@ const noteSchema = z.object({
   title: z
     .string()
     .min(1, "Title is required")
-    .max(40, "Title must be 40 characters or less"),
+    .max(60, "Title must be 60 characters or less"),
   content: z
     .string()
     .min(1, "Content is required")
@@ -138,7 +138,7 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
                           ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-teal-500"
                           : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
                       }`}
-                      maxLength={40}
+                      maxLength={60}
                       {...field}
                     />
                   </FormControl>
@@ -149,7 +149,7 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
                         isDarkMode ? "text-gray-400" : "text-gray-500"
                       }`}
                     >
-                      {field.value?.length || 0}/40
+                      {field.value?.length || 0}/60
                     </span>
                   </div>
                 </FormItem>

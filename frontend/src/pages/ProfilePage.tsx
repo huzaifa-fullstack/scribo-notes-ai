@@ -18,6 +18,7 @@ import {
   Tag,
   Eye,
   EyeOff,
+  Loader2,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useNotesStore } from "../store/notesStore";
@@ -72,7 +73,7 @@ type PasswordChangeData = z.infer<typeof passwordChangeSchema>;
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, logout, setAuthData } = useAuthStore();
   const { notes } = useNotesStore();
   const { toast } = useToast();
   const { theme } = useTheme();
@@ -81,6 +82,7 @@ const ProfilePage = () => {
   const [name, setName] = useState(user?.name || "");
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar || "");
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Change Password State
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -119,9 +121,18 @@ const ProfilePage = () => {
   };
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       // Call API to update user profile
-      await updateProfile({ name, avatar: avatarUrl });
+      const response = await updateProfile({ name, avatar: avatarUrl });
+
+      // Update auth store with new user data to reflect changes immediately
+      if (response.data && response.data.user) {
+        const token = localStorage.getItem("token");
+        if (token) {
+          setAuthData(token, response.data.user);
+        }
+      }
 
       toast({
         title: "Profile updated!",
@@ -137,6 +148,8 @@ const ProfilePage = () => {
           "Failed to update profile. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -215,6 +228,14 @@ const ProfilePage = () => {
 
         // Update avatar URL with Cloudinary URL
         setAvatarUrl(response.data.avatar);
+
+        // Update auth store immediately to reflect changes across the app
+        if (user) {
+          const token = localStorage.getItem("token");
+          if (token) {
+            setAuthData(token, { ...user, avatar: response.data.avatar });
+          }
+        }
 
         toast({
           title: "Avatar uploaded!",
@@ -392,9 +413,17 @@ const ProfilePage = () => {
                     {isEditing && (
                       <label
                         htmlFor="avatar-upload"
-                        className="absolute bottom-0 right-0 bg-teal-600 text-white p-2 rounded-full cursor-pointer hover:bg-teal-700 transition-colors shadow-lg"
+                        className={`absolute bottom-0 right-0 bg-teal-600 text-white p-2 rounded-full shadow-lg transition-colors ${
+                          isUploading
+                            ? "cursor-not-allowed opacity-75"
+                            : "cursor-pointer hover:bg-teal-700"
+                        }`}
                       >
-                        <Camera className="h-4 w-4" />
+                        {isUploading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Camera className="h-4 w-4" />
+                        )}
                         <input
                           id="avatar-upload"
                           type="file"
@@ -407,13 +436,15 @@ const ProfilePage = () => {
                     )}
                   </div>
 
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <h3
-                      className={`text-lg font-semibold ${themeClasses.cardText}`}
+                      className={`text-lg font-semibold ${themeClasses.cardText} break-words overflow-wrap-anywhere`}
                     >
                       {user?.name}
                     </h3>
-                    <p className={`text-sm ${themeClasses.cardSubtext}`}>
+                    <p
+                      className={`text-sm ${themeClasses.cardSubtext} break-words`}
+                    >
                       {user?.email}
                     </p>
                     {!isEditing && (
@@ -447,6 +478,7 @@ const ProfilePage = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       disabled={!isEditing}
+                      maxLength={50}
                       className={
                         !isEditing
                           ? themeClasses.inputDisabled
@@ -494,10 +526,15 @@ const ProfilePage = () => {
                   <div className="flex gap-3 pt-4">
                     <Button
                       onClick={handleSave}
-                      className="flex-1 bg-teal-600 hover:bg-teal-700 text-white transition-colors duration-300"
+                      disabled={isUploading || isSaving}
+                      className="flex-1 bg-teal-600 hover:bg-teal-700 text-white transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Save className="h-4 w-4 mr-0.5" />
-                      Save Changes
+                      {isUploading
+                        ? "Uploading..."
+                        : isSaving
+                        ? "Saving..."
+                        : "Save Changes"}
                     </Button>
                     <Button
                       variant="outline"
@@ -506,7 +543,8 @@ const ProfilePage = () => {
                         setName(user?.name || "");
                         setAvatarUrl(user?.avatar || "");
                       }}
-                      className={`${themeClasses.button} ${themeClasses.buttonHover} transition-colors duration-300`}
+                      disabled={isUploading || isSaving}
+                      className={`${themeClasses.button} ${themeClasses.buttonHover} transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       Cancel
                     </Button>
@@ -710,7 +748,7 @@ const ProfilePage = () => {
                       Account Type
                     </p>
                     <p className={`text-sm ${themeClasses.cardSubtext}`}>
-                      Personal
+                      User
                     </p>
                   </div>
                 </div>

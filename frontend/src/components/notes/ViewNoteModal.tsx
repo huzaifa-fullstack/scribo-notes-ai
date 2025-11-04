@@ -29,7 +29,7 @@ const ViewNoteModal = ({ open, note, onClose }: ViewNoteModalProps) => {
       >
         <DialogHeader>
           <DialogTitle
-            className={`text-2xl font-bold pr-8 ${
+            className={`text-xl sm:text-2xl font-bold pr-10 break-words ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
@@ -86,7 +86,7 @@ const ViewNoteModal = ({ open, note, onClose }: ViewNoteModalProps) => {
           <div
             className={`prose prose-sm max-w-none [&_p]:min-h-[1.5em] ${
               isDarkMode
-                ? "prose-invert prose-headings:text-white prose-p:text-white prose-strong:text-white prose-em:text-gray-300 [&_*]:text-white"
+                ? "prose-invert prose-headings:text-white prose-p:text-white prose-strong:text-white prose-em:text-gray-300 [&_*]:text-white [&_mark]:!text-gray-900 [&_mark]:!bg-yellow-300"
                 : "prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-em:text-gray-600"
             }`}
             dangerouslySetInnerHTML={{ __html: note.content }}
