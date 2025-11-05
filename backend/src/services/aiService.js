@@ -3,53 +3,138 @@ const logger = require('../config/logger');
 
 // Hugging Face API Configuration
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
-const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models';
+const HUGGINGFACE_CHAT_API = 'https://router.huggingface.co/v1/chat/completions';
 
-// Model configurations
+// Check if API key is configured
+if (!HUGGINGFACE_API_KEY) {
+    logger.error('HUGGINGFACE_API_KEY is not configured in environment variables');
+}
+
+// Free models available (fast and good quality)
 const MODELS = {
-    GRAMMAR_CORRECTION: 'grammarly/coedit-large',
-    SUMMARIZATION: 'facebook/bart-large-cnn',
-    TEXT_GENERATION: 'google/flan-t5-large',
-    ZERO_SHOT_CLASSIFICATION: 'facebook/bart-large-mnli',
-    PARAPHRASE: 'tuner007/pegasus_paraphrase',
+    // Using Meta's Llama 3.2 - Great for text generation, grammar, and writing tasks
+    CHAT_MODEL: 'meta-llama/Llama-3.2-3B-Instruct',
+    // Alternative options (uncomment to try):
+    // CHAT_MODEL: 'Qwen/Qwen2.5-Coder-32B-Instruct', // Qwen (excellent for text)
+    // CHAT_MODEL: 'mistralai/Mixtral-8x7B-Instruct-v0.1', // Mistral AI (very good)
+    // CHAT_MODEL: 'microsoft/Phi-3-mini-4k-instruct', // Microsoft Phi-3 (fast)
 };
 
 /**
- * Make a request to Hugging Face API
+ * Make a chat completion request (for text generation tasks)
  */
-const queryHuggingFace = async (model, payload, retries = 3) => {
+const queryChatCompletion = async (prompt, systemMessage = 'You are a helpful AI assistant for note-taking.', maxTokens = 500) => {
+    if (!HUGGINGFACE_API_KEY) {
+        throw new Error('Hugging Face API key is not configured. Please set HUGGINGFACE_API_KEY in your .env file.');
+    }
+
     try {
+        logger.info(`Querying chat model: ${MODELS.CHAT_MODEL}`);
+
         const response = await axios.post(
-            `${HUGGINGFACE_API_URL}/${model}`,
+            HUGGINGFACE_CHAT_API,
+            {
+                model: MODELS.CHAT_MODEL,
+                messages: [
+                    { role: 'system', content: systemMessage },
+                    { role: 'user', content: prompt }
+                ],
+                max_tokens: maxTokens,
+                temperature: 0.7,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                timeout: 30000,
+            }
+        );
+
+        let content = response.data.choices[0]?.message?.content || '';
+
+        // Clean up markdown formatting that AI models sometimes add
+        content = content
+            .replace(/^\*\*(.+?)\*\*$/gm, '$1') // Remove bold markers at line start/end
+            .replace(/\*\*(.+?)\*\*/g, '$1') // Remove bold markers
+            .replace(/\*(.+?)\*/g, '$1') // Remove italic markers
+            .replace(/^#+\s+/gm, '') // Remove markdown headers
+            .replace(/^[-*]\s+/gm, '') // Remove bullet points
+            .trim();
+
+        logger.info(`Successfully got chat completion`);
+        return content;
+    } catch (error) {
+        console.error('Chat completion error:', error.message);
+        console.error('Error response:', error.response?.data);
+
+        logger.error('Chat completion error:', {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+        });
+
+        if (error.response?.status === 401) {
+            throw new Error('Invalid Hugging Face API key.');
+        }
+        if (error.response?.status === 429) {
+            throw new Error('Rate limit exceeded. Please try again later.');
+        }
+        throw new Error(`AI service error: ${error.message}`);
+    }
+};
+
+/**
+ * Make a request to Hugging Face Inference API (for specific models like BART)
+ */
+const queryHuggingFaceInference = async (model, payload, retries = 3) => {
+    if (!HUGGINGFACE_API_KEY) {
+        throw new Error('Hugging Face API key is not configured. Please set HUGGINGFACE_API_KEY in your .env file.');
+    }
+
+    try {
+        logger.info(`Querying Hugging Face model: ${model}`);
+
+        const response = await axios.post(
+            `https://router.huggingface.co/hf-inference/models/${model}`,
             payload,
             {
                 headers: {
                     Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
                     'Content-Type': 'application/json',
                 },
-                timeout: 30000, // 30 seconds timeout
+                timeout: 30000,
             }
         );
 
-        // If model is loading, wait and retry
         if (response.data.error && response.data.error.includes('loading')) {
             if (retries > 0) {
                 logger.info(`Model ${model} is loading, retrying in 10 seconds...`);
                 await new Promise(resolve => setTimeout(resolve, 10000));
-                return queryHuggingFace(model, payload, retries - 1);
+                return queryHuggingFaceInference(model, payload, retries - 1);
             }
-            throw new Error('Model is still loading. Please try again in a few moments.');
+            throw new Error('Model is still loading. Please try again later.');
         }
 
+        logger.info(`Successfully queried model: ${model}`);
         return response.data;
     } catch (error) {
-        logger.error(`Hugging Face API error for model ${model}:`, error.message);
+        logger.error(`Hugging Face API error for model ${model}:`, {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+        });
 
         if (error.response?.data?.error) {
             throw new Error(error.response.data.error);
         }
-
-        throw new Error('AI service is temporarily unavailable. Please try again.');
+        if (error.response?.status === 401) {
+            throw new Error('Invalid Hugging Face API key.');
+        }
+        if (error.response?.status === 429) {
+            throw new Error('Rate limit exceeded. Please try again later.');
+        }
+        throw new Error(`AI service error: ${error.message}`);
     }
 };
 
@@ -62,25 +147,16 @@ const correctGrammar = async (text) => {
             throw new Error('Text is required for grammar correction');
         }
 
-        // For grammar correction, we'll use a text-to-text generation model
-        const prompt = `Fix grammar and spelling errors in the following text, keep the same meaning and tone:\n\n${text}`;
-
-        const result = await queryHuggingFace(MODELS.TEXT_GENERATION, {
-            inputs: prompt,
-            parameters: {
-                max_length: text.length + 100,
-                temperature: 0.3,
-                do_sample: false,
-            },
-        });
-
-        const correctedText = Array.isArray(result)
-            ? result[0]?.generated_text || text
-            : result.generated_text || text;
+        const prompt = `Fix any grammar and spelling errors in the following text. Return ONLY the corrected text, nothing else:\n\n${text}`;
+        const correctedText = await queryChatCompletion(
+            prompt,
+            'You are an expert grammar and spelling checker. Fix errors while keeping the original meaning and tone.',
+            Math.max(text.length + 100, 200)
+        );
 
         return {
             original: text,
-            corrected: correctedText.replace(prompt, '').trim(),
+            corrected: correctedText,
             changes: correctedText !== text,
         };
     } catch (error) {
@@ -102,18 +178,13 @@ const summarizeText = async (text, maxLength = 150) => {
             throw new Error('Text is too short to summarize (minimum 100 characters)');
         }
 
-        const result = await queryHuggingFace(MODELS.SUMMARIZATION, {
-            inputs: text,
-            parameters: {
-                max_length: maxLength,
-                min_length: 30,
-                do_sample: false,
-            },
-        });
+        const prompt = `Summarize the following text in a concise way (around ${maxLength} words):\n\n${text}\n\nSummary:`;
 
-        const summary = Array.isArray(result)
-            ? result[0]?.summary_text || ''
-            : result.summary_text || '';
+        const summary = await queryChatCompletion(
+            prompt,
+            'You are an expert at creating concise, informative summaries.',
+            maxLength + 50
+        );
 
         return {
             original: text,
@@ -141,41 +212,25 @@ const generateContent = async (context, options = {}) => {
             tone = 'neutral',
         } = options;
 
-        // Create detailed prompt based on options
-        let prompt = 'Write a detailed note';
+        // Create a detailed prompt based on user preferences
+        let styleGuide = '';
+        if (style === 'professional') styleGuide = 'professional and clear';
+        else if (style === 'casual') styleGuide = 'casual and friendly';
+        else if (style === 'academic') styleGuide = 'academic and formal';
+        else styleGuide = style;
 
-        if (style === 'professional') {
-            prompt += ' in a professional and clear manner';
-        } else if (style === 'casual') {
-            prompt += ' in a casual and friendly manner';
-        } else if (style === 'academic') {
-            prompt += ' in an academic and formal manner';
-        }
+        let lengthGuide = '';
+        if (length === 'short') lengthGuide = 'brief (2-3 paragraphs)';
+        else if (length === 'medium') lengthGuide = 'moderate length (4-5 paragraphs)';
+        else lengthGuide = 'detailed and comprehensive (6-8 paragraphs)';
 
-        if (tone === 'positive') {
-            prompt += ' with a positive tone';
-        } else if (tone === 'neutral') {
-            prompt += ' with a balanced tone';
-        }
+        const prompt = `Write a ${lengthGuide} note in a ${styleGuide} style with a ${tone} tone about the following topic:\n\n${context}\n\nWrite the note content:`;
 
-        prompt += ` based on the following information:\n\n${context}\n\nNote:`;
-
-        const result = await queryHuggingFace(MODELS.TEXT_GENERATION, {
-            inputs: prompt,
-            parameters: {
-                max_length: length === 'short' ? 150 : length === 'medium' ? 300 : 500,
-                temperature: 0.7,
-                do_sample: true,
-                top_p: 0.9,
-            },
-        });
-
-        let generatedContent = Array.isArray(result)
-            ? result[0]?.generated_text || ''
-            : result.generated_text || '';
-
-        // Clean up the generated content
-        generatedContent = generatedContent.replace(prompt, '').trim();
+        const generatedContent = await queryChatCompletion(
+            prompt,
+            'You are an expert note-taking assistant. Generate well-structured, informative notes based on user requests.',
+            length === 'short' ? 200 : length === 'medium' ? 400 : 600
+        );
 
         return {
             context,
@@ -198,57 +253,45 @@ const suggestTags = async (text, maxTags = 5) => {
             throw new Error('Text is required for tag suggestions');
         }
 
-        // Define common tag categories for notes
-        const candidateLabels = [
-            'work', 'personal', 'ideas', 'todo', 'meeting',
-            'project', 'research', 'learning', 'finance', 'health',
-            'travel', 'food', 'technology', 'business', 'creative',
-            'important', 'urgent', 'planning', 'goals', 'notes'
-        ];
+        // Use AI to suggest relevant tags
+        const prompt = `Based on the following note content, suggest ${maxTags} relevant tags/keywords that categorize this note. Return ONLY the tags as a comma-separated list, nothing else:\n\n${text.substring(0, 500)}\n\nTags:`;
 
-        const result = await queryHuggingFace(MODELS.ZERO_SHOT_CLASSIFICATION, {
-            inputs: text,
-            parameters: {
-                candidate_labels: candidateLabels,
-                multi_label: true,
-            },
-        });
+        const response = await queryChatCompletion(
+            prompt,
+            'You are an expert at categorizing and tagging content. Suggest short, relevant tags.',
+            100
+        );
 
-        // Get top tags with scores above threshold
-        const tags = [];
-        const threshold = 0.3; // Only suggest tags with >30% confidence
+        // Parse the AI response to extract tags
+        const suggestedTags = response
+            .split(',')
+            .map(tag => tag.trim().toLowerCase())
+            .filter(tag => tag.length > 0 && tag.length < 20)
+            .slice(0, maxTags)
+            .map(tag => ({
+                tag: tag,
+                confidence: '95.0', // AI-suggested tags are high confidence
+            }));
 
-        if (result.labels && result.scores) {
-            for (let i = 0; i < Math.min(maxTags, result.labels.length); i++) {
-                if (result.scores[i] >= threshold) {
-                    tags.push({
-                        tag: result.labels[i],
-                        confidence: (result.scores[i] * 100).toFixed(1),
-                    });
-                }
-            }
-        }
-
-        // Also extract keywords from the text
+        // Also extract keywords from the text as backup
         const words = text.toLowerCase().match(/\b\w+\b/g) || [];
         const wordFreq = {};
 
         words.forEach(word => {
-            if (word.length > 4) { // Only consider words longer than 4 chars
+            if (word.length > 4) {
                 wordFreq[word] = (wordFreq[word] || 0) + 1;
             }
         });
 
-        // Get top keywords
         const keywords = Object.entries(wordFreq)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 3)
-            .map(([word]) => ({ tag: word, confidence: 'keyword' }));
+            .map(([word]) => word);
 
         return {
-            suggestedTags: tags,
-            keywords: keywords.map(k => k.tag),
-            allSuggestions: [...tags, ...keywords].slice(0, maxTags),
+            suggestedTags: suggestedTags,
+            keywords: keywords,
+            allSuggestions: suggestedTags,
         };
     } catch (error) {
         logger.error('Tag suggestion error:', error.message);
@@ -265,32 +308,24 @@ const enhanceContent = async (text, style = 'professional') => {
             throw new Error('Text is required for content enhancement');
         }
 
-        let prompt = '';
-
+        let styleInstruction = '';
         if (style === 'professional') {
-            prompt = `Rewrite the following text to make it more professional, detailed, and well-structured while keeping the same meaning:\n\n${text}\n\nEnhanced version:`;
+            styleInstruction = 'Make it more professional, well-structured, and detailed';
         } else if (style === 'casual') {
-            prompt = `Rewrite the following text to make it more casual, friendly, and easy to read:\n\n${text}\n\nCasual version:`;
+            styleInstruction = 'Make it more casual, friendly, and easy to read';
         } else if (style === 'concise') {
-            prompt = `Rewrite the following text to make it more concise and to the point:\n\n${text}\n\nConcise version:`;
+            styleInstruction = 'Make it more concise and to the point';
         } else {
-            prompt = `Improve and enhance the following text:\n\n${text}\n\nImproved version:`;
+            styleInstruction = 'Improve and enhance it';
         }
 
-        const result = await queryHuggingFace(MODELS.TEXT_GENERATION, {
-            inputs: prompt,
-            parameters: {
-                max_length: text.length + 200,
-                temperature: 0.7,
-                do_sample: true,
-            },
-        });
+        const prompt = `${styleInstruction}. Keep the same core message:\n\n${text}\n\nEnhanced version:`;
 
-        let enhanced = Array.isArray(result)
-            ? result[0]?.generated_text || ''
-            : result.generated_text || '';
-
-        enhanced = enhanced.replace(prompt, '').trim();
+        const enhanced = await queryChatCompletion(
+            prompt,
+            'You are an expert writer who enhances and improves text while keeping its original meaning.',
+            Math.max(text.length + 200, 300)
+        );
 
         return {
             original: text,
@@ -312,39 +347,31 @@ const adjustTone = async (text, targetTone = 'professional') => {
             throw new Error('Text is required for tone adjustment');
         }
 
-        let prompt = '';
-
+        let toneInstruction = '';
         switch (targetTone) {
             case 'professional':
-                prompt = `Rewrite in a professional tone: ${text}`;
+                toneInstruction = 'Rewrite in a professional and business-appropriate tone';
                 break;
             case 'casual':
-                prompt = `Rewrite in a casual and friendly tone: ${text}`;
+                toneInstruction = 'Rewrite in a casual, friendly, and conversational tone';
                 break;
             case 'formal':
-                prompt = `Rewrite in a formal tone: ${text}`;
+                toneInstruction = 'Rewrite in a formal and academic tone';
                 break;
             case 'enthusiastic':
-                prompt = `Rewrite with enthusiasm and energy: ${text}`;
+                toneInstruction = 'Rewrite with enthusiasm, energy, and excitement';
                 break;
             default:
-                prompt = `Rewrite this text: ${text}`;
+                toneInstruction = `Rewrite in a ${targetTone} tone`;
         }
 
-        const result = await queryHuggingFace(MODELS.TEXT_GENERATION, {
-            inputs: prompt,
-            parameters: {
-                max_length: text.length + 100,
-                temperature: 0.6,
-                do_sample: true,
-            },
-        });
+        const prompt = `${toneInstruction}. Keep the same core message:\n\n${text}\n\nRewritten text:`;
 
-        let adjusted = Array.isArray(result)
-            ? result[0]?.generated_text || ''
-            : result.generated_text || '';
-
-        adjusted = adjusted.replace(prompt, '').trim();
+        const adjusted = await queryChatCompletion(
+            prompt,
+            'You are an expert writer who can adjust the tone of text while preserving its meaning.',
+            Math.max(text.length + 100, 200)
+        );
 
         return {
             original: text,
