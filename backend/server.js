@@ -73,6 +73,7 @@ app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/notes', require('./src/routes/notes'));
 app.use('/api/export', require('./src/routes/export'));
 app.use('/api/profile', require('./src/routes/profile'));
+app.use('/api/ai', require('./src/routes/ai'));
 
 // 404 handler for undefined API routes
 app.use('/api', (req, res, next) => {
