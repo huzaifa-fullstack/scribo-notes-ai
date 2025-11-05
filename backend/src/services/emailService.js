@@ -370,7 +370,7 @@ This is an automated message, please do not reply to this email.
                 <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                     <!-- Header with gradient -->
                     <tr>
-                        <td style="padding: 40px 40px 30px 40px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); border-radius: 8px 8px 0 0;">
+                        <td style="padding: 40px 40px 30px 40px; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); border-radius: 8px 8px 0 0;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; text-align: center;">
                                 ✉️ Verify Your Email
                             </h1>
@@ -389,7 +389,7 @@ This is an automated message, please do not reply to this email.
                             </p>
                             
                             <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
-                                To complete your registration and get the <strong style="color: #8b5cf6;">✓ Verified</strong> badge on your account, please verify your email address by clicking the button below:
+                                To complete your registration and get the <strong style="color: #14b8a6;">✓ Verified</strong> badge on your account, please verify your email address by clicking the button below:
                             </p>
                             
                             <!-- Verification Button -->
@@ -397,7 +397,7 @@ This is an automated message, please do not reply to this email.
                                 <tr>
                                     <td align="center">
                                         <a href="${verificationUrl}" 
-                                           style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.25);">
+                                           style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(20, 184, 166, 0.25);">
                                             Verify Email Address
                                         </a>
                                     </td>
@@ -407,7 +407,7 @@ This is an automated message, please do not reply to this email.
                             <p style="margin: 20px 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
                                 Or copy and paste this URL into your browser:
                             </p>
-                            <p style="margin: 0 0 20px 0; padding: 12px; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; color: #8b5cf6; font-size: 13px; word-break: break-all;">
+                            <p style="margin: 0 0 20px 0; padding: 12px; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; color: #14b8a6; font-size: 13px; word-break: break-all;">
                                 ${verificationUrl}
                             </p>
                             
@@ -433,7 +433,7 @@ This is an automated message, please do not reply to this email.
                         <td style="padding: 30px 40px; background-color: #f9fafb; border-radius: 0 0 8px 8px; border-top: 1px solid #e5e7eb;">
                             <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 13px; text-align: center;">
                                 Best regards,<br>
-                                <strong style="color: #8b5cf6;">The Scribo Team</strong>
+                                <strong style="color: #14b8a6;">The Scribo Team</strong>
                             </p>
                             <p style="margin: 10px 0 0 0; color: #9ca3af; font-size: 12px; text-align: center;">
                                 This is an automated message, please do not reply to this email.
@@ -496,7 +496,7 @@ The Scribo Team
             <td align="center" style="padding: 40px 0;">
                 <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                     <tr>
-                        <td style="padding: 40px 40px 30px 40px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 8px 8px 0 0;">
+                        <td style="padding: 40px 40px 30px 40px; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); border-radius: 8px 8px 0 0;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; text-align: center;">
                                 🎉 Welcome to Scribo!
                             </h1>
@@ -515,9 +515,9 @@ The Scribo Team
                             
                             <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                                 <tr>
-                                    <td style="padding: 20px; background-color: #d1fae5; border-left: 4px solid #10b981; border-radius: 4px; text-align: center;">
-                                        <p style="margin: 0; color: #065f46; font-size: 18px; line-height: 1.6; font-weight: 600;">
-                                            ✓ You now have the <span style="color: #10b981;">Verified</span> badge!
+                                    <td style="padding: 20px; background-color: #ccfbf1; border-left: 4px solid #14b8a6; border-radius: 4px; text-align: center;">
+                                        <p style="margin: 0; color: #0f766e; font-size: 18px; line-height: 1.6; font-weight: 600;">
+                                            ✓ You now have the <span style="color: #14b8a6;">Verified</span> badge!
                                         </p>
                                     </td>
                                 </tr>
@@ -531,7 +531,7 @@ The Scribo Team
                                 <tr>
                                     <td align="center">
                                         <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard" 
-                                           style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.25);">
+                                           style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(20, 184, 166, 0.25);">
                                             Go to Dashboard
                                         </a>
                                     </td>

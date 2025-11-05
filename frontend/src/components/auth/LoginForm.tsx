@@ -50,6 +50,18 @@ const LoginForm = () => {
     return () => subscription.unsubscribe();
   }, [form, error, clearError]);
 
+  // Check for account deletion flag and show success toast
+  useEffect(() => {
+    const accountDeleted = localStorage.getItem("accountDeleted");
+    if (accountDeleted === "true") {
+      localStorage.removeItem("accountDeleted");
+      toast({
+        title: "Account Deleted Successfully",
+        description: "Your account and all data have been permanently deleted.",
+      });
+    }
+  }, [toast]);
+
   const onSubmit = async (data: LoginFormData) => {
     try {
       clearError();

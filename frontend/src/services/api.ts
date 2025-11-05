@@ -39,7 +39,10 @@ api.interceptors.response.use(
         url.includes("/auth/login") ||
         url.includes("/auth/register") ||
         url.includes("/auth/google") ||
-        url.includes("/auth/callback");
+        url.includes("/auth/callback") ||
+        url.includes("/auth/verify-email") ||
+        url.includes("/auth/forgot-password") ||
+        url.includes("/auth/reset-password");
 
       // Don't logout for password change errors (incorrect current password)
       const isPasswordChange = url.includes("/profile/password");

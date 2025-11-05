@@ -14,6 +14,7 @@ import RecycleBinPage from "./pages/RecycleBinPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import { Toaster } from "./components/ui/toaster";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -158,6 +159,9 @@ function App() {
               {/* Password Reset Routes (Public) */}
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+              {/* Email Verification Route (Public - can be accessed with or without auth) */}
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
 
               {/* Protected Routes */}
               <Route

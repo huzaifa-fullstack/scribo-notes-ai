@@ -1,5 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Search, Filter, Download, Pin } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Filter,
+  Download,
+  Pin,
+  ShieldCheck,
+  X,
+  Mail,
+} from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useNotesStore } from "../store/notesStore";
 import { useAuthStore } from "../store/authStore";
@@ -28,6 +37,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { useToast } from "../components/ui/use-toast";
 import LogoutAnimation from "../components/common/LogoutAnimation";
+import { sendVerificationEmail } from "../services/profileService";
 
 const DashboardPage = () => {
   const { notes, isLoading, fetchNotes, deleteNote, togglePin, toggleArchive } =
@@ -49,6 +59,19 @@ const DashboardPage = () => {
   const [exportNoteId, setExportNoteId] = useState<string | null>(null);
   const [pinLimitDialogOpen, setPinLimitDialogOpen] = useState(false);
   const [showLogoutAnimation, setShowLogoutAnimation] = useState(false);
+  const [verificationBannerDismissed, setVerificationBannerDismissed] =
+    useState(() => {
+      // Key banner dismissal to user email AND user ID to handle account deletion/recreation
+      const dismissedFor = localStorage.getItem(
+        "verificationBannerDismissedFor"
+      );
+      const dismissedUserId = localStorage.getItem(
+        "verificationBannerDismissedUserId"
+      );
+      // Show banner if email OR user ID doesn't match (means it's a different account)
+      return dismissedFor === user?.email && dismissedUserId === user?._id;
+    });
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
   const isInitialMount = useRef(true);
 
   const isDarkMode = theme === "dark";
@@ -99,8 +122,47 @@ const DashboardPage = () => {
     setShowLogoutAnimation(true);
     setTimeout(() => {
       logout();
-    }, 3000);
+    }, 2000);
   };
+
+  const handleSendVerificationEmail = async () => {
+    setIsSendingVerification(true);
+    try {
+      await sendVerificationEmail();
+      toast({
+        title: "Verification email sent! ✉️",
+        description: "Please check your inbox and spam folder.",
+      });
+      setVerificationBannerDismissed(true);
+      if (user?.email && user?._id) {
+        localStorage.setItem("verificationBannerDismissedFor", user.email);
+        localStorage.setItem("verificationBannerDismissedUserId", user._id);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.response?.data?.error || "Failed to send verification email.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingVerification(false);
+    }
+  };
+
+  const handleDismissBanner = () => {
+    setVerificationBannerDismissed(true);
+    if (user?.email && user?._id) {
+      localStorage.setItem("verificationBannerDismissedFor", user.email);
+      localStorage.setItem("verificationBannerDismissedUserId", user._id);
+    }
+  };
+
+  const showVerificationBanner =
+    user &&
+    !user.isEmailVerified &&
+    !user.googleId &&
+    !verificationBannerDismissed;
 
   const handleTogglePin = async (id: string) => {
     const note = notes.find((n) => n._id === id);
@@ -289,6 +351,90 @@ const DashboardPage = () => {
           </div>
         </div>
       </header>
+
+      {/* Email Verification Banner */}
+      <AnimatePresence>
+        {showVerificationBanner && (
+          <div
+            className={`${
+              isDarkMode
+                ? "bg-purple-900/80 border-purple-700/50"
+                : "bg-purple-50 border-purple-200"
+            } border-b backdrop-blur-sm`}
+          >
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div
+                    className={`flex-shrink-0 p-2 rounded-lg ${
+                      isDarkMode ? "bg-purple-800/50" : "bg-white/80"
+                    }`}
+                  >
+                    <ShieldCheck
+                      className={`h-5 w-5 ${
+                        isDarkMode ? "text-purple-400" : "text-purple-600"
+                      }`}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`text-sm font-semibold ${
+                        isDarkMode ? "text-purple-100" : "text-purple-900"
+                      }`}
+                    >
+                      Verify your email to unlock all features
+                    </p>
+                    <p
+                      className={`text-xs mt-0.5 ${
+                        isDarkMode ? "text-purple-300" : "text-purple-700"
+                      }`}
+                    >
+                      Get the verified badge and enable password changes
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    onClick={handleSendVerificationEmail}
+                    disabled={isSendingVerification}
+                    size="sm"
+                    className={`${
+                      isDarkMode
+                        ? "bg-purple-600 hover:bg-purple-700 text-white"
+                        : "bg-purple-600 hover:bg-purple-700 text-white"
+                    } font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50`}
+                  >
+                    {isSendingVerification ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="h-3.5 w-3.5 mr-1" />
+                        Verify Now
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleDismissBanner}
+                    size="sm"
+                    variant="ghost"
+                    className={`${
+                      isDarkMode
+                        ? "hover:bg-purple-800/50 text-purple-300"
+                        : "hover:bg-purple-100 text-purple-600"
+                    } transition-colors`}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
