@@ -100,24 +100,20 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
-        className={`sm:max-w-[600px] p-6 ${
+        className={`sm:max-w-[600px] ${
           isDarkMode
             ? "bg-gray-900 border-gray-700"
             : "bg-white border-gray-200"
         }`}
       >
         <DialogHeader className="mb-4">
-          <DialogTitle
-            className={`text-xl font-semibold ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
+          <DialogTitle className={isDarkMode ? "text-white" : "text-gray-900"}>
             Edit Note
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="title"
@@ -133,12 +129,12 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
                   <FormControl>
                     <Input
                       placeholder="Enter note title"
-                      className={`h-11 ${
+                      maxLength={60}
+                      className={
                         isDarkMode
                           ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-teal-500"
                           : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
-                      }`}
-                      maxLength={60}
+                      }
                       {...field}
                     />
                   </FormControl>
@@ -203,11 +199,11 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
                   <FormControl>
                     <Input
                       placeholder="work, ideas, personal (comma separated)"
-                      className={`h-11 ${
+                      className={
                         isDarkMode
                           ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-teal-500"
                           : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
-                      }`}
+                      }
                       {...field}
                     />
                   </FormControl>
@@ -216,24 +212,28 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
               )}
             />
 
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end space-x-2 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={isLoading}
-                className={`transition-all duration-300 ${
+                className={
                   isDarkMode
-                    ? "bg-gray-800 hover:bg-gray-700 border-gray-600 text-gray-200 hover:text-white"
+                    ? "bg-gray-800 hover:bg-gray-700 border-gray-600 text-gray-300"
                     : "bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900"
-                }`}
+                }
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={
+                  isDarkMode
+                    ? "bg-teal-600 hover:bg-teal-700 text-white"
+                    : "bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white"
+                }
               >
                 {isLoading ? (
                   <>

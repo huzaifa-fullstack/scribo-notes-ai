@@ -486,11 +486,7 @@ const DashboardPage = () => {
             {!filterArchived && (
               <Button
                 onClick={() => setCreateModalOpen(true)}
-                className={`px-3 sm:px-5 text-sm ${
-                  isDarkMode
-                    ? "bg-teal-600 hover:bg-teal-700 text-white border-0"
-                    : "bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white border-0"
-                } transition-all duration-300 hover:scale-105 font-medium whitespace-nowrap`}
+                className="px-3 sm:px-5 text-sm bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white border-0 transition-all duration-300 hover:scale-105 font-medium whitespace-nowrap"
               >
                 <Plus className="h-4 w-4 mr-0" />
                 New Note

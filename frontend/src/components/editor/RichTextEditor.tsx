@@ -162,6 +162,16 @@ const RichTextEditor = ({
   };
 
   const handleSummarize = async (text: string) => {
+    // Client-side validation for minimum word count
+    const wordCount = text.trim().split(/\s+/).length;
+    if (wordCount < 20 || text.length < 100) {
+      toast.error(
+        `Text is too short to summarize. Please provide at least 20 words. Current: ${wordCount} words`
+      );
+      setIsProcessing(false);
+      return;
+    }
+
     const result = await aiService.summarizeText({ text });
     setIsProcessing(false);
     setAiResult({

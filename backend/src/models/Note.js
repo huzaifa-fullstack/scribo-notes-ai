@@ -11,7 +11,7 @@ const NoteSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Note content is required'],
         trim: true,
-        maxlength: [10000, 'Content cannot be more than 10000 characters']
+        maxlength: [50000, 'Content cannot be more than 50000 characters']
     },
     category: {
         type: String,
@@ -22,7 +22,7 @@ const NoteSchema = new mongoose.Schema({
     tags: [{
         type: String,
         trim: true,
-        maxlength: [30, 'Tag cannot be more than 30 characters']
+        maxlength: [50, 'Tag cannot be more than 50 characters']
     }],
     isPinned: {
         type: Boolean,

@@ -207,24 +207,20 @@ const SlidingAuthPage = () => {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="relative w-full max-w-5xl md:h-[600px] h-[900px] bg-white dark:bg-white rounded-2xl shadow-2xl overflow-hidden">
-        {/* Sliding Panel - Animated Gradient Background */}
+      <style>{`@media (min-width: 766px) and (max-width: 805px) {
+          .good-see-heading { text-align: center !important; }
+        }`}</style>
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="relative w-full max-w-5xl md:h-[600px] h-[900px] bg-white dark:bg-white rounded-2xl shadow-2xl overflow-hidden"
+      >
+        {/* Sliding Panel - Animated Gradient Background (use responsive classes, avoid window.innerWidth) */}
         <div
-          className="absolute md:top-0 top-0 md:w-1/2 md:h-full w-full h-1/2 overflow-hidden transition-all duration-700 ease-in-out z-10"
-          style={{
-            left:
-              typeof window !== "undefined" && window.innerWidth < 768
-                ? "0"
-                : isSignIn
-                ? "0"
-                : "50%",
-            top:
-              typeof window !== "undefined" && window.innerWidth < 768
-                ? isSignIn
-                  ? "0"
-                  : "50%"
-                : "0",
-          }}
+          className={`absolute md:top-0 ${
+            isSignIn ? "top-0 md:left-0" : "top-1/2 md:left-1/2"
+          } md:w-1/2 md:h-full w-full h-1/2 overflow-hidden transition-all duration-700 ease-in-out z-10`}
         >
           {/* Gradient 1: Sign In state (teal-800 → teal-500) */}
           <div
@@ -254,7 +250,7 @@ const SlidingAuthPage = () => {
 
             {isSignIn ? (
               <>
-                <h2 className="md:text-4xl text-2xl font-bold mb-4">
+                <h2 className="md:text-4xl text-2xl font-bold mb-4 good-see-heading">
                   Good to See You!
                 </h2>
                 <p className="text-center text-white/90 md:mb-8 mb-6 max-w-xs text-sm md:text-base">
@@ -290,11 +286,11 @@ const SlidingAuthPage = () => {
         <div
           className={`absolute md:top-0 md:w-1/2 md:h-full w-full h-1/2 transition-all duration-700 ease-in-out ${
             isSignIn
-              ? "md:right-0 md:opacity-100 top-1/2 opacity-100" // mobile: below teal
-              : "md:right-full md:opacity-0 top-full opacity-0"
+              ? "md:right-0 md:top-1/2 md:-translate-y-1/2 md:opacity-100 top-1/2 -translate-y-1/2 opacity-100"
+              : "md:right-full md:top-0 md:translate-y-0 md:opacity-0 top-full translate-y-0 opacity-0"
           }`}
         >
-          <div className="h-full flex flex-col items-center justify-center md:p-12 p-6">
+          <div className="h-full flex flex-col items-center justify-center md:p-12 p-6 md:translate-y-4 translate-y-46">
             <h2 className="md:text-3xl text-2xl font-bold text-teal-500 mb-2">
               Sign in to Scribo
             </h2>
@@ -528,7 +524,7 @@ const SlidingAuthPage = () => {
             </form>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

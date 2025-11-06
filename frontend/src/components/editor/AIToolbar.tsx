@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import {
   Sparkles,
   Check,
@@ -97,47 +96,38 @@ const AIToolbar = ({
           disabled={isProcessing}
           className={`relative group ${
             isDarkMode
-              ? "hover:bg-purple-900/20 hover:text-purple-400"
-              : "hover:bg-purple-50 hover:text-purple-600"
+              ? "text-gray-400 hover:bg-gray-700 hover:text-gray-300"
+              : "text-gray-600 hover:bg-gray-200 hover:text-gray-700"
           }`}
         >
           {isProcessing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <>
+              <Loader2 className="h-4 w-4 mr-0 animate-spin" />
+              <span className="ml-1 text-xs font-medium">AI</span>
+            </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4" />
-              <motion.div
-                className="absolute inset-0 rounded-md"
-                initial={false}
-                animate={{
-                  boxShadow: isOpen
-                    ? isDarkMode
-                      ? "0 0 20px rgba(168, 85, 247, 0.4)"
-                      : "0 0 20px rgba(147, 51, 234, 0.3)"
-                    : "none",
-                }}
-                transition={{ duration: 0.2 }}
-              />
+              <Sparkles className="h-4 w-4 mr-0" />
+              <span className="ml-1 text-xs font-medium">AI</span>
             </>
           )}
-          <span className="ml-1.5 text-xs font-medium">AI</span>
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
         align="start"
-        className={`w-64 ${
+        className={`w-56 ${
           isDarkMode
             ? "bg-gray-800 border-gray-700"
             : "bg-white border-gray-200"
         }`}
       >
         <DropdownMenuLabel
-          className={`flex items-center gap-2 ${
+          className={`flex items-center gap-1.5 text-xs py-1.5 ${
             isDarkMode ? "text-purple-400" : "text-purple-600"
           }`}
         >
-          <Sparkles className="h-4 w-4" />
+          <Sparkles className="h-3.5 w-3.5" />
           AI Assistant
         </DropdownMenuLabel>
         <DropdownMenuSeparator
@@ -146,22 +136,21 @@ const AIToolbar = ({
 
         {selectedText && (
           <div
-            className={`px-2 py-1.5 mb-1 text-xs ${
+            className={`px-2 py-1 mb-0.5 text-[10px] leading-tight ${
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
-            ✨ {selectedText.length} characters selected (will process selected
-            text only)
+            ✨ {selectedText.length} chars selected
           </div>
         )}
 
         {!selectedText && (
           <div
-            className={`px-2 py-1.5 mb-1 text-xs ${
+            className={`px-2 py-1 mb-0.5 text-[10px] leading-tight ${
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
-            💡 Tip: Will process all content (or select text first)
+            💡 Will process all content
           </div>
         )}
 
@@ -172,27 +161,27 @@ const AIToolbar = ({
             <DropdownMenuItem
               key={action.id}
               onClick={() => handleAction(action.id)}
-              className={`flex items-start gap-3 py-2.5 cursor-pointer ${
+              className={`flex items-start gap-2 py-1.5 cursor-pointer ${
                 isDarkMode
                   ? "hover:bg-gray-700 focus:bg-gray-700"
                   : "hover:bg-gray-100 focus:bg-gray-100"
               }`}
             >
               <Icon
-                className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                className={`h-3.5 w-3.5 mt-0.5 flex-shrink-0 ${
                   isDarkMode ? "text-purple-400" : "text-purple-600"
                 }`}
               />
               <div className="flex-1 min-w-0">
                 <div
-                  className={`font-medium text-sm ${
+                  className={`font-medium text-xs leading-tight ${
                     isDarkMode ? "text-gray-200" : "text-gray-900"
                   }`}
                 >
                   {action.label}
                 </div>
                 <div
-                  className={`text-xs mt-0.5 ${
+                  className={`text-[10px] mt-0.5 leading-tight ${
                     isDarkMode ? "text-gray-400" : "text-gray-600"
                   }`}
                 >

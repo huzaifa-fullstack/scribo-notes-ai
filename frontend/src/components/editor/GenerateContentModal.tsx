@@ -50,15 +50,15 @@ const GenerateContentModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent
-        className={`max-w-xl ${
+        className={`max-w-xl max-h-[90vh] overflow-y-auto ${
           isDarkMode
             ? "bg-gray-900 border-gray-700"
             : "bg-white border-gray-200"
         }`}
       >
-        <DialogHeader>
+        <DialogHeader className="space-y-3">
           <DialogTitle
-            className={`flex items-center gap-2 ${
+            className={`flex items-center gap-2 text-lg ${
               isDarkMode ? "text-purple-400" : "text-purple-600"
             }`}
           >
@@ -66,18 +66,22 @@ const GenerateContentModal = ({
             Generate Content with AI
           </DialogTitle>
           <DialogDescription
-            className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+            className={`${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            } text-sm leading-relaxed`}
           >
             Provide a brief context and let AI create detailed content for you
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-2">
           {/* Context Input */}
           <div className="space-y-2">
             <Label
               htmlFor="context"
-              className={isDarkMode ? "text-gray-300" : "text-gray-700"}
+              className={`text-sm font-medium ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}
             >
               What do you want to write about?
             </Label>
@@ -175,13 +179,13 @@ const GenerateContentModal = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 pt-4 border-t border-gray-700">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t border-gray-700">
           <Button
             type="button"
             variant="outline"
             onClick={handleClose}
             disabled={isProcessing}
-            className={`${
+            className={`w-full sm:w-auto ${
               isDarkMode
                 ? "border-gray-600 hover:bg-gray-800 text-gray-300"
                 : ""
@@ -193,16 +197,16 @@ const GenerateContentModal = ({
             type="button"
             onClick={handleGenerate}
             disabled={!context.trim() || isProcessing}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white"
           >
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-0 animate-spin" />
                 Generating...
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Sparkles className="h-4 w-4 mr-0" />
                 Generate
               </>
             )}
