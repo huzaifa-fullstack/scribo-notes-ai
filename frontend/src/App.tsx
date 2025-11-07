@@ -4,7 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "./store/authStore";
 import SlidingAuthPage from "./components/auth/SlidingAuthPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -87,10 +87,17 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const { getCurrentUser, isLoading } = useAuthStore();
+  const [minLoadingTime, setMinLoadingTime] = useState(true);
 
   useEffect(() => {
     // Check if user is authenticated on app load
-    getCurrentUser();
+    const startTime = Date.now();
+    getCurrentUser().then(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 2000 - elapsed);
+      // Wait remaining time to ensure minimum 2s loading display
+      setTimeout(() => setMinLoadingTime(false), remaining);
+    });
   }, [getCurrentUser]);
 
   const AppLoader = () => {
@@ -120,7 +127,7 @@ function App() {
 
   return (
     <ThemeProvider>
-      {isLoading ? (
+      {isLoading || minLoadingTime ? (
         <AppLoader />
       ) : (
         <Router>

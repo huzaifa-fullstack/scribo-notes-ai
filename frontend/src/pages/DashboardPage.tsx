@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { useToast } from "../components/ui/use-toast";
+import LogoutAnimation from "../components/common/LogoutAnimation";
 
 const DashboardPage = () => {
   const { notes, isLoading, fetchNotes, deleteNote, togglePin, toggleArchive } =
@@ -47,12 +48,19 @@ const DashboardPage = () => {
   const [exportImportModalOpen, setExportImportModalOpen] = useState(false);
   const [exportNoteId, setExportNoteId] = useState<string | null>(null);
   const [pinLimitDialogOpen, setPinLimitDialogOpen] = useState(false);
+  const [showLogoutAnimation, setShowLogoutAnimation] = useState(false);
   const isInitialMount = useRef(true);
 
   const isDarkMode = theme === "dark";
 
   useEffect(() => {
-    fetchNotes();
+    const startTime = Date.now();
+    fetchNotes().then(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 2000 - elapsed);
+      // Wait remaining time to ensure minimum 2s loading display
+      return new Promise((resolve) => setTimeout(resolve, remaining));
+    });
   }, [fetchNotes]);
 
   const handleEdit = (note: Note) => {
@@ -85,6 +93,13 @@ const DashboardPage = () => {
       setDeleteDialogOpen(false);
       setNoteToDelete(null);
     }
+  };
+
+  const handleLogout = () => {
+    setShowLogoutAnimation(true);
+    setTimeout(() => {
+      logout();
+    }, 3000);
   };
 
   const handleTogglePin = async (id: string) => {
@@ -258,7 +273,7 @@ const DashboardPage = () => {
             <div className="flex items-center gap-2 flex-shrink-0">
               <UserDropdown />
               <Button
-                onClick={logout}
+                onClick={handleLogout}
                 variant="outline"
                 className={`${
                   isDarkMode
@@ -596,6 +611,9 @@ const DashboardPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Logout Animation */}
+      <LogoutAnimation isVisible={showLogoutAnimation} />
     </div>
   );
 };
