@@ -64,15 +64,15 @@ const ToneAdjustmentModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={`max-w-xl ${
+        className={`max-w-xl max-h-[90vh] overflow-y-auto ${
           isDarkMode
             ? "bg-gray-900 border-gray-700"
             : "bg-white border-gray-200"
         }`}
       >
-        <DialogHeader>
+        <DialogHeader className="space-y-3">
           <DialogTitle
-            className={`flex items-center gap-2 ${
+            className={`flex items-center gap-2 text-lg ${
               isDarkMode ? "text-purple-400" : "text-purple-600"
             }`}
           >
@@ -80,16 +80,22 @@ const ToneAdjustmentModal = ({
             Adjust Tone
           </DialogTitle>
           <DialogDescription
-            className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+            className={`${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            } text-sm leading-relaxed`}
           >
             Choose how you want your text to sound
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-2">
           {/* Selected Text Preview */}
           <div className="space-y-2">
-            <Label className={isDarkMode ? "text-gray-300" : "text-gray-700"}>
+            <Label
+              className={`text-sm font-medium ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
               Selected Text
             </Label>
             <div
@@ -144,13 +150,13 @@ const ToneAdjustmentModal = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 pt-4 border-t border-gray-700">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t border-gray-700">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
             disabled={isProcessing}
-            className={`${
+            className={`w-full sm:w-auto ${
               isDarkMode
                 ? "border-gray-600 hover:bg-gray-800 text-gray-300"
                 : ""
@@ -162,16 +168,16 @@ const ToneAdjustmentModal = ({
             type="button"
             onClick={handleAdjust}
             disabled={isProcessing}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white"
           >
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-0 animate-spin" />
                 Adjusting...
               </>
             ) : (
               <>
-                <MessageSquare className="h-4 w-4 mr-2" />
+                <MessageSquare className="h-4 w-4 mr-0" />
                 Adjust Tone
               </>
             )}

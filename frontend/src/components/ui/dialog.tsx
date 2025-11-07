@@ -74,7 +74,7 @@ function DialogContent({
     >
       {showCloseButton && (
         <button
-          className={`absolute top-2 right-2 z-50 rounded-full p-1 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:pointer-events-none ${
+          className={`absolute top-2 right-1 sm:right-2 z-50 rounded-full p-1 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:pointer-events-none ${
             isDarkMode
               ? "text-red-400 hover:text-red-300 hover:bg-red-500/20"
               : "text-red-600 hover:text-red-700 hover:bg-red-100"

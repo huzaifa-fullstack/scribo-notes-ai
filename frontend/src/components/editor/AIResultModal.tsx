@@ -239,15 +239,15 @@ const AIResultModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={`max-w-2xl max-h-[85vh] overflow-hidden flex flex-col ${
+        className={`max-w-2xl max-h-[90vh] overflow-hidden flex flex-col ${
           isDarkMode
             ? "bg-gray-900 border-gray-700"
             : "bg-white border-gray-200"
         }`}
       >
-        <DialogHeader>
+        <DialogHeader className="space-y-3">
           <DialogTitle
-            className={`flex items-center gap-2 ${
+            className={`flex items-center gap-2 text-lg ${
               isDarkMode ? "text-purple-400" : "text-purple-600"
             }`}
           >
@@ -255,45 +255,49 @@ const AIResultModal = ({
             {title}
           </DialogTitle>
           <DialogDescription
-            className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+            className={`${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            } text-sm leading-relaxed`}
           >
             Review the AI suggestion and choose to accept or reject
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto py-4">{renderContent()}</div>
+        <div className="flex-1 overflow-y-auto py-2">{renderContent()}</div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-700">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-4 border-t border-gray-700">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={handleCopy}
-            className={isDarkMode ? "text-gray-400 hover:text-gray-200" : ""}
+            className={`w-full sm:w-auto ${
+              isDarkMode ? "text-gray-400 hover:text-gray-200" : ""
+            }`}
           >
-            <Copy className="h-4 w-4 mr-2" />
+            <Copy className="h-4 w-4 mr-1" />
             Copy
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <Button
               type="button"
               variant="outline"
               onClick={onReject}
-              className={`${
+              className={`w-full sm:w-auto ${
                 isDarkMode
                   ? "border-gray-600 hover:bg-gray-800 text-gray-300"
                   : ""
               }`}
             >
-              <X className="h-4 w-4 mr-2" />
+              <X className="h-4 w-4 mr-0" />
               Reject
             </Button>
             <Button
               type="button"
               onClick={onAccept}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white"
             >
-              <Check className="h-4 w-4 mr-2" />
+              <Check className="h-4 w-4 mr-0" />
               Accept
             </Button>
           </div>

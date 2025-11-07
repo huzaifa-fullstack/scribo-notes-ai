@@ -174,8 +174,15 @@ const summarizeText = async (text, maxLength = 150) => {
             throw new Error('Text is required for summarization');
         }
 
+        // Count words for better validation
+        const wordCount = text.trim().split(/\s+/).length;
+
         if (text.length < 100) {
-            throw new Error('Text is too short to summarize (minimum 100 characters)');
+            throw new Error(`Text is too short to summarize. Please provide at least 100 characters (minimum 20 words). Current: ${wordCount} words`);
+        }
+
+        if (wordCount < 20) {
+            throw new Error(`Text is too short to summarize. Please provide at least 20 words. Current: ${wordCount} words`);
         }
 
         const prompt = `Summarize the following text in a concise way (around ${maxLength} words):\n\n${text}\n\nSummary:`;

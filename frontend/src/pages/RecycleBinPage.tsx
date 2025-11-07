@@ -381,9 +381,16 @@ const RecycleBinPage = () => {
                             <div className="flex items-start justify-between">
                               <div className="flex-1 min-w-0">
                                 <h3
-                                  className={`font-semibold text-lg ${
+                                  className={`font-semibold text-lg overflow-hidden text-ellipsis line-clamp-1 ${
                                     isDarkMode ? "text-white" : "text-gray-900"
-                                  } truncate`}
+                                  }`}
+                                  style={{
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 1,
+                                    WebkitBoxOrient: "vertical",
+                                    wordBreak: "break-all",
+                                  }}
+                                  title={note.title}
                                 >
                                   {note.title}
                                 </h3>
