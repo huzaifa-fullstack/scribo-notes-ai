@@ -360,6 +360,7 @@ const DashboardPage = () => {
       />
 
       <EditNoteModal
+        key={selectedNote?._id || "new"}
         open={editModalOpen}
         note={selectedNote}
         onClose={() => {
