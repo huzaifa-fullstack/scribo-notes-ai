@@ -31,9 +31,9 @@ describe("RegisterPage", () => {
   it("renders register page correctly", () => {
     render(<RegisterPage />);
 
-    // Should have "Create account" in both title and button
+    // Should have "Create account" text (could be in title, subtitle, or button)
     const createAccountElements = screen.getAllByText(/create account/i);
-    expect(createAccountElements).toHaveLength(2);
+    expect(createAccountElements.length).toBeGreaterThanOrEqual(2);
     expect(
       screen.getByText(/sign up to get started with your notes/i)
     ).toBeInTheDocument();

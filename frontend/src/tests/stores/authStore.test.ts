@@ -92,7 +92,7 @@ describe("Auth Store", () => {
   });
 
   describe("logout", () => {
-    it("should logout successfully", () => {
+    it("should logout successfully", async () => {
       useAuthStore.setState({
         user: { _id: "1", name: "Test", email: "test@test.com" } as any,
         token: "token",
@@ -100,6 +100,9 @@ describe("Auth Store", () => {
       });
 
       useAuthStore.getState().logout();
+
+      // Wait for the setTimeout in logout (300ms)
+      await new Promise((resolve) => setTimeout(resolve, 350));
 
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
