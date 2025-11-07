@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - develop
-      - 'feature/**'
+      - "feature/**"
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -13,29 +13,29 @@ jobs:
   sonarcloud:
     name: SonarCloud Code Analysis
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for better analysis
-      
+          fetch-depth: 0 # Shallow clones should be disabled for better analysis
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-      
+          node-version: "20"
+          cache: "npm"
+
       - name: Install Backend Dependencies
         working-directory: ./backend
         run: npm ci
         continue-on-error: true
-      
+
       - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: npm ci
         continue-on-error: true
-      
+
       - name: Run Backend Tests with Coverage
         working-directory: ./backend
         run: npm run test:coverage
@@ -44,12 +44,12 @@ jobs:
           MONGODB_URI: mongodb://localhost:27017/notes-app-test
           JWT_SECRET: test-jwt-secret-for-ci
         continue-on-error: true
-      
+
       - name: Run Frontend Tests with Coverage
         working-directory: ./frontend
         run: npm run test:coverage
         continue-on-error: true
-      
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
