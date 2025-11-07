@@ -8,15 +8,18 @@ const logger = require('../config/logger');
  */
 exports.correctGrammar = async (req, res) => {
     try {
+        logger.info('Grammar correction endpoint called');
         const { text } = req.body;
 
         if (!text) {
+            logger.warn('No text provided for grammar correction');
             return res.status(400).json({
                 success: false,
                 message: 'Text is required',
             });
         }
 
+        logger.info(`Processing grammar correction for text length: ${text.length}`);
         const result = await aiService.correctGrammar(text);
 
         res.status(200).json({
@@ -24,7 +27,10 @@ exports.correctGrammar = async (req, res) => {
             data: result,
         });
     } catch (error) {
-        logger.error('Grammar correction controller error:', error.message);
+        logger.error('Grammar correction controller error:', {
+            message: error.message,
+            stack: error.stack,
+        });
         res.status(500).json({
             success: false,
             message: error.message || 'Failed to correct grammar',
@@ -123,6 +129,10 @@ exports.suggestTags = async (req, res) => {
             data: result,
         });
     } catch (error) {
+        console.error('Tag suggestion controller error:');
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+
         logger.error('Tag suggestion controller error:', error.message);
         res.status(500).json({
             success: false,
