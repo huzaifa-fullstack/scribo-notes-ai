@@ -155,6 +155,14 @@ const CreateNoteModal = ({ open, onClose }: CreateNoteModalProps) => {
                       content={field.value}
                       onChange={field.onChange}
                       placeholder="Write your note here..."
+                      onTagsSuggested={(tags) => {
+                        const currentTagsStr = form.getValues("tags") || "";
+                        const currentTags = currentTagsStr
+                          ? currentTagsStr.split(",").map((t) => t.trim())
+                          : [];
+                        const newTags = [...new Set([...currentTags, ...tags])];
+                        form.setValue("tags", newTags.join(", "));
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

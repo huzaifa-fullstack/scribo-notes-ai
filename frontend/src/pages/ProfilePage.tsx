@@ -839,15 +839,6 @@ const ProfilePage = () => {
                   <CardTitle className={`text-lg ${themeClasses.cardTitle}`}>
                     Security
                   </CardTitle>
-                  {user?.googleId && (
-                    <span
-                      className={`text-xs ${
-                        isDarkMode ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
-                      (Not available for Google sign-ins)
-                    </span>
-                  )}
                 </div>
               </CardHeader>
               <CardContent>
