@@ -8,7 +8,10 @@ const {
     logout,
     googleCallback,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    sendVerificationEmail,
+    verifyEmail,
+    resendVerificationEmail
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
@@ -21,6 +24,11 @@ router.post('/login', login);
 // Password reset routes (public)
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+
+// Email verification routes
+router.post('/send-verification', protect, sendVerificationEmail); // Protected - user must be logged in
+router.get('/verify-email/:token', verifyEmail); // Public - can verify from email link
+router.post('/resend-verification', protect, resendVerificationEmail); // Protected - user must be logged in
 
 // Google OAuth routes
 router.get(

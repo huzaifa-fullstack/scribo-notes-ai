@@ -282,6 +282,290 @@ The Scribo Team
             return { success: false };
         }
     }
+
+    /**
+     * Send email verification email with verification link
+     * @param {string} email - Recipient email address
+     * @param {string} verificationToken - Email verification token
+     * @param {string} userName - User's name for personalization
+     */
+    async sendVerificationEmail(email, verificationToken, userName) {
+        try {
+            if (!this.mailgun) {
+                throw new Error('Mailgun is not configured. Please check your environment variables.');
+            }
+
+            // Construct verification URL
+            const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
+
+            const messageData = {
+                from: `${process.env.MAILGUN_FROM_NAME || 'Scribo Notes'} <${process.env.MAILGUN_FROM_EMAIL || `noreply@${this.domain}`}>`,
+                to: email,
+                subject: 'Verify Your Email Address - Scribo',
+                text: this.getVerificationEmailTextTemplate(userName, verificationUrl),
+                html: this.getVerificationEmailHtmlTemplate(userName, verificationUrl),
+            };
+
+            const response = await this.mailgun.messages.create(this.domain, messageData);
+
+            logger.info(`Email verification sent to: ${email}`, { messageId: response.id });
+            return { success: true, message: 'Verification email sent successfully' };
+        } catch (error) {
+            logger.error('Mailgun email error:', error);
+
+            if (error.response) {
+                logger.error('Mailgun error response status:', error.response.status);
+                logger.error('Mailgun error response body:', error.response.body);
+            }
+
+            if (error.message) {
+                logger.error('Mailgun error message:', error.message);
+            }
+
+            throw new Error('Failed to send verification email. Please try again later.');
+        }
+    }
+
+    /**
+     * Plain text template for email verification
+     */
+    getVerificationEmailTextTemplate(userName, verificationUrl) {
+        return `
+Hello ${userName},
+
+Thank you for signing up with Scribo! We're excited to have you on board.
+
+To complete your registration and get the verified badge on your account, please verify your email address by clicking the link below:
+
+${verificationUrl}
+
+This link will expire in 24 hours for security reasons.
+
+If you did not create an account with Scribo, please ignore this email.
+
+Best regards,
+The Scribo Team
+
+---
+This is an automated message, please do not reply to this email.
+        `.trim();
+    }
+
+    /**
+     * HTML template for email verification
+     */
+    getVerificationEmailHtmlTemplate(userName, verificationUrl) {
+        return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                    <!-- Header with gradient -->
+                    <tr>
+                        <td style="padding: 40px 40px 30px 40px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); border-radius: 8px 8px 0 0;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; text-align: center;">
+                                ✉️ Verify Your Email
+                            </h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Content -->
+                    <tr>
+                        <td style="padding: 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                Hello <strong>${userName}</strong>,
+                            </p>
+                            
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                Thank you for signing up with <strong>Scribo</strong>! We're excited to have you on board. 🎉
+                            </p>
+                            
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                To complete your registration and get the <strong style="color: #8b5cf6;">✓ Verified</strong> badge on your account, please verify your email address by clicking the button below:
+                            </p>
+                            
+                            <!-- Verification Button -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="${verificationUrl}" 
+                                           style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.25);">
+                                            Verify Email Address
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 20px 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                                Or copy and paste this URL into your browser:
+                            </p>
+                            <p style="margin: 0 0 20px 0; padding: 12px; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; color: #8b5cf6; font-size: 13px; word-break: break-all;">
+                                ${verificationUrl}
+                            </p>
+                            
+                            <!-- Info Box -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                                <tr>
+                                    <td style="padding: 16px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                                        <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+                                            ⏰ <strong>Note:</strong> This verification link will expire in <strong>24 hours</strong> for security reasons.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 20px 0 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                                If you did not create an account with Scribo, please ignore this email.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-radius: 0 0 8px 8px; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 13px; text-align: center;">
+                                Best regards,<br>
+                                <strong style="color: #8b5cf6;">The Scribo Team</strong>
+                            </p>
+                            <p style="margin: 10px 0 0 0; color: #9ca3af; font-size: 12px; text-align: center;">
+                                This is an automated message, please do not reply to this email.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <!-- Footer Text -->
+                <p style="margin: 20px 0 0 0; color: #9ca3af; font-size: 12px; text-align: center;">
+                    © ${new Date().getFullYear()} Scribo. All rights reserved.
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+        `.trim();
+    }
+
+    /**
+     * Send welcome email after successful verification
+     * @param {string} email - Recipient email address
+     * @param {string} userName - User's name
+     */
+    async sendWelcomeEmail(email, userName) {
+        try {
+            if (!this.mailgun) {
+                logger.warn('Mailgun not configured, skipping welcome email');
+                return { success: false };
+            }
+
+            const messageData = {
+                from: `${process.env.MAILGUN_FROM_NAME || 'Scribo Notes'} <${process.env.MAILGUN_FROM_EMAIL || `noreply@${this.domain}`}>`,
+                to: email,
+                subject: 'Welcome to Scribo - Email Verified! ✓',
+                text: `
+Hello ${userName},
+
+Congratulations! Your email has been successfully verified. 🎉
+
+You now have the verified badge on your account, which helps build trust and security.
+
+Start exploring Scribo and create your first note today!
+
+Best regards,
+The Scribo Team
+                `.trim(),
+                html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Scribo</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                    <tr>
+                        <td style="padding: 40px 40px 30px 40px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 8px 8px 0 0;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; text-align: center;">
+                                🎉 Welcome to Scribo!
+                            </h1>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td style="padding: 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                Hello <strong>${userName}</strong>,
+                            </p>
+                            
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                Congratulations! Your email has been successfully verified. 🎉
+                            </p>
+                            
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                                <tr>
+                                    <td style="padding: 20px; background-color: #d1fae5; border-left: 4px solid #10b981; border-radius: 4px; text-align: center;">
+                                        <p style="margin: 0; color: #065f46; font-size: 18px; line-height: 1.6; font-weight: 600;">
+                                            ✓ You now have the <span style="color: #10b981;">Verified</span> badge!
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                This badge helps build trust and security for your account. You're all set to explore Scribo and create your first note today!
+                            </p>
+                            
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard" 
+                                           style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.25);">
+                                            Go to Dashboard
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-radius: 0 0 8px 8px; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0; color: #6b7280; font-size: 13px; text-align: center;">
+                                Best regards,<br>
+                                <strong style="color: #14b8a6;">The Scribo Team</strong>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+                `.trim(),
+            };
+
+            const response = await this.mailgun.messages.create(this.domain, messageData);
+            logger.info(`Welcome email sent to: ${email}`, { messageId: response.id });
+            return { success: true };
+        } catch (error) {
+            logger.error('Failed to send welcome email:', error);
+            // Don't throw error for welcome email - it's not critical
+            return { success: false };
+        }
+    }
 }
 
 module.exports = new EmailService();

@@ -382,13 +382,229 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+// @desc    Send email verification link
+// @route   POST /api/auth/send-verification
+// @access  Private
+const sendVerificationEmail = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Check if email is already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email is already verified'
+      });
+    }
+
+    // Check if user is Google OAuth user
+    if (user.googleId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Google OAuth accounts are automatically verified'
+      });
+    }
+
+    // Generate verification token
+    const verificationToken = user.getEmailVerificationToken();
+    await user.save();
+
+    logger.info(`Verification token generated for user: ${user.email}`);
+
+    // Send verification email
+    try {
+      await emailService.sendVerificationEmail(user.email, verificationToken, user.name);
+
+      logger.info(`Verification email sent successfully to: ${user.email}`);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Verification email sent successfully. Please check your inbox.'
+      });
+    } catch (emailError) {
+      // If email fails, clear the verification token
+      user.emailVerificationToken = undefined;
+      user.emailVerificationExpire = undefined;
+      await user.save();
+
+      logger.error(`Failed to send verification email to: ${user.email}`, emailError);
+
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to send verification email. Please try again later.'
+      });
+    }
+  } catch (error) {
+    logger.error('Send verification email error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error. Please try again later.'
+    });
+  }
+};
+
+// @desc    Verify email with token
+// @route   GET /api/auth/verify-email/:token
+// @access  Public
+const verifyEmail = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+
+    logger.info('Email verification attempt with token');
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        error: 'Verification token is required'
+      });
+    }
+
+    // Hash the token from URL to compare with stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with valid verification token that hasn't expired
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      logger.warn('Invalid or expired verification token');
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid or expired verification token. Please request a new verification email.'
+      });
+    }
+
+    // Mark email as verified
+    user.isEmailVerified = true;
+
+    // Clear verification token fields
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpire = undefined;
+
+    await user.save();
+
+    logger.info(`Email successfully verified for user: ${user.email}`);
+
+    // Send welcome email (don't wait for it, send in background)
+    emailService.sendWelcomeEmail(user.email, user.name)
+      .catch(err => logger.error('Failed to send welcome email:', err));
+
+    return res.status(200).json({
+      success: true,
+      message: 'Email verified successfully! You now have the verified badge.',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
+  } catch (error) {
+    logger.error('Verify email error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error. Please try again later.'
+    });
+  }
+};
+
+// @desc    Resend verification email
+// @route   POST /api/auth/resend-verification
+// @access  Private
+const resendVerificationEmail = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Check if email is already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email is already verified'
+      });
+    }
+
+    // Check if user is Google OAuth user
+    if (user.googleId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Google OAuth accounts are automatically verified'
+      });
+    }
+
+    // Check if a verification token already exists and is still valid
+    if (user.emailVerificationToken && user.emailVerificationExpire > Date.now()) {
+      const timeLeft = Math.ceil((user.emailVerificationExpire - Date.now()) / 1000 / 60);
+      logger.info(`Valid verification token already exists for: ${user.email}, expires in ${timeLeft} minutes`);
+    }
+
+    // Generate new verification token (overwrites any existing one)
+    const verificationToken = user.getEmailVerificationToken();
+    await user.save();
+
+    logger.info(`New verification token generated for user: ${user.email}`);
+
+    // Send verification email
+    try {
+      await emailService.sendVerificationEmail(user.email, verificationToken, user.name);
+
+      logger.info(`Verification email resent successfully to: ${user.email}`);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Verification email sent successfully. Please check your inbox.'
+      });
+    } catch (emailError) {
+      // If email fails, clear the verification token
+      user.emailVerificationToken = undefined;
+      user.emailVerificationExpire = undefined;
+      await user.save();
+
+      logger.error(`Failed to resend verification email to: ${user.email}`, emailError);
+
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to send verification email. Please try again later.'
+      });
+    }
+  } catch (error) {
+    logger.error('Resend verification email error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error. Please try again later.'
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
   updateProfile,
   logout,
-  googleCallback,  // Add this
+  googleCallback,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  sendVerificationEmail,
+  verifyEmail,
+  resendVerificationEmail
 };
