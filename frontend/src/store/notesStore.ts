@@ -15,7 +15,9 @@ export const useNotesStore = create<NotesStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await api.get("/notes?archived=true");
+          // Fetch ALL notes (active + archived) without pagination
+          // Backend will return all notes, client-side handles display logic
+          const response = await api.get("/notes?limit=1000&archived=true");
           set({
             notes: response.data.notes || response.data.data || [],
             isLoading: false,
@@ -107,10 +109,9 @@ export const useNotesStore = create<NotesStore>()(
           const response = await api.delete(`/notes/${id}`);
           const deletedNote = response.data.data || response.data.note;
 
+          // Remove from notes array since it's deleted
           set((state) => ({
-            notes: state.notes.map((note) =>
-              note._id === id ? deletedNote : note
-            ),
+            notes: state.notes.filter((note) => note._id !== id),
             // add to recycleNotes if not present
             recycleNotes: [
               deletedNote,
@@ -138,12 +139,8 @@ export const useNotesStore = create<NotesStore>()(
           const restoredNote = response.data.data || response.data.note;
 
           set((state) => ({
-            // if note exists in notes list, update it; otherwise prepend
-            notes: state.notes.some((n) => n._id === id)
-              ? state.notes.map((note) =>
-                  note._id === id ? restoredNote : note
-                )
-              : [restoredNote, ...state.notes],
+            // Add restored note to notes array
+            notes: [restoredNote, ...state.notes.filter((n) => n._id !== id)],
             // remove from recycleNotes
             recycleNotes: state.recycleNotes.filter((note) => note._id !== id),
             isLoading: false,
@@ -214,6 +211,15 @@ export const useNotesStore = create<NotesStore>()(
               note._id === id ? updatedNote : note
             ),
           }));
+
+          // Refetch all notes to ensure consistency
+          // This is important because pinned notes affect pagination
+          const fetchResponse = await api.get(
+            "/notes?limit=1000&archived=true"
+          );
+          set({
+            notes: fetchResponse.data.notes || fetchResponse.data.data || [],
+          });
         } catch (error: any) {
           const errorMessage =
             error.response?.data?.error || "Failed to toggle pin";
@@ -232,6 +238,15 @@ export const useNotesStore = create<NotesStore>()(
               note._id === id ? updatedNote : note
             ),
           }));
+
+          // Refetch all notes to ensure consistency
+          // This is important because archived status affects which view shows the note
+          const fetchResponse = await api.get(
+            "/notes?limit=1000&archived=true"
+          );
+          set({
+            notes: fetchResponse.data.notes || fetchResponse.data.data || [],
+          });
         } catch (error: any) {
           const errorMessage =
             error.response?.data?.error || "Failed to toggle archive";
