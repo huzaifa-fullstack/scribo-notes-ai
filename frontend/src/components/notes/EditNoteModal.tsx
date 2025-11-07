@@ -96,7 +96,7 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] p-6">
+      <DialogContent className="sm:max-w-[600px] p-6 bg-white">
         <DialogHeader className="mb-4">
           <DialogTitle className="text-xl font-semibold">Edit Note</DialogTitle>
         </DialogHeader>
