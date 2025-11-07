@@ -56,10 +56,11 @@ const SettingsPage = () => {
     try {
       setIsDeleting(true);
       await deleteAccount();
-      toast({
-        title: "Account Deleted",
-        description: "Your account has been permanently deleted.",
-      });
+
+      // Set flag in localStorage to show toast on login page
+      localStorage.setItem("accountDeleted", "true");
+
+      // Immediate logout and redirect
       logout();
       navigate("/login");
     } catch (error: any) {
@@ -69,7 +70,6 @@ const SettingsPage = () => {
           error.response?.data?.message || "Failed to delete account",
         variant: "destructive",
       });
-    } finally {
       setIsDeleting(false);
     }
   };

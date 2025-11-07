@@ -19,6 +19,8 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  ShieldCheck,
+  AlertCircle,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useNotesStore } from "../store/notesStore";
@@ -47,6 +49,7 @@ import {
   updateProfile,
   changePassword,
   uploadAvatar,
+  sendVerificationEmail,
 } from "../services/profileService";
 import LogoutAnimation from "../components/common/LogoutAnimation";
 
@@ -90,6 +93,7 @@ const ProfilePage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showLogoutAnimation, setShowLogoutAnimation] = useState(false);
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
 
   const isDarkMode = theme === "dark";
 
@@ -254,6 +258,34 @@ const ProfilePage = () => {
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleSendVerificationEmail = async () => {
+    setIsSendingVerification(true);
+    try {
+      await sendVerificationEmail();
+      toast({
+        title: "Verification email sent! ✉️",
+        description: "Please check your inbox and spam folder.",
+      });
+    } catch (error: any) {
+      // Check if already verified
+      if (error.response?.data?.error?.includes("already verified")) {
+        toast({
+          title: "Email already verified",
+          description: "Your email is already verified!",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description:
+            error.response?.data?.error || "Failed to send verification email.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsSendingVerification(false);
+    }
   };
 
   const getInitials = (name: string) => {
@@ -491,11 +523,11 @@ const ProfilePage = () => {
                     />
                   </div>
 
-                  {/* Email - Read Only */}
+                  {/* Email - Read Only with Verification Badge */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="email"
-                      className={`flex items-center gap-2 ${themeClasses.labelText} font-semibold`}
+                      className={`flex items-center gap-2 ${themeClasses.labelText} font-semibold flex-wrap`}
                     >
                       <Mail className={`h-4 w-4 ${themeClasses.iconColor}`} />
                       Email Address
@@ -506,6 +538,31 @@ const ProfilePage = () => {
                       >
                         (Cannot be changed)
                       </span>
+                      {user?.isEmailVerified ? (
+                        <span
+                          className={`hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                            isDarkMode
+                              ? "bg-emerald-900/50 text-emerald-300 border border-emerald-700"
+                              : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          }`}
+                        >
+                          <ShieldCheck className="h-3 w-3" />
+                          Verified
+                        </span>
+                      ) : (
+                        !user?.googleId && (
+                          <span
+                            className={`hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                              isDarkMode
+                                ? "bg-amber-900/50 text-amber-300 border border-amber-700"
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                            }`}
+                          >
+                            <AlertCircle className="h-3 w-3" />
+                            Not Verified
+                          </span>
+                        )
+                      )}
                     </Label>
                     <Input
                       id="email"
@@ -690,7 +747,7 @@ const ProfilePage = () => {
           </div>
 
           {/* Right Column - Account Stats & Info */}
-          <div className="space-y-6">
+          <div className="space-y-[1.5rem]">
             {/* Account Information */}
             <Card
               className={`${themeClasses.card} shadow-lg hover:shadow-xl transition-shadow duration-300 border`}
@@ -704,7 +761,7 @@ const ProfilePage = () => {
                   Account Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-8 flex-1">
+              <CardContent className="space-y-8.5 flex-1">
                 <div className="flex items-start gap-3">
                   <Calendar
                     className={`h-5 w-5 ${themeClasses.statIcon} mt-0.5`}
@@ -795,21 +852,109 @@ const ProfilePage = () => {
               </CardHeader>
               <CardContent>
                 {!isChangingPassword ? (
-                  <Button
-                    variant="outline"
-                    className={`w-full justify-start ${themeClasses.button} ${
-                      themeClasses.buttonHover
-                    } transition-colors duration-300 ${
-                      user?.googleId ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    onClick={() =>
-                      !user?.googleId && setIsChangingPassword(true)
-                    }
-                    disabled={!!user?.googleId}
-                  >
-                    <Shield className="h-4 w-4 mr-1" />
-                    Change Password
-                  </Button>
+                  <div className="space-y-3">
+                    <Button
+                      variant="outline"
+                      className={`w-full justify-start ${themeClasses.button} ${
+                        themeClasses.buttonHover
+                      } transition-colors duration-300 ${
+                        user?.googleId ||
+                        (!user?.isEmailVerified && !user?.googleId)
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        !user?.googleId &&
+                        user?.isEmailVerified &&
+                        setIsChangingPassword(true)
+                      }
+                      disabled={
+                        !!user?.googleId ||
+                        (!user?.isEmailVerified && !user?.googleId)
+                      }
+                    >
+                      <Shield className="h-4 w-4 mr-1" />
+                      Change Password
+                    </Button>
+
+                    {/* Verification Required Notice */}
+                    {!user?.isEmailVerified && !user?.googleId && (
+                      <div className="space-y-3">
+                        <div
+                          className={`p-3 rounded-lg border ${
+                            isDarkMode
+                              ? "bg-amber-900/20 border-amber-700/50"
+                              : "bg-amber-50 border-amber-200"
+                          }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            <AlertCircle
+                              className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                                isDarkMode ? "text-amber-400" : "text-amber-600"
+                              }`}
+                            />
+                            <div>
+                              <p
+                                className={`text-sm font-medium ${
+                                  isDarkMode
+                                    ? "text-amber-300"
+                                    : "text-amber-800"
+                                }`}
+                              >
+                                Email verification required
+                              </p>
+                              <p
+                                className={`text-xs mt-1 ${
+                                  isDarkMode
+                                    ? "text-amber-400"
+                                    : "text-amber-700"
+                                }`}
+                              >
+                                Please verify your email address below to enable
+                                password changes. This security measure helps
+                                protect your account.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Email Verification Button */}
+                        <Button
+                          onClick={handleSendVerificationEmail}
+                          disabled={isSendingVerification}
+                          className={`w-full justify-start ${
+                            isDarkMode
+                              ? "bg-purple-700 hover:bg-purple-800 text-white border-0"
+                              : "bg-purple-600 hover:bg-purple-700 text-white border-0"
+                          } transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 font-medium`}
+                        >
+                          {isSendingVerification ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                              Sending verification email...
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="h-4 w-4 mr-1" />
+                              Verify Email Address
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Google OAuth Notice */}
+                    {user?.googleId && (
+                      <p
+                        className={`text-xs ${
+                          isDarkMode ? "text-gray-400" : "text-gray-500"
+                        }`}
+                      >
+                        You signed in with Google, so password management is
+                        handled by Google.
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <Form {...passwordForm}>
                     <form

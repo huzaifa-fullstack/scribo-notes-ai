@@ -89,3 +89,21 @@ export const deleteAccount = async () => {
   const response = await api.delete("/profile/account");
   return response.data;
 };
+
+// Send email verification email
+export const sendVerificationEmail = async () => {
+  const response = await api.post("/auth/send-verification");
+  return response.data;
+};
+
+// Verify email with token
+export const verifyEmail = async (token: string) => {
+  const response = await api.get(`/auth/verify-email/${token}`);
+  return response.data;
+};
+
+// Resend verification email
+export const resendVerificationEmail = async () => {
+  const response = await api.post("/auth/resend-verification");
+  return response.data;
+};

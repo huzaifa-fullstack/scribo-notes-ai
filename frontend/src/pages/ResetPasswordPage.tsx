@@ -142,9 +142,9 @@ const ResetPasswordPage = () => {
     input: isDarkMode
       ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
       : "bg-white border-gray-200 text-gray-900 placeholder:text-gray-500",
-    gradient: isDarkMode
-      ? "from-teal-400 to-cyan-400"
-      : "from-teal-600 to-cyan-600",
+    buttonBg: isDarkMode
+      ? "bg-teal-600 hover:bg-teal-700"
+      : "bg-teal-600 hover:bg-teal-700",
     iconColor: isDarkMode ? "text-teal-400" : "text-teal-600",
     errorBox: isDarkMode
       ? "bg-red-900/30 border-red-700"
@@ -193,7 +193,7 @@ const ResetPasswordPage = () => {
               <div className="space-y-3">
                 <Link to="/forgot-password">
                   <Button
-                    className={`w-full bg-gradient-to-r ${themeClasses.gradient} hover:opacity-90 text-white`}
+                    className={`w-full ${themeClasses.buttonBg} text-white`}
                   >
                     Request New Reset Link
                   </Button>
@@ -384,7 +384,7 @@ const ResetPasswordPage = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full h-12 bg-gradient-to-r ${themeClasses.gradient} hover:opacity-90 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50`}
+                className={`w-full h-12 ${themeClasses.buttonBg} text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50`}
               >
                 {isLoading ? (
                   <>

@@ -74,6 +74,19 @@ const SlidingAuthPage = () => {
     }
   }, [isSignIn, searchParams, setSearchParams]);
 
+  // Check for account deletion flag and show success toast
+  useEffect(() => {
+    const accountDeleted = localStorage.getItem("accountDeleted");
+    if (accountDeleted === "true") {
+      localStorage.removeItem("accountDeleted");
+      // Also clear verification banner flag for the deleted account
+      localStorage.removeItem("verificationBannerDismissedFor");
+      toast.success("Account Deleted Successfully", {
+        description: "Your account and all data have been permanently deleted.",
+      });
+    }
+  }, []);
+
   // Helper: switch to sign in deterministically
   const switchToSignIn = () => {
     setIsSignIn(true);

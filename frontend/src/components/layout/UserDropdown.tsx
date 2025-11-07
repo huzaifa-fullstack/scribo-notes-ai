@@ -107,16 +107,18 @@ const UserDropdown = () => {
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p
-              className={`text-sm font-medium ${
+              className={`text-sm font-medium truncate ${
                 isDarkMode ? "text-white" : "text-gray-900"
               }`}
+              title={user?.name}
             >
               {user?.name}
             </p>
             <p
-              className={`text-xs ${
+              className={`text-xs truncate ${
                 isDarkMode ? "text-gray-400" : "text-gray-500"
               }`}
+              title={user?.email}
             >
               {user?.email}
             </p>
