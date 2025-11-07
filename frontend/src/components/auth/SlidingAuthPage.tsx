@@ -197,7 +197,7 @@ const SlidingAuthPage = () => {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="relative w-full max-w-5xl md:h-[600px] h-[900px] bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-5xl md:h-[600px] h-[900px] bg-white dark:bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Sliding Panel - Animated Gradient Background */}
         <div
           className="absolute md:top-0 top-0 md:w-1/2 md:h-full w-full h-1/2 overflow-hidden transition-all duration-700 ease-in-out z-10"
@@ -296,11 +296,11 @@ const SlidingAuthPage = () => {
             >
               <div>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400 dark:text-gray-400" />
                   <input
                     type="email"
                     placeholder="Email"
-                    className="w-full md:pl-12 md:pr-4 pl-10 pr-4 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base"
+                    className="w-full md:pl-12 md:pr-4 pl-10 pr-4 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base text-gray-900 placeholder:text-gray-400 dark:text-gray-900 dark:placeholder:text-gray-400"
                     {...loginForm.register("email")}
                   />
                 </div>
@@ -313,11 +313,11 @@ const SlidingAuthPage = () => {
 
               <div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400 dark:text-gray-400" />
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
-                    className="w-full md:pl-12 md:pr-12 pl-10 pr-10 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base"
+                    className="w-full md:pl-12 md:pr-12 pl-10 pr-10 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base text-gray-900 placeholder:text-gray-400 dark:text-gray-900 dark:placeholder:text-gray-400"
                     {...loginForm.register("password")}
                   />
                   <button
@@ -326,9 +326,9 @@ const SlidingAuthPage = () => {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="md:w-5 md:h-5 w-4 h-4 text-gray-400 hover:text-gray-600" />
+                      <EyeOff className="md:w-5 md:h-5 w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-400" />
                     ) : (
-                      <Eye className="md:w-5 md:h-5 w-4 h-4 text-gray-400 hover:text-gray-600" />
+                      <Eye className="md:w-5 md:h-5 w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-400" />
                     )}
                   </button>
                 </div>
@@ -390,11 +390,11 @@ const SlidingAuthPage = () => {
             >
               <div>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400 dark:text-gray-400" />
                   <input
                     type="text"
                     placeholder="Full Name"
-                    className="w-full md:pl-12 md:pr-4 pl-10 pr-4 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base"
+                    className="w-full md:pl-12 md:pr-4 pl-10 pr-4 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base text-gray-900 placeholder:text-gray-400 dark:text-gray-900 dark:placeholder:text-gray-400"
                     {...registerForm.register("name")}
                   />
                 </div>
@@ -407,11 +407,11 @@ const SlidingAuthPage = () => {
 
               <div>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400 dark:text-gray-400" />
                   <input
                     type="email"
                     placeholder="Email"
-                    className="w-full md:pl-12 md:pr-4 pl-10 pr-4 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base"
+                    className="w-full md:pl-12 md:pr-4 pl-10 pr-4 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base text-gray-900 placeholder:text-gray-400 dark:text-gray-900 dark:placeholder:text-gray-400"
                     {...registerForm.register("email")}
                   />
                 </div>
@@ -424,11 +424,11 @@ const SlidingAuthPage = () => {
 
               <div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400 dark:text-gray-400" />
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
-                    className="w-full md:pl-12 md:pr-12 pl-10 pr-10 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base"
+                    className="w-full md:pl-12 md:pr-12 pl-10 pr-10 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base text-gray-900 placeholder:text-gray-400 dark:text-gray-900 dark:placeholder:text-gray-400"
                     {...registerForm.register("password")}
                   />
                   <button
@@ -437,9 +437,9 @@ const SlidingAuthPage = () => {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="md:w-5 md:h-5 w-4 h-4 text-gray-400 hover:text-gray-600" />
+                      <EyeOff className="md:w-5 md:h-5 w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-400" />
                     ) : (
-                      <Eye className="md:w-5 md:h-5 w-4 h-4 text-gray-400 hover:text-gray-600" />
+                      <Eye className="md:w-5 md:h-5 w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-400" />
                     )}
                   </button>
                 </div>
@@ -452,11 +452,11 @@ const SlidingAuthPage = () => {
 
               <div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 md:w-5 md:h-5 w-4 h-4 text-gray-400 dark:text-gray-400" />
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm Password"
-                    className="w-full md:pl-12 md:pr-12 pl-10 pr-10 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base"
+                    className="w-full md:pl-12 md:pr-12 pl-10 pr-10 md:py-3 py-2.5 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm md:text-base text-gray-900 placeholder:text-gray-400 dark:text-gray-900 dark:placeholder:text-gray-400"
                     {...registerForm.register("confirmPassword")}
                   />
                   <button
