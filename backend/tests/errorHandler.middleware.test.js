@@ -16,12 +16,12 @@ describe('Error Handler Middleware Tests', () => {
             query: {},
             ip: '127.0.0.1'
         };
-        
+
         res = {
             status: sinon.stub().returnsThis(),
             json: sinon.stub().returnsThis()
         };
-        
+
         next = sinon.stub();
     });
 

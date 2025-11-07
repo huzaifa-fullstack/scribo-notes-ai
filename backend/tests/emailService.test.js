@@ -24,10 +24,10 @@ describe('Email Service Tests', () => {
     });
 
     describe('sendVerificationEmail', () => {
-        it('should send verification email with correct parameters', async function() {
+        it('should send verification email with correct parameters', async function () {
             // Skip in test environment to avoid actual email sending
             if (!isMailgunConfigured || process.env.NODE_ENV === 'test') return this.skip();
-            
+
             const email = 'test@example.com';
             const name = 'Test User';
             const verificationToken = 'test-token-123';
@@ -42,7 +42,7 @@ describe('Email Service Tests', () => {
             }
         });
 
-        it('should handle missing email parameter', async function() {
+        it('should handle missing email parameter', async function () {
             try {
                 await emailService.sendVerificationEmail(null, 'Test', 'token');
                 expect.fail('Should have thrown an error');
@@ -51,10 +51,10 @@ describe('Email Service Tests', () => {
             }
         });
 
-        it('should include verification link in email', async function() {
+        it('should include verification link in email', async function () {
             // Skip in test environment to avoid actual email sending
             if (!isMailgunConfigured || process.env.NODE_ENV === 'test') return this.skip();
-            
+
             const email = 'test@example.com';
             const token = 'verify-123';
 
