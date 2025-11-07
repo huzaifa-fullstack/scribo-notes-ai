@@ -77,3 +77,15 @@ export const getUserStats = async () => {
   );
   return response.data;
 };
+
+// Delete all notes
+export const deleteAllNotes = async () => {
+  const response = await api.delete("/profile/notes");
+  return response.data;
+};
+
+// Delete account
+export const deleteAccount = async () => {
+  const response = await api.delete("/profile/account");
+  return response.data;
+};

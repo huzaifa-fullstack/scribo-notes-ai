@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { useAuthStore } from "../store/authStore";
+import { useNotesStore } from "../store/notesStore";
 import UserDropdown from "../components/layout/UserDropdown";
 import {
   Card,
@@ -25,12 +26,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../components/ui/alert-dialog";
+import { deleteAllNotes, deleteAccount } from "../services/profileService";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { logout } = useAuthStore();
+  const { clearNotes } = useNotesStore();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDarkModeToggle = (checked: boolean) => {
     setIsDarkMode(checked);
@@ -41,22 +45,61 @@ const SettingsPage = () => {
     });
   };
 
-  const handleDeleteAccount = () => {
-    // TODO: Implement account deletion
-    toast({
-      title: "Account Deletion",
-      description: "This feature will be implemented with backend integration.",
-      variant: "destructive",
-    });
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+
+      // Clear local storage
+      clearNotes();
+
+      toast({
+        title: "Account Deleted",
+        description: "Your account and all data have been permanently deleted.",
+      });
+
+      // Logout and redirect to home
+      setTimeout(() => {
+        logout();
+        navigate("/");
+      }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.response?.data?.error ||
+          "Failed to delete account. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
-  const handleDeleteAllNotes = () => {
-    // TODO: Implement delete all notes
-    toast({
-      title: "Delete All Notes",
-      description: "This feature will be implemented with backend integration.",
-      variant: "destructive",
-    });
+  const handleDeleteAllNotes = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteAllNotes();
+
+      // Clear notes from local state
+      clearNotes();
+
+      toast({
+        title: "All Notes Deleted",
+        description:
+          result.message || "All your notes have been permanently deleted.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.response?.data?.error ||
+          "Failed to delete notes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -106,20 +149,22 @@ const SettingsPage = () => {
       >
         <div className="space-y-6">
           {/* Appearance */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Appearance</CardTitle>
+          <Card className="border-teal-100/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader className="border-b border-teal-100/30">
+              <CardTitle className="text-lg text-teal-700">
+                Appearance
+              </CardTitle>
               <CardDescription>
                 Customize how the app looks and feels
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-4 bg-teal-50/30 rounded-lg border border-teal-200/50 hover:border-teal-300 transition-colors duration-300">
                 <div className="flex items-center gap-3">
                   {isDarkMode ? (
-                    <Moon className="h-5 w-5 text-gray-700" />
+                    <Moon className="h-5 w-5 text-teal-700" />
                   ) : (
-                    <Sun className="h-5 w-5 text-gray-700" />
+                    <Sun className="h-5 w-5 text-teal-700" />
                   )}
                   <div>
                     <p className="font-medium text-gray-900">Dark Mode</p>
@@ -131,23 +176,25 @@ const SettingsPage = () => {
                 <Switch
                   checked={isDarkMode}
                   onCheckedChange={handleDarkModeToggle}
-                  className="data-[state=unchecked]:bg-gray-200 data-[state=checked]:bg-gray-900"
+                  className="data-[state=unchecked]:bg-gray-200 data-[state=checked]:bg-teal-600"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Danger Zone */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-600">Danger Zone</CardTitle>
+          <Card className="border-red-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader className="border-b border-red-200/50">
+              <CardTitle className="text-lg text-red-600">
+                Danger Zone
+              </CardTitle>
               <CardDescription>
                 Irreversible actions - proceed with caution
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Delete All Notes */}
-              <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="flex items-center justify-between p-4 bg-red-50/50 rounded-lg border border-red-200/50 hover:border-red-300 transition-colors duration-300">
                 <div className="flex items-center gap-3">
                   <Trash2 className="h-5 w-5 text-red-600" />
                   <div>
@@ -163,7 +210,8 @@ const SettingsPage = () => {
                   <AlertDialogTrigger asChild>
                     <Button
                       size="sm"
-                      className="bg-red-600 text-white hover:bg-red-700"
+                      disabled={isDeleting}
+                      className="bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
                     >
                       Delete All Notes
                     </Button>
@@ -179,12 +227,15 @@ const SettingsPage = () => {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel disabled={isDeleting}>
+                        Cancel
+                      </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAllNotes}
-                        className="bg-red-600 hover:bg-red-700 text-white"
+                        disabled={isDeleting}
+                        className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
                       >
-                        Yes, Delete All Notes
+                        {isDeleting ? "Deleting..." : "Yes, Delete All Notes"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -192,7 +243,7 @@ const SettingsPage = () => {
               </div>
 
               {/* Delete Account */}
-              <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="flex items-center justify-between p-4 bg-red-50/50 rounded-lg border border-red-200/50 hover:border-red-300 transition-colors duration-300">
                 <div className="flex items-center gap-3">
                   <Trash2 className="h-5 w-5 text-red-600" />
                   <div>
@@ -205,8 +256,9 @@ const SettingsPage = () => {
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
-                      className="bg-red-600 hover:bg-red-700 text-white"
+                      className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
                       size="sm"
+                      disabled={isDeleting}
                     >
                       Delete Account
                     </Button>
@@ -223,12 +275,15 @@ const SettingsPage = () => {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel disabled={isDeleting}>
+                        Cancel
+                      </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
-                        className="bg-red-600 hover:bg-red-700 text-white"
+                        disabled={isDeleting}
+                        className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
                       >
-                        Yes, Delete My Account
+                        {isDeleting ? "Deleting..." : "Yes, Delete My Account"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

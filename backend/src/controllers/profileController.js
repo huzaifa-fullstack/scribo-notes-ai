@@ -384,3 +384,81 @@ exports.getUserStats = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * @desc    Delete all user notes
+ * @route   DELETE /api/profile/notes
+ * @access  Private
+ */
+exports.deleteAllNotes = async (req, res, next) => {
+    try {
+        // Delete all notes belonging to the user (including deleted ones)
+        const result = await Note.deleteMany({ user: req.user.id });
+
+        logger.info(`User ${req.user.email} deleted all ${result.deletedCount} notes`);
+
+        res.status(200).json({
+            success: true,
+            message: `Successfully deleted ${result.deletedCount} notes`,
+            data: {
+                deletedCount: result.deletedCount
+            }
+        });
+    } catch (error) {
+        logger.error('Delete all notes error:', error);
+        next(error);
+    }
+};
+
+/**
+ * @desc    Delete user account and all associated data
+ * @route   DELETE /api/profile/account
+ * @access  Private
+ */
+exports.deleteAccount = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // Delete user's avatar from Cloudinary if exists
+        if (user.avatar && user.avatar.includes('cloudinary.com')) {
+            const publicId = extractPublicId(user.avatar);
+            if (publicId) {
+                try {
+                    await deleteImage(publicId);
+                    logger.info(`Avatar deleted from Cloudinary during account deletion: ${publicId}`);
+                } catch (error) {
+                    logger.warn(`Failed to delete avatar from Cloudinary: ${error.message}`);
+                    // Continue even if Cloudinary deletion fails
+                }
+            }
+        }
+
+        // Delete all user's notes
+        const notesResult = await Note.deleteMany({ user: req.user.id });
+        logger.info(`Deleted ${notesResult.deletedCount} notes for user: ${user.email}`);
+
+        // Delete the user account
+        await User.findByIdAndDelete(req.user.id);
+
+        logger.info(`User account deleted: ${user.email}`);
+
+        res.status(200).json({
+            success: true,
+            message: 'Account and all associated data deleted successfully',
+            data: {
+                notesDeleted: notesResult.deletedCount
+            }
+        });
+    } catch (error) {
+        logger.error('Delete account error:', error);
+        next(error);
+    }
+};
+

@@ -6,7 +6,9 @@ const {
     changePassword,
     uploadAvatar,
     deleteAvatar,
-    getUserStats
+    getUserStats,
+    deleteAllNotes,
+    deleteAccount
 } = require('../controllers/profileController');
 const { protect } = require('../middleware/auth');
 
@@ -28,5 +30,9 @@ router.route('/avatar')
 
 // User statistics
 router.get('/stats', getUserStats);
+
+// Settings - Danger Zone
+router.delete('/notes', deleteAllNotes);  // Delete all notes
+router.delete('/account', deleteAccount);  // Delete account
 
 module.exports = router;
