@@ -3,10 +3,11 @@ name: SonarCloud Analysis
 on:
   push:
     branches:
-      - main
       - develop
       - "feature/**"
   pull_request:
+    branches:
+      - develop
     types: [opened, synchronize, reopened]
 
 jobs:
@@ -24,16 +25,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
       - name: Install Backend Dependencies
         working-directory: ./backend
-        run: npm ci
+        run: npm install
         continue-on-error: true
 
       - name: Install Frontend Dependencies
         working-directory: ./frontend
-        run: npm ci
+        run: npm install
         continue-on-error: true
 
       - name: Run Backend Tests with Coverage
