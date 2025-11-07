@@ -73,39 +73,7 @@ const NoteSchema = new mongoose.Schema({
     lastModified: {
         type: Date,
         default: Date.now
-    },
-    reminder: {
-        date: {
-            type: Date,
-            default: null
-        },
-        isActive: {
-            type: Boolean,
-            default: false
-        }
-    },
-    attachments: [{
-        filename: {
-            type: String,
-            required: true
-        },
-        originalName: {
-            type: String,
-            required: true
-        },
-        mimetype: {
-            type: String,
-            required: true
-        },
-        size: {
-            type: Number,
-            required: true
-        },
-        uploadDate: {
-            type: Date,
-            default: Date.now
-        }
-    }]
+    }
 }, {
     timestamps: true
 });

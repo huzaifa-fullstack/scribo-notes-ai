@@ -1,3 +1,4 @@
+const { expect } = require('chai');
 const request = require('supertest');
 const app = require('../server');
 const Note = require('../src/models/Note');
@@ -9,7 +10,11 @@ describe('Recycle Bin API Tests', () => {
     let userId;
     let noteId;
 
-    beforeAll(async () => {
+    before(async () => {
+        // Clean up existing test data
+        await User.deleteMany({ email: 'recycleBinTest@test.com' });
+        await Note.deleteMany({});
+
         // Create test user
         const user = await User.create({
             name: 'Test User',
@@ -19,18 +24,11 @@ describe('Recycle Bin API Tests', () => {
         });
         userId = user._id;
 
-        // Login to get token
-        const loginRes = await request(app)
-            .post('/api/auth/login')
-            .send({
-                email: 'recycleBinTest@test.com',
-                password: 'Test123!@#'
-            });
-
-        authToken = loginRes.body.data.token;
+        // Get token from user model
+        authToken = user.getSignedJwtToken();
     });
 
-    afterAll(async () => {
+    after(async () => {
         // Cleanup test data
         await Note.deleteMany({ user: userId });
         await User.findByIdAndDelete(userId);
@@ -46,9 +44,9 @@ describe('Recycle Bin API Tests', () => {
                     content: 'This note will be deleted and restored'
                 });
 
-            expect(res.status).toBe(201);
-            expect(res.body.success).toBe(true);
-            expect(res.body.data).toHaveProperty('_id');
+            expect(res.status).to.equal(201);
+            expect(res.body.success).to.equal(true);
+            expect(res.body.data).to.have.property('_id');
             noteId = res.body.data._id;
         });
     });
@@ -59,11 +57,11 @@ describe('Recycle Bin API Tests', () => {
                 .delete(`/api/notes/${noteId}`)
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(200);
-            expect(res.body.success).toBe(true);
-            expect(res.body.message).toContain('recycle bin');
-            expect(res.body.data.isDeleted).toBe(true);
-            expect(res.body.data.deletedAt).toBeDefined();
+            expect(res.status).to.equal(200);
+            expect(res.body.success).to.equal(true);
+            expect(res.body.message).to.include('recycle bin');
+            expect(res.body.data.isDeleted).to.equal(true);
+            expect(res.body.data.deletedAt).to.exist;
         });
 
         it('should not show deleted note in regular notes list', async () => {
@@ -71,9 +69,9 @@ describe('Recycle Bin API Tests', () => {
                 .get('/api/notes')
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(200);
+            expect(res.status).to.equal(200);
             const deletedNote = res.body.data.find(note => note._id === noteId);
-            expect(deletedNote).toBeUndefined();
+            expect(deletedNote).to.be.undefined;
         });
 
         it('should return 404 for non-existent note', async () => {
@@ -82,8 +80,8 @@ describe('Recycle Bin API Tests', () => {
                 .delete(`/api/notes/${fakeId}`)
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(404);
-            expect(res.body.success).toBe(false);
+            expect(res.status).to.equal(404);
+            expect(res.body.success).to.equal(false);
         });
 
         it('should not allow deleting another user\'s note', async () => {
@@ -106,8 +104,8 @@ describe('Recycle Bin API Tests', () => {
                 .delete(`/api/notes/${otherNote._id}`)
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(403);
-            expect(res.body.success).toBe(false);
+            expect(res.status).to.equal(403);
+            expect(res.body.success).to.equal(false);
 
             // Cleanup
             await Note.findByIdAndDelete(otherNote._id);
@@ -121,14 +119,14 @@ describe('Recycle Bin API Tests', () => {
                 .get('/api/notes/recycle-bin')
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(200);
-            expect(res.body.success).toBe(true);
-            expect(res.body.data).toBeInstanceOf(Array);
-            expect(res.body.data.length).toBeGreaterThan(0);
+            expect(res.status).to.equal(200);
+            expect(res.body.success).to.equal(true);
+            expect(res.body.data).to.be.an.instanceOf(Array);
+            expect(res.body.data.length).to.be.greaterThan(0);
 
             const deletedNote = res.body.data.find(note => note._id === noteId);
-            expect(deletedNote).toBeDefined();
-            expect(deletedNote.isDeleted).toBe(true);
+            expect(deletedNote).to.exist;
+            expect(deletedNote.isDeleted).to.equal(true);
         });
 
         it('should support pagination', async () => {
@@ -147,10 +145,10 @@ describe('Recycle Bin API Tests', () => {
                 .get('/api/notes/recycle-bin?page=1&limit=3')
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(200);
-            expect(res.body.data.length).toBeLessThanOrEqual(3);
-            expect(res.body.page).toBe(1);
-            expect(res.body.pages).toBeGreaterThanOrEqual(1);
+            expect(res.status).to.equal(200);
+            expect(res.body.data.length).to.be.at.most(3);
+            expect(res.body.page).to.equal(1);
+            expect(res.body.pages).to.be.at.least(1);
         });
     });
 
@@ -160,11 +158,11 @@ describe('Recycle Bin API Tests', () => {
                 .put(`/api/notes/${noteId}/restore`)
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(200);
-            expect(res.body.success).toBe(true);
-            expect(res.body.message).toContain('restored');
-            expect(res.body.data.isDeleted).toBe(false);
-            expect(res.body.data.deletedAt).toBeNull();
+            expect(res.status).to.equal(200);
+            expect(res.body.success).to.equal(true);
+            expect(res.body.message).to.include('restored');
+            expect(res.body.data.isDeleted).to.equal(false);
+            expect(res.body.data.deletedAt).to.be.null;
         });
 
         it('should show restored note in regular notes list', async () => {
@@ -172,10 +170,10 @@ describe('Recycle Bin API Tests', () => {
                 .get('/api/notes')
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(200);
+            expect(res.status).to.equal(200);
             const restoredNote = res.body.data.find(note => note._id === noteId);
-            expect(restoredNote).toBeDefined();
-            expect(restoredNote.isDeleted).toBe(false);
+            expect(restoredNote).to.exist;
+            expect(restoredNote.isDeleted).to.equal(false);
         });
 
         it('should return 404 for non-existent note', async () => {
@@ -184,8 +182,8 @@ describe('Recycle Bin API Tests', () => {
                 .put(`/api/notes/${fakeId}/restore`)
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(404);
-            expect(res.body.success).toBe(false);
+            expect(res.status).to.equal(404);
+            expect(res.body.success).to.equal(false);
         });
 
         it('should return error if note is not in recycle bin', async () => {
@@ -194,9 +192,9 @@ describe('Recycle Bin API Tests', () => {
                 .put(`/api/notes/${noteId}/restore`)
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(400);
-            expect(res.body.success).toBe(false);
-            expect(res.body.error).toContain('not in recycle bin');
+            expect(res.status).to.equal(400);
+            expect(res.body.success).to.equal(false);
+            expect(res.body.error).to.include('not in recycle bin');
         });
     });
 
@@ -220,13 +218,13 @@ describe('Recycle Bin API Tests', () => {
                 .delete(`/api/notes/${noteToDelete}/permanent`)
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(200);
-            expect(res.body.success).toBe(true);
-            expect(res.body.message).toContain('permanently deleted');
+            expect(res.status).to.equal(200);
+            expect(res.body.success).to.equal(true);
+            expect(res.body.message).to.include('permanently deleted');
 
             // Verify note is completely removed from database
             const note = await Note.findById(noteToDelete);
-            expect(note).toBeNull();
+            expect(note).to.be.null;
         });
 
         it('should return 404 for non-existent note', async () => {
@@ -235,8 +233,8 @@ describe('Recycle Bin API Tests', () => {
                 .delete(`/api/notes/${fakeId}/permanent`)
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(404);
-            expect(res.body.success).toBe(false);
+            expect(res.status).to.equal(404);
+            expect(res.body.success).to.equal(false);
         });
     });
 
@@ -259,16 +257,16 @@ describe('Recycle Bin API Tests', () => {
                 .delete('/api/notes/recycle-bin/empty')
                 .set('Authorization', `Bearer ${authToken}`);
 
-            expect(res.status).toBe(200);
-            expect(res.body.success).toBe(true);
-            expect(res.body.data.deletedCount).toBeGreaterThan(0);
+            expect(res.status).to.equal(200);
+            expect(res.body.success).to.equal(true);
+            expect(res.body.data.deletedCount).to.be.greaterThan(0);
 
             // Verify all deleted notes are gone
             const deletedNotes = await Note.find({
                 user: userId,
                 isDeleted: true
             });
-            expect(deletedNotes.length).toBe(0);
+            expect(deletedNotes.length).to.equal(0);
         });
 
         it('should only delete current user\'s notes', async () => {
@@ -294,7 +292,7 @@ describe('Recycle Bin API Tests', () => {
 
             // Verify other user's note still exists
             const stillExists = await Note.findById(otherNote._id);
-            expect(stillExists).toBeDefined();
+            expect(stillExists).to.exist;
 
             // Cleanup
             await Note.findByIdAndDelete(otherNote._id);
@@ -328,15 +326,15 @@ describe('Recycle Bin API Tests', () => {
             // Run cleanup
             const deletedCount = await cleanupRecycleBin();
 
-            expect(deletedCount).toBeGreaterThan(0);
+            expect(deletedCount).to.be.greaterThan(0);
 
             // Verify old note is deleted
             const oldNoteExists = await Note.findById(oldNote._id);
-            expect(oldNoteExists).toBeNull();
+            expect(oldNoteExists).to.be.null;
 
             // Verify recent note still exists
             const recentNoteExists = await Note.findById(recentNote._id);
-            expect(recentNoteExists).toBeDefined();
+            expect(recentNoteExists).to.exist;
 
             // Cleanup
             await Note.findByIdAndDelete(recentNote._id);
@@ -354,8 +352,9 @@ describe('Recycle Bin API Tests', () => {
 
             for (const endpoint of endpoints) {
                 const res = await request(app)[endpoint.method](endpoint.path);
-                expect(res.status).toBe(401);
+                expect(res.status).to.equal(401);
             }
         });
     });
 });
+
