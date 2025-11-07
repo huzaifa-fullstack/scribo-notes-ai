@@ -12,6 +12,8 @@ import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import RecycleBinPage from "./pages/RecycleBinPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import { Toaster } from "./components/ui/toaster";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -152,6 +154,10 @@ function App() {
 
               {/* Auth Callback Route */}
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
+
+              {/* Password Reset Routes (Public) */}
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
 
               {/* Protected Routes */}
               <Route

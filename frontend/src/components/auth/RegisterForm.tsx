@@ -82,12 +82,12 @@ const RegisterForm = () => {
         password: data.password,
       });
       toast({
-        title: "Account created successfully!",
-        description: "Please log in with your credentials.",
+        title: "Welcome to Scribo! 🎉",
+        description: "Your account has been created successfully.",
         variant: "default",
       });
-      // Navigate to auth page instead of auto-login
-      navigate("/auth");
+      // Auto-login: redirect to dashboard
+      navigate("/dashboard");
     } catch {
       toast({
         title: "Registration failed",

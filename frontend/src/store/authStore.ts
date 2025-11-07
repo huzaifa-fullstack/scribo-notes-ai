@@ -49,11 +49,21 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          // Only register the user, do not auto-login
-          await api.post("/auth/register", credentials);
+          // Register user and get token for auto-login
+          const response = await api.post("/auth/register", credentials);
+          const { token, user } = response.data;
 
-          // Clear loading state
-          set({ isLoading: false, error: null });
+          // Auto-login: Save token and user data
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
+
+          set({
+            user,
+            token,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
         } catch (error: any) {
           const errorMessage =
             error.response?.data?.error || "Registration failed";
