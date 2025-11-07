@@ -64,7 +64,7 @@ const Pagination = ({
         size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="h-9 w-9 p-0 hover:bg-gray-100 transition-colors"
+        className="h-9 w-9 p-0 bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 hover:border-teal-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -90,10 +90,10 @@ const Pagination = ({
             variant={isActive ? "default" : "outline"}
             size="sm"
             onClick={() => onPageChange(pageNum)}
-            className={`h-9 w-9 p-0 font-medium transition-all ${
+            className={`h-9 w-9 p-0 font-medium transition-all duration-300 ${
               isActive
-                ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md scale-105"
-                : "hover:bg-gray-100 hover:border-gray-400"
+                ? "bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 border-0 shadow-md scale-105"
+                : "bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 hover:border-teal-300"
             }`}
           >
             {pageNum}
@@ -107,7 +107,7 @@ const Pagination = ({
         size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="h-9 w-9 p-0 hover:bg-gray-100 transition-colors"
+        className="h-9 w-9 p-0 bg-white/90 hover:bg-teal-50 border-teal-200 text-teal-700 hover:text-teal-800 hover:border-teal-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

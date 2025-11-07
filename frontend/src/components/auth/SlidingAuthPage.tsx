@@ -231,9 +231,9 @@ const SlidingAuthPage = () => {
 
             {isSignIn ? (
               <>
-                <h2 className="text-4xl font-bold mb-4">Good to See You!</h2>
+                <h2 className="text-4xl font-bold mb-4">Welcome back!</h2>
                 <p className="text-center text-white/90 mb-8 max-w-xs">
-                  New to Scribo? Create an account to get started
+                  Ready to capture more ideas? Sign up and start writing.
                 </p>
                 <button
                   onClick={handleSwitchToSignUp}

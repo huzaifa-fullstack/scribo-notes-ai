@@ -42,7 +42,7 @@ const UserDropdown = () => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex items-center gap-2 px-2 sm:px-3"
+          className="flex items-center gap-2 px-2 sm:px-3 hover:bg-teal-50 transition-all duration-300 rounded-md"
         >
           {/* User Avatar - Show Google profile pic if available, otherwise initials */}
           {user?.avatar ? (
@@ -51,7 +51,7 @@ const UserDropdown = () => {
               alt={user.name || "User"}
               referrerPolicy="no-referrer"
               crossOrigin="anonymous"
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200"
+              className="w-8 h-8 rounded-full object-cover ring-2 ring-teal-200"
               onError={(e) => {
                 // If image fails to load, hide it and show initials
                 console.log("Image failed to load, showing initials");
@@ -66,7 +66,7 @@ const UserDropdown = () => {
           ) : null}
           {/* Fallback to initials if no avatar or if image fails */}
           <div
-            className={`w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-gray-200 ${
+            className={`w-8 h-8 rounded-full bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-teal-200 ${
               user?.avatar ? "hidden" : ""
             }`}
           >
@@ -94,7 +94,7 @@ const UserDropdown = () => {
         {/* Profile & Settings */}
         <DropdownMenuItem
           onClick={handleProfileClick}
-          className="cursor-pointer"
+          className="cursor-pointer hover:bg-teal-50 hover:text-teal-700 transition-all duration-300"
         >
           <User className="mr-0.5 h-4 w-4" />
           <span>View Profile</span>
@@ -102,7 +102,7 @@ const UserDropdown = () => {
 
         <DropdownMenuItem
           onClick={handleSettingsClick}
-          className="cursor-pointer"
+          className="cursor-pointer hover:bg-teal-50 hover:text-teal-700 transition-all duration-300"
         >
           <Settings className="mr-0.5 h-4 w-4" />
           <span>Settings</span>
@@ -111,7 +111,7 @@ const UserDropdown = () => {
         {/* Recycle Bin */}
         <DropdownMenuItem
           onClick={handleRecycleBinClick}
-          className="cursor-pointer"
+          className="cursor-pointer hover:bg-red-50 hover:text-red-700 transition-all duration-300"
         >
           <Trash2 className="mr-0.5 h-4 w-4" />
           <span>Recycle Bin</span>
