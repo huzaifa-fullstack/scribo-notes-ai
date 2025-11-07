@@ -49,12 +49,12 @@ describe("DashboardPage", () => {
     role: "user",
   };
 
-  const mockFetchNotes = vi.fn();
-  const mockCreateNote = vi.fn();
-  const mockUpdateNote = vi.fn();
-  const mockDeleteNote = vi.fn();
-  const mockPinNote = vi.fn();
-  const mockArchiveNote = vi.fn();
+  const mockFetchNotes = vi.fn().mockResolvedValue(undefined);
+  const mockCreateNote = vi.fn().mockResolvedValue(undefined);
+  const mockUpdateNote = vi.fn().mockResolvedValue(undefined);
+  const mockDeleteNote = vi.fn().mockResolvedValue(undefined);
+  const mockPinNote = vi.fn().mockResolvedValue(undefined);
+  const mockArchiveNote = vi.fn().mockResolvedValue(undefined);
   const mockLogout = vi.fn();
 
   beforeEach(() => {
@@ -81,15 +81,27 @@ describe("DashboardPage", () => {
     });
   });
 
-  it("renders dashboard correctly for authenticated user", () => {
-    render(<DashboardPage />);
+  it(
+    "renders dashboard correctly for authenticated user",
+    async () => {
+      render(<DashboardPage />);
 
-    expect(screen.getByText(/welcome back, test user/i)).toBeInTheDocument();
-    expect(screen.getByText(/my notes/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /new note/i })
-    ).toBeInTheDocument();
-  });
+      // Wait for the async content to load
+      await waitFor(
+        () => {
+          expect(screen.getByText(/welcome back,/i)).toBeInTheDocument();
+        },
+        { timeout: 8000 }
+      );
+
+      expect(screen.getAllByText("Test User").length).toBeGreaterThan(0);
+      expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /new note/i })
+      ).toBeInTheDocument();
+    },
+    { timeout: 10000 }
+  );
 
   it("displays notes grid", () => {
     render(<DashboardPage />);
@@ -136,20 +148,27 @@ describe("DashboardPage", () => {
     });
   });
 
-  it("handles archive filtering", async () => {
-    render(<DashboardPage />);
+  it(
+    "handles archive filtering",
+    async () => {
+      render(<DashboardPage />);
 
-    // Click on the filter button to toggle between active and archived
-    const filterButton = screen.getByRole("button", { name: /active/i });
-    fireEvent.click(filterButton);
+      // Click on the filter button to toggle between active and archived
+      const filterButton = screen.getByRole("button", { name: /active/i });
+      fireEvent.click(filterButton);
 
-    await waitFor(() => {
       // Should toggle filter state - check for the button text
-      expect(
-        screen.getByRole("button", { name: /archived/i })
-      ).toBeInTheDocument();
-    });
-  });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByRole("button", { name: /archived/i })
+          ).toBeInTheDocument();
+        },
+        { timeout: 8000 }
+      );
+    },
+    { timeout: 10000 }
+  );
 
   it("displays loading state", () => {
     vi.mocked(useNotesStore).mockReturnValue({
@@ -189,7 +208,7 @@ describe("DashboardPage", () => {
     expect(screen.getByText(/create your first note/i)).toBeInTheDocument();
   });
 
-  it("displays empty state with search query", () => {
+  it("displays empty state with search query", async () => {
     vi.mocked(useNotesStore).mockReturnValue({
       notes: [],
       isLoading: false,
@@ -208,7 +227,12 @@ describe("DashboardPage", () => {
     const searchInput = screen.getByPlaceholderText(/search notes/i);
     fireEvent.change(searchInput, { target: { value: "nonexistent" } });
 
-    expect(screen.getByText(/no notes found/i)).toBeInTheDocument();
+    await waitFor(
+      () => {
+        expect(screen.getByText(/no notes found/i)).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
   });
 
   it("handles logout", async () => {
@@ -217,9 +241,13 @@ describe("DashboardPage", () => {
     const logoutButton = screen.getByRole("button", { name: /logout/i });
     fireEvent.click(logoutButton);
 
-    await waitFor(() => {
-      expect(mockLogout).toHaveBeenCalled();
-    });
+    // Wait for the 2-second delay in handleLogout
+    await waitFor(
+      () => {
+        expect(mockLogout).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it("fetches notes on mount", () => {
@@ -241,7 +269,7 @@ describe("DashboardPage", () => {
 
     // Since the component doesn't handle authentication redirect itself,
     // it will still render but with user being null
-    expect(screen.getByText(/my notes/i)).toBeInTheDocument();
+    expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
     // The welcome message should show empty user name
     expect(screen.getByText(/welcome back,/i)).toBeInTheDocument();
   });

@@ -3,9 +3,14 @@ import type { RenderOptions } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import type { ReactElement, ReactNode } from "react";
 import "@testing-library/jest-dom";
+import { ThemeProvider } from "../../context/ThemeContext";
 
 const AllTheProviders = ({ children }: { children: ReactNode }) => {
-  return <BrowserRouter>{children}</BrowserRouter>;
+  return (
+    <BrowserRouter>
+      <ThemeProvider>{children}</ThemeProvider>
+    </BrowserRouter>
+  );
 };
 
 const customRender = (
