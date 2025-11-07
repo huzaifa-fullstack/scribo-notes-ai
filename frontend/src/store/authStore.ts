@@ -67,16 +67,23 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        localStorage.removeItem("notes-storage");
+        // Add loading state for smooth transition
+        set({ isLoading: true });
 
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-          error: null,
-        });
+        // Small delay for smooth animation
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          localStorage.removeItem("notes-storage");
+
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            error: null,
+            isLoading: false,
+          });
+        }, 300);
       },
 
       getCurrentUser: async () => {

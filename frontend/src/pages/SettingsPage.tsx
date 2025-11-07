@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ArrowLeft, Moon, Sun, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -6,6 +5,7 @@ import { Button } from "../components/ui/button";
 import { useAuthStore } from "../store/authStore";
 import { useNotesStore } from "../store/notesStore";
 import UserDropdown from "../components/layout/UserDropdown";
+import { useTheme } from "../context/ThemeContext";
 import {
   Card,
   CardContent,
@@ -27,48 +27,41 @@ import {
   AlertDialogTrigger,
 } from "../components/ui/alert-dialog";
 import { deleteAllNotes, deleteAccount } from "../services/profileService";
+import { useState } from "react";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { logout } = useAuthStore();
-  const { clearNotes } = useNotesStore();
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { fetchNotes } = useNotesStore();
+  const { theme, toggleTheme } = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const isDarkMode = theme === "dark";
+
   const handleDarkModeToggle = (checked: boolean) => {
-    setIsDarkMode(checked);
-    // TODO: Implement actual dark mode
+    toggleTheme();
     toast({
       title: checked ? "Dark Mode Enabled" : "Light Mode Enabled",
-      description: "Dark mode functionality will be implemented soon.",
+      description: "Theme updated successfully!",
     });
   };
 
   const handleDeleteAccount = async () => {
-    setIsDeleting(true);
     try {
+      setIsDeleting(true);
       await deleteAccount();
-
-      // Clear local storage
-      clearNotes();
-
       toast({
         title: "Account Deleted",
-        description: "Your account and all data have been permanently deleted.",
+        description: "Your account has been permanently deleted.",
       });
-
-      // Logout and redirect to home
-      setTimeout(() => {
-        logout();
-        navigate("/");
-      }, 1500);
+      logout();
+      navigate("/login");
     } catch (error: any) {
       toast({
         title: "Error",
         description:
-          error.response?.data?.error ||
-          "Failed to delete account. Please try again.",
+          error.response?.data?.message || "Failed to delete account",
         variant: "destructive",
       });
     } finally {
@@ -77,24 +70,19 @@ const SettingsPage = () => {
   };
 
   const handleDeleteAllNotes = async () => {
-    setIsDeleting(true);
     try {
-      const result = await deleteAllNotes();
-
-      // Clear notes from local state
-      clearNotes();
-
+      setIsDeleting(true);
+      await deleteAllNotes();
       toast({
         title: "All Notes Deleted",
-        description:
-          result.message || "All your notes have been permanently deleted.",
+        description: "All your notes have been permanently deleted.",
       });
+      // Refresh notes in the store
+      await fetchNotes();
     } catch (error: any) {
       toast({
         title: "Error",
-        description:
-          error.response?.data?.error ||
-          "Failed to delete notes. Please try again.",
+        description: error.response?.data?.message || "Failed to delete notes",
         variant: "destructive",
       });
     } finally {
@@ -102,10 +90,39 @@ const SettingsPage = () => {
     }
   };
 
+  // Dynamic theme classes
+  const themeClasses = {
+    bg: isDarkMode ? "bg-slate-950" : "bg-gray-50",
+    header: isDarkMode
+      ? "bg-gray-900/80 border-teal-600/30"
+      : "bg-white border-gray-200",
+    headerText: isDarkMode ? "text-white" : "text-gray-900",
+    headerSubtext: isDarkMode ? "text-gray-400" : "text-gray-500",
+    card: isDarkMode
+      ? "bg-gray-900 border-gray-700"
+      : "bg-white border-gray-200",
+    cardTitle: isDarkMode ? "text-white" : "text-gray-900",
+    cardDescription: isDarkMode ? "text-gray-400" : "text-gray-600",
+    box: isDarkMode
+      ? "bg-gray-800 border-gray-700"
+      : "bg-gray-50 border-gray-200",
+    boxText: isDarkMode ? "text-white" : "text-gray-900",
+    boxSubtext: isDarkMode ? "text-gray-400" : "text-gray-600",
+    icon: isDarkMode ? "text-teal-400" : "text-teal-600",
+    button: isDarkMode
+      ? "border-gray-600 text-teal-400 hover:bg-gray-800"
+      : "border-teal-200 text-teal-600 hover:bg-teal-50",
+    buttonHover: isDarkMode
+      ? "hover:border-teal-500 hover:text-teal-300"
+      : "hover:border-teal-400 hover:text-teal-700",
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-teal-50/20">
+    <div className={`min-h-screen ${themeClasses.bg}`}>
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-teal-100/50 sticky top-0 z-50">
+      <header
+        className={`${themeClasses.header} backdrop-blur-xl shadow-sm border-b sticky top-0 z-50`}
+      >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-shrink min-w-0 max-w-[65%] sm:max-w-none">
@@ -113,15 +130,25 @@ const SettingsPage = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="flex-shrink-0 hover:bg-teal-50 hover:text-teal-700 transition-all duration-300 -ml-2"
+                className={`flex-shrink-0 ${
+                  isDarkMode
+                    ? "hover:bg-gray-800 text-white"
+                    : "hover:bg-gray-100 text-gray-900"
+                } transition-all duration-300 -ml-2`}
               >
                 <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
               <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                <h1
+                  className={`text-2xl sm:text-3xl font-bold ${
+                    isDarkMode ? "text-teal-400" : "text-teal-600"
+                  }`}
+                >
                   Settings
                 </h1>
-                <p className="text-xs sm:text-sm mt-1.5 text-gray-600">
+                <p
+                  className={`text-xs sm:text-sm mt-1.5 ${themeClasses.headerSubtext}`}
+                >
                   Manage your app preferences
                 </p>
               </div>
@@ -131,7 +158,11 @@ const SettingsPage = () => {
               <Button
                 onClick={logout}
                 variant="outline"
-                className="bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4"
+                className={`${
+                  isDarkMode
+                    ? "bg-red-600/20 border-red-600 text-red-500 hover:bg-red-600 hover:text-white"
+                    : "bg-white/90 border-red-200 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600"
+                } backdrop-blur-sm transition-all duration-300 hover:shadow-md font-medium text-xs sm:text-sm px-2 sm:px-4`}
               >
                 Logout
               </Button>
@@ -149,26 +180,48 @@ const SettingsPage = () => {
       >
         <div className="space-y-6">
           {/* Appearance */}
-          <Card className="border-teal-100/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="border-b border-teal-100/30">
-              <CardTitle className="text-lg text-teal-700">
+          <Card
+            className={`${themeClasses.card} shadow-lg hover:shadow-xl transition-shadow duration-300`}
+          >
+            <CardHeader
+              className={`border-b ${
+                isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
+            >
+              <CardTitle className={`text-lg ${themeClasses.cardTitle}`}>
                 Appearance
               </CardTitle>
-              <CardDescription>
+              <CardDescription className={themeClasses.cardDescription}>
                 Customize how the app looks and feels
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between p-4 bg-teal-50/30 rounded-lg border border-teal-200/50 hover:border-teal-300 transition-colors duration-300">
-                <div className="flex items-center gap-3">
+              <div
+                className={`flex items-center justify-between gap-3 p-3 sm:p-4 ${
+                  themeClasses.box
+                } rounded-lg border ${
+                  isDarkMode ? "hover:border-teal-600" : "hover:border-teal-400"
+                } transition-colors duration-300`}
+              >
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   {isDarkMode ? (
-                    <Moon className="h-5 w-5 text-teal-700" />
+                    <Moon
+                      className={`h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${themeClasses.icon}`}
+                    />
                   ) : (
-                    <Sun className="h-5 w-5 text-teal-700" />
+                    <Sun
+                      className={`h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${themeClasses.icon}`}
+                    />
                   )}
-                  <div>
-                    <p className="font-medium text-gray-900">Dark Mode</p>
-                    <p className="text-sm text-gray-500">
+                  <div className="min-w-0">
+                    <p
+                      className={`font-medium text-sm sm:text-base ${themeClasses.boxText}`}
+                    >
+                      Dark Mode
+                    </p>
+                    <p
+                      className={`text-xs sm:text-sm ${themeClasses.boxSubtext}`}
+                    >
                       Switch between light and dark theme
                     </p>
                   </div>
@@ -176,32 +229,68 @@ const SettingsPage = () => {
                 <Switch
                   checked={isDarkMode}
                   onCheckedChange={handleDarkModeToggle}
-                  className="data-[state=unchecked]:bg-gray-200 data-[state=checked]:bg-teal-600"
+                  className={`flex-shrink-0 ${
+                    isDarkMode
+                      ? "data-[state=checked]:bg-teal-600"
+                      : "data-[state=unchecked]:bg-gray-300 data-[state=checked]:bg-teal-600"
+                  }`}
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Danger Zone */}
-          <Card className="border-red-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="border-b border-red-200/50">
-              <CardTitle className="text-lg text-red-600">
+          <Card
+            className={`${
+              isDarkMode
+                ? "bg-gray-900 border-red-900/50"
+                : "bg-white border-red-200"
+            } shadow-lg hover:shadow-xl transition-shadow duration-300`}
+          >
+            <CardHeader
+              className={`border-b ${
+                isDarkMode ? "border-red-900/50" : "border-red-200"
+              }`}
+            >
+              <CardTitle
+                className={`text-lg ${
+                  isDarkMode ? "text-red-500" : "text-red-600"
+                }`}
+              >
                 Danger Zone
               </CardTitle>
-              <CardDescription>
+              <CardDescription
+                className={isDarkMode ? "text-gray-400" : "text-gray-600"}
+              >
                 Irreversible actions - proceed with caution
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Delete All Notes */}
-              <div className="flex items-center justify-between p-4 bg-red-50/50 rounded-lg border border-red-200/50 hover:border-red-300 transition-colors duration-300">
-                <div className="flex items-center gap-3">
-                  <Trash2 className="h-5 w-5 text-red-600" />
-                  <div>
-                    <p className="font-medium text-gray-900">
+              <div
+                className={`flex items-center justify-between gap-3 p-3 sm:p-4 ${
+                  themeClasses.box
+                } rounded-lg border ${
+                  isDarkMode
+                    ? "border-red-900/50 hover:border-red-700"
+                    : "border-red-200 hover:border-red-400"
+                } transition-colors duration-300`}
+              >
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <Trash2
+                    className={`h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${
+                      isDarkMode ? "text-red-500" : "text-red-600"
+                    }`}
+                  />
+                  <div className="min-w-0">
+                    <p
+                      className={`font-medium text-sm sm:text-base ${themeClasses.boxText}`}
+                    >
                       Delete All Notes
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p
+                      className={`text-xs sm:text-sm ${themeClasses.boxSubtext}`}
+                    >
                       Permanently delete all your notes
                     </p>
                   </div>
@@ -210,30 +299,49 @@ const SettingsPage = () => {
                   <AlertDialogTrigger asChild>
                     <Button
                       size="sm"
-                      disabled={isDeleting}
-                      className="bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                      className={`flex-shrink-0 text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-9 w-20 sm:w-44 ${
+                        isDarkMode
+                          ? "bg-red-600 text-white hover:bg-red-700"
+                          : "bg-red-600 text-white hover:bg-red-700"
+                      }`}
                     >
-                      Delete All Notes
+                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1.5" />
+                      <span className="hidden sm:inline">Delete All Notes</span>
+                      <span className="sm:hidden">Delete</span>
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent
+                    className={
+                      isDarkMode
+                        ? "bg-gray-900 border-gray-700"
+                        : "bg-white border-gray-200"
+                    }
+                  >
                     <AlertDialogHeader>
-                      <AlertDialogTitle>
+                      <AlertDialogTitle className={themeClasses.cardTitle}>
                         Delete all your notes?
                       </AlertDialogTitle>
-                      <AlertDialogDescription>
+                      <AlertDialogDescription
+                        className={themeClasses.cardDescription}
+                      >
                         This action cannot be undone. This will permanently
                         delete all your notes.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel disabled={isDeleting}>
+                      <AlertDialogCancel
+                        className={
+                          isDarkMode
+                            ? "bg-gray-800 text-white border-gray-600"
+                            : "bg-white text-gray-900 border-gray-200"
+                        }
+                      >
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAllNotes}
                         disabled={isDeleting}
-                        className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+                        className="bg-red-600 hover:bg-red-700 text-white"
                       >
                         {isDeleting ? "Deleting..." : "Yes, Delete All Notes"}
                       </AlertDialogAction>
@@ -243,12 +351,30 @@ const SettingsPage = () => {
               </div>
 
               {/* Delete Account */}
-              <div className="flex items-center justify-between p-4 bg-red-50/50 rounded-lg border border-red-200/50 hover:border-red-300 transition-colors duration-300">
-                <div className="flex items-center gap-3">
-                  <Trash2 className="h-5 w-5 text-red-600" />
-                  <div>
-                    <p className="font-medium text-gray-900">Delete Account</p>
-                    <p className="text-sm text-gray-500">
+              <div
+                className={`flex items-center justify-between gap-3 p-3 sm:p-4 ${
+                  themeClasses.box
+                } rounded-lg border ${
+                  isDarkMode
+                    ? "border-red-900/50 hover:border-red-700"
+                    : "border-red-200 hover:border-red-400"
+                } transition-colors duration-300`}
+              >
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <Trash2
+                    className={`h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${
+                      isDarkMode ? "text-red-500" : "text-red-600"
+                    }`}
+                  />
+                  <div className="min-w-0">
+                    <p
+                      className={`font-medium text-sm sm:text-base ${themeClasses.boxText}`}
+                    >
+                      Delete Account
+                    </p>
+                    <p
+                      className={`text-xs sm:text-sm ${themeClasses.boxSubtext}`}
+                    >
                       Permanently delete your account and all your data
                     </p>
                   </div>
@@ -256,32 +382,47 @@ const SettingsPage = () => {
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
-                      className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+                      className={`flex-shrink-0 text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-9 w-20 sm:w-44 bg-red-600 hover:bg-red-700 text-white`}
                       size="sm"
-                      disabled={isDeleting}
                     >
-                      Delete Account
+                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1.5" />
+                      <span className="hidden sm:inline">Delete Account</span>
+                      <span className="sm:hidden">Delete</span>
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent
+                    className={
+                      isDarkMode
+                        ? "bg-gray-900 border-gray-700"
+                        : "bg-white border-gray-200"
+                    }
+                  >
                     <AlertDialogHeader>
-                      <AlertDialogTitle>
+                      <AlertDialogTitle className={themeClasses.cardTitle}>
                         Are you absolutely sure?
                       </AlertDialogTitle>
-                      <AlertDialogDescription>
+                      <AlertDialogDescription
+                        className={themeClasses.cardDescription}
+                      >
                         This action cannot be undone. This will permanently
                         delete your account and remove all your data from our
                         servers including all your notes, tags, and preferences.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel disabled={isDeleting}>
+                      <AlertDialogCancel
+                        className={
+                          isDarkMode
+                            ? "bg-gray-800 text-white border-gray-600"
+                            : "bg-white text-gray-900 border-gray-200"
+                        }
+                      >
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
                         disabled={isDeleting}
-                        className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+                        className="bg-red-600 hover:bg-red-700 text-white"
                       >
                         {isDeleting ? "Deleting..." : "Yes, Delete My Account"}
                       </AlertDialogAction>

@@ -15,6 +15,7 @@ import {
   Strikethrough,
   Highlighter,
 } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
 
 interface RichTextEditorProps {
   content: string;
@@ -27,6 +28,9 @@ const RichTextEditor = ({
   onChange,
   placeholder = "Start writing...",
 }: RichTextEditorProps) => {
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -46,8 +50,9 @@ const RichTextEditor = ({
     },
     editorProps: {
       attributes: {
-        class:
-          "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[200px] max-w-none",
+        class: isDarkMode
+          ? "prose prose-sm sm:prose lg:prose-lg xl:prose-xl prose-invert focus:outline-none min-h-[200px] max-w-none text-white"
+          : "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[200px] max-w-none",
       },
     },
     immediatelyRender: false,
@@ -74,8 +79,14 @@ const RichTextEditor = ({
           onClick();
         }
       }}
-      className={`p-2 rounded hover:bg-gray-200 transition-colors ${
-        active ? "bg-gray-200 text-blue-600" : "text-gray-600"
+      className={`p-2 rounded transition-colors ${
+        active
+          ? isDarkMode
+            ? "bg-gray-700 text-teal-400"
+            : "bg-gray-200 text-blue-600"
+          : isDarkMode
+          ? "text-gray-400 hover:bg-gray-700"
+          : "text-gray-600 hover:bg-gray-200"
       }`}
     >
       {children}
@@ -83,9 +94,19 @@ const RichTextEditor = ({
   );
 
   return (
-    <div className="border border-gray-300 rounded-lg overflow-hidden">
+    <div
+      className={`border rounded-lg overflow-hidden ${
+        isDarkMode ? "border-gray-600 bg-gray-800" : "border-gray-300 bg-white"
+      }`}
+    >
       {/* Toolbar */}
-      <div className="bg-gray-50 border-b border-gray-300 p-2 flex flex-wrap gap-1">
+      <div
+        className={`border-b p-2 flex flex-wrap gap-1 ${
+          isDarkMode
+            ? "bg-gray-900 border-gray-600"
+            : "bg-gray-50 border-gray-300"
+        }`}
+      >
         <MenuButton
           onClick={() => {
             if (editor && !editor.isDestroyed) {
@@ -167,7 +188,7 @@ const RichTextEditor = ({
       </div>
 
       {/* Editor Content */}
-      <div className="p-4 bg-white">
+      <div className={`p-4 ${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
         <EditorContent editor={editor} />
       </div>
     </div>

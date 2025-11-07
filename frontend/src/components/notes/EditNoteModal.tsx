@@ -18,6 +18,7 @@ import type { Note } from "../../types/note";
 import { useNotesStore } from "../../store/notesStore";
 import { useToast } from "../ui/use-toast";
 import RichTextEditor from "../editor/RichTextEditor";
+import { useTheme } from "../../context/ThemeContext";
 
 const noteSchema = z.object({
   title: z
@@ -42,6 +43,8 @@ interface EditNoteModalProps {
 const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
   const { updateNote, isLoading } = useNotesStore();
   const { toast } = useToast();
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   const form = useForm<NoteFormData>({
     resolver: zodResolver(noteSchema),
@@ -96,9 +99,21 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] p-6 bg-white">
+      <DialogContent
+        className={`sm:max-w-[600px] p-6 ${
+          isDarkMode
+            ? "bg-gray-900 border-gray-700"
+            : "bg-white border-gray-200"
+        }`}
+      >
         <DialogHeader className="mb-4">
-          <DialogTitle className="text-xl font-semibold">Edit Note</DialogTitle>
+          <DialogTitle
+            className={`text-xl font-semibold ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Edit Note
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -108,18 +123,32 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Title</FormLabel>
+                  <FormLabel
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
+                    Title
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter note title"
-                      className="h-11"
+                      className={`h-11 ${
+                        isDarkMode
+                          ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-teal-500"
+                          : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
+                      }`}
                       maxLength={40}
                       {...field}
                     />
                   </FormControl>
                   <div className="flex justify-between items-center">
                     <FormMessage />
-                    <span className="text-xs text-gray-500">
+                    <span
+                      className={`text-xs ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
                       {field.value?.length || 0}/40
                     </span>
                   </div>
@@ -132,7 +161,13 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
               name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Content</FormLabel>
+                  <FormLabel
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
+                    Content
+                  </FormLabel>
                   <FormControl>
                     <RichTextEditor
                       content={field.value}
@@ -150,13 +185,21 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
               name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">
+                  <FormLabel
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
                     Tags (optional)
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="work, ideas, personal (comma separated)"
-                      className="h-11"
+                      className={`h-11 ${
+                        isDarkMode
+                          ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-teal-500"
+                          : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
+                      }`}
                       {...field}
                     />
                   </FormControl>
@@ -171,7 +214,11 @@ const EditNoteModal = ({ open, note, onClose }: EditNoteModalProps) => {
                 variant="outline"
                 onClick={onClose}
                 disabled={isLoading}
-                className="bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900 transition-all duration-300"
+                className={`transition-all duration-300 ${
+                  isDarkMode
+                    ? "bg-gray-800 hover:bg-gray-700 border-gray-600 text-gray-200 hover:text-white"
+                    : "bg-white/90 hover:bg-gray-50 border-gray-300 text-gray-700 hover:text-gray-900"
+                }`}
               >
                 Cancel
               </Button>
