@@ -31,8 +31,13 @@ const RECYCLE_BIN_RETENTION_DAYS = 30;
 
 const RecycleBinPage = () => {
   const navigate = useNavigate();
-  const { notes, restoreNote, permanentlyDeleteNote, emptyRecycleBin } =
-    useNotesStore();
+  const {
+    recycleNotes,
+    fetchRecycleBin,
+    restoreNote,
+    permanentlyDeleteNote,
+    emptyRecycleBin,
+  } = useNotesStore();
   const { logout } = useAuthStore();
   const { toast } = useToast();
 
@@ -40,8 +45,8 @@ const RecycleBinPage = () => {
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
   const [emptyBinDialogOpen, setEmptyBinDialogOpen] = useState(false);
 
-  // Filter deleted notes and auto-delete expired ones
-  const deletedNotes = notes.filter((note) => {
+  // Use recycleNotes from store and auto-delete expired ones
+  const deletedNotes = recycleNotes.filter((note) => {
     if (!note.isDeleted || !note.deletedAt) return false;
 
     const deletedDate = new Date(note.deletedAt);
@@ -78,6 +83,12 @@ const RecycleBinPage = () => {
       setCurrentPage(1);
     }
   }, [deletedNotes.length, currentPage, totalPages]);
+
+  // Fetch recycle bin data on mount
+  useEffect(() => {
+    fetchRecycleBin().catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRestore = async (id: string) => {
     try {
@@ -199,7 +210,7 @@ const RecycleBinPage = () => {
             <Button
               variant="outline"
               onClick={handleEmptyBinClick}
-              className="gap-2 bg-white/90 hover:bg-red-50 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 transition-all duration-300"
+              className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-600 hover:text-red-700 hover:border-red-300 transition-all duration-300"
             >
               <Trash className="h-4 w-4" />
               Empty Recycle Bin
