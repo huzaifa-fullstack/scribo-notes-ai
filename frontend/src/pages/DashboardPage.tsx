@@ -108,8 +108,9 @@ const DashboardPage = () => {
 
     // Check if trying to pin and already have 6 pinned notes
     if (!note.isPinned) {
+      // Count pinned notes in the current context (archived or active)
       const currentPinnedCount = notes.filter(
-        (n) => n.isPinned && !n.isDeleted && !n.isArchived
+        (n) => n.isPinned && !n.isDeleted && n.isArchived === note.isArchived
       ).length;
 
       if (currentPinnedCount >= 6) {
@@ -264,9 +265,10 @@ const DashboardPage = () => {
                 Dashboard
               </h1>
               <p
-                className={`text-xs sm:text-sm mt-1.5 ${themeClasses.headerSubtext}`}
+                className={`text-xs sm:text-sm mt-1.5 ${themeClasses.headerSubtext} break-words`}
               >
-                Welcome back, {user?.name}! 👋
+                Welcome back, <span className="break-all">{user?.name}</span>!
+                👋
               </p>
             </div>
             {/* Desktop: UserDropdown + Logout */}
