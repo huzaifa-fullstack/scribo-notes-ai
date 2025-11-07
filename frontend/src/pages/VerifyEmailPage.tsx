@@ -26,7 +26,6 @@ const VerifyEmailPage = () => {
   useEffect(() => {
     // Prevent double calls in React Strict Mode
     if (hasVerified.current) {
-      console.log("Verification already attempted, skipping...");
       return;
     }
 
@@ -40,19 +39,15 @@ const VerifyEmailPage = () => {
       hasVerified.current = true; // Mark as attempted
 
       try {
-        console.log("Starting email verification with token:", token);
         const response = await verifyEmail(token);
-        console.log("Verification API response:", response);
 
         // Check response structure - backend returns { success: true, message, user }
         if (response && response.success === true) {
-          console.log("Verification successful!");
           setStatus("success");
           setMessage(response.message || "Email verified successfully!");
 
           // Immediately update user state with verified user data from response
           if (response.user && user) {
-            console.log("Updating user state immediately with verified data");
             const currentToken = localStorage.getItem("token");
             if (currentToken) {
               setAuthData(currentToken, {
@@ -62,20 +57,22 @@ const VerifyEmailPage = () => {
             }
           }
         } else {
-          console.error("Verification failed - response:", response);
           setStatus("error");
           setMessage(
             response?.error || response?.message || "Verification failed."
           );
         }
-      } catch (error: any) {
-        console.error("Verification error caught:", error);
-        console.error("Error response:", error.response);
+      } catch (error: unknown) {
+        const err = error as {
+          response?: {
+            status?: number;
+            data?: { error?: string; message?: string };
+          };
+        };
 
         // If it's a 400 error but the token was already used (second call in strict mode)
         // and user is already verified, treat as success
-        if (error.response?.status === 400 && user?.isEmailVerified) {
-          console.log("User already verified, treating as success");
+        if (err.response?.status === 400 && user?.isEmailVerified) {
           setStatus("success");
           setMessage("Email verified successfully!");
           return;
@@ -83,8 +80,8 @@ const VerifyEmailPage = () => {
 
         setStatus("error");
         setMessage(
-          error.response?.data?.error ||
-            error.response?.data?.message ||
+          err.response?.data?.error ||
+            err.response?.data?.message ||
             "Invalid or expired verification token. Please request a new verification email."
         );
       }
