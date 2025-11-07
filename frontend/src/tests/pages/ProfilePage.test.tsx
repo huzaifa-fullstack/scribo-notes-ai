@@ -51,7 +51,9 @@ describe("ProfilePage", () => {
   it("renders profile page with user information", () => {
     render(<ProfilePage />);
 
-    expect(screen.getByRole("heading", { name: /profile/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /profile/i })
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue("Test User")).toBeInTheDocument();
     expect(screen.getByDisplayValue("test@example.com")).toBeInTheDocument();
   });
@@ -138,7 +140,9 @@ describe("ProfilePage", () => {
 
     // ProfilePage renders regardless of authentication
     // (authentication check might be handled by a route guard)
-    expect(screen.getByRole("heading", { name: /profile/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /profile/i })
+    ).toBeInTheDocument();
   });
 
   it("displays email verification status", () => {
@@ -171,7 +175,8 @@ describe("ProfilePage", () => {
     // Get all elements with "User" text and check if at least one exists
     const elements = screen.getAllByText((content, element) => {
       return (
-        element?.tagName.toLowerCase() === "p" && content.toLowerCase() === "user"
+        element?.tagName.toLowerCase() === "p" &&
+        content.toLowerCase() === "user"
       );
     });
     expect(elements.length).toBeGreaterThan(0);
@@ -184,8 +189,7 @@ describe("ProfilePage", () => {
         () =>
           new Promise((resolve) =>
             setTimeout(
-              () =>
-                resolve({ success: true, data: { user: mockUser } } as any),
+              () => resolve({ success: true, data: { user: mockUser } } as any),
               100
             )
           )
