@@ -17,8 +17,8 @@ jobs:
   sonarqube:
     name: SonarQube Self-Hosted Analysis
     runs-on: ubuntu-latest
-    # Only run if SonarQube host URL is configured
-    if: ${{ vars.SONARQUBE_HOST_URL != '' || secrets.SONARQUBE_HOST_URL != '' }}
+    # This workflow requires SONARQUBE_HOST_URL and SONARQUBE_TOKEN secrets
+    # Only trigger manually when you have a self-hosted SonarQube server
 
     steps:
       - name: Checkout code
