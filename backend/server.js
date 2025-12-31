@@ -1,4 +1,9 @@
-require('dotenv').config(); // Load environment variables first
+// IMPORTANT: Import instrument.js at the very top of your file (Sentry requirement)
+// This also loads dotenv, so environment variables are available immediately
+require('./instrument.js');
+
+// Import Sentry after instrument.js
+const Sentry = require('@sentry/node');
 
 const express = require('express');
 const cors = require('cors');
@@ -75,6 +80,11 @@ app.use('/api/export', require('./src/routes/export'));
 app.use('/api/profile', require('./src/routes/profile'));
 app.use('/api/ai', require('./src/routes/ai'));
 
+// Sentry debug route (for testing - remove in production if not needed)
+app.get("/debug-sentry", function mainHandler(req, res) {
+    throw new Error("My first Sentry error!");
+});
+
 // 404 handler for undefined API routes
 app.use('/api', (req, res, next) => {
     // Only handle if no other route matched
@@ -87,13 +97,28 @@ app.use('/api', (req, res, next) => {
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-    const path = require('path');
+    const path = require('node:path');
     app.use(express.static('public'));
 
     app.get('*', (req, res) => {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     });
 }
+
+// The Sentry error handler must be registered before any other error middleware and after all controllers
+Sentry.setupExpressErrorHandler(app);
+
+// Optional fallthrough error handler with Sentry ID
+app.use(function onError(err, req, res, next) {
+    // The error id is attached to `res.sentry` to be returned
+    // and optionally displayed to the user for support.
+    res.statusCode = 500;
+    res.json({
+        success: false,
+        error: 'Internal server error',
+        sentryId: res.sentry
+    });
+});
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
