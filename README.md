@@ -33,8 +33,11 @@
 ![Helmet](https://img.shields.io/badge/Helmet-Security-000000?style=for-the-badge)
 ![CORS](https://img.shields.io/badge/CORS-Enabled-success?style=for-the-badge)
 ![SonarQube](https://img.shields.io/badge/SonarQube-4E9BCD?style=for-the-badge&logo=sonarqube&logoColor=white)
+![Sentry](https://img.shields.io/badge/Sentry-362D59?style=for-the-badge&logo=sentry&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![CI/CD Pipeline](https://img.shields.io/badge/CI/CD-Automated-success?style=for-the-badge&logo=githubactions&logoColor=white)
+![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Project Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 
@@ -246,10 +249,15 @@ Key highlights include:
 ### **DevOps & Deployment**
 
 - [**GitHub Actions**](https://github.com/features/actions) — Automated CI/CD pipeline
+- [**Render**](https://render.com/) — Backend hosting platform
+- [**Vercel**](https://vercel.com/) — Frontend hosting platform
+- [**Sentry**](https://sentry.io/) — Error tracking and monitoring
+- [**SonarCloud**](https://sonarcloud.io/) — Cloud-based code analysis
 - [**Docker Ready**](https://www.docker.com/) — Containerization support
 
+---
 
-<!-- ## 🔄 CI/CD Pipeline
+## 🔄 CI/CD Pipeline
 
 ### **🚀 Automated Workflow**
 
@@ -257,36 +265,57 @@ Our CI/CD pipeline ensures **code quality**, **security**, and **reliable deploy
 
 #### **Quality Checks** ✅
 
-- **SonarQube Analysis** — Code quality and security scanning
-- **ESLint** — Code style and best practices validation
-- **TypeScript** — Static type checking
-- **Build Verification** — Ensures production builds succeed
-- **Test Execution** — Automated test suite (105 tests)
-- **Coverage Reports** — Test coverage tracking (Backend & Frontend)
-- **Dependency Audit** — Security vulnerability scanning
+| Check        | Tool         | Description                       |
+| ------------ | ------------ | --------------------------------- |
+| Code Quality | SonarCloud   | Security scanning and code smells |
+| Linting      | ESLint       | Code style and best practices     |
+| Type Safety  | TypeScript   | Static type checking              |
+| Build        | Vite         | Production build verification     |
+| Testing      | Mocha/Vitest | 105+ automated tests              |
+| Coverage     | NYC/V8       | Code coverage reporting           |
+| Security     | npm audit    | Dependency vulnerability scan     |
 
 #### **Deployment Strategy** 🌐
 
-- **Production** — Automatic deployment on `main` branch
-- **Preview** — Automatic preview deployments for pull requests
-- **Rollback** — Instant rollback capability for critical issues
+| Branch        | Action                   | Platform        |
+| ------------- | ------------------------ | --------------- |
+| `main`        | Production Deploy        | Render + Vercel |
+| `develop`     | Quality Checks Only      | -               |
+| Pull Requests | Preview + Quality Checks | Vercel Preview  |
 
 #### **Pipeline Triggers** 🔄
 
-- **Main Branch** → Production deployment with full quality checks
-- **Pull Requests** → Preview deployment with code review
-- **Security** → Automatic dependency updates and vulnerability alerts
+```yaml
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+```
 
 #### **Workflow Status** 📊
 
-```yaml
-✅ Code Quality & Build Check
-✅ SonarQube Analysis
-✅ Test Execution (Backend: Mocha/Chai, Frontend: Vitest)
-✅ Security & Dependency Check
-✅ Coverage Report Generation
-⏭️ Deploy (Production/Preview)
-``` -->
+```
+┌─────────────────────────────────────────────────────────┐
+│  ✅ Install Dependencies (Backend + Frontend)          │
+│  ✅ Run Linting & Type Checks                          │
+│  ✅ Execute Tests with Coverage                        │
+│  ✅ Build Production Bundle                            │
+│  ✅ SonarCloud Analysis                                │
+│  ✅ Security Audit                                     │
+│  🚀 Deploy Backend → Render                            │
+│  🚀 Deploy Frontend → Vercel                           │
+└─────────────────────────────────────────────────────────┘
+```
+
+### **📖 Production Deployment**
+
+This project is configured for deployment on **Render** (backend) and **Vercel** (frontend).
+
+#### Quick Deploy Steps:
+
+1. **Backend on Render**: Connect GitHub repo → Set Root Directory: `backend` → Add environment variables → Deploy
+2. **Frontend on Vercel**: Connect GitHub repo → Set Root Directory: `frontend` → Add `VITE_API_URL` → Deploy
 
 ---
 
@@ -354,9 +383,17 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 MAILGUN_API_KEY=your_mailgun_api_key
 MAILGUN_DOMAIN=your_mailgun_domain
 MAILGUN_FROM_EMAIL=noreply@yourdomain.com
+MAILGUN_FROM_NAME=Scribo Notes
 
-# Frontend URL
+# Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:5173
+CLIENT_URL=http://localhost:5173
+
+# AI Features (HuggingFace)
+HUGGINGFACE_API_KEY=hf_your_api_key_here
+
+# Error Tracking (Optional)
+SENTRY_DSN=your_sentry_dsn_here
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
@@ -369,6 +406,7 @@ Create `.env` file in the `frontend` directory:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
+VITE_SENTRY_DSN=your_sentry_dsn_here
 ```
 
 6. **Database Setup**
@@ -383,12 +421,14 @@ npm run init-db
 7. **Start Development Servers**
 
 **Backend:**
+
 ```bash
 cd backend
 npm run dev
 ```
 
 **Frontend:**
+
 ```bash
 cd frontend
 npm run dev
@@ -404,12 +444,14 @@ Backend API: http://localhost:5000
 9. **Build for Production**
 
 **Backend:**
+
 ```bash
 cd backend
 npm start
 ```
 
 **Frontend:**
+
 ```bash
 cd frontend
 npm run build
@@ -463,6 +505,7 @@ npm run preview
 - **Coverage:** 105 tests with ~60% code coverage
 
 **Test Categories:**
+
 - Authentication flows
 - Note CRUD operations
 - Rich-text editor functionality
@@ -479,6 +522,7 @@ npm run preview
 - **Coverage:** Comprehensive test suite with NYC
 
 **Test Categories:**
+
 - User authentication and authorization
 - Note management endpoints
 - File upload and processing
