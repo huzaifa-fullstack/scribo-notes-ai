@@ -42,7 +42,7 @@ const PrivacyPolicyPage = () => {
               Introduction
             </h2>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              Welcome to Scribo Notes AI ("we," "our," or "us"). We are
+              Welcome to Scribo Notes ("we," "our," or "us"). We are
               committed to protecting your privacy and ensuring the security of
               your personal information. This Privacy Policy explains how we
               collect, use, disclose, and safeguard your information when you
@@ -241,7 +241,7 @@ const PrivacyPolicyPage = () => {
 
         {/* Footer */}
         <div className="mt-8 text-center text-slate-500 dark:text-slate-400">
-          <p>© 2025 Scribo Notes AI. All rights reserved.</p>
+          <p>© 2025 Scribo Notes. All rights reserved.</p>
         </div>
       </div>
     </div>

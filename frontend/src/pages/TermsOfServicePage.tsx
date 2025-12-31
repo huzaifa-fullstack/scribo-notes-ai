@@ -41,7 +41,7 @@ const TermsOfServicePage = () => {
               Agreement to Terms
             </h2>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              By accessing or using Scribo Notes AI ("the Service"), you agree
+              By accessing or using Scribo Notes ("the Service"), you agree
               to be bound by these Terms of Service. If you do not agree to
               these terms, please do not use our Service. These terms apply to
               all users, including visitors, registered users, and contributors.
@@ -54,7 +54,7 @@ const TermsOfServicePage = () => {
               Description of Service
             </h2>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              Scribo Notes AI is a cloud-based note-taking application that
+              Scribo Notes is a cloud-based note-taking application that
               provides:
             </p>
             <ul className="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300 ml-4 mt-4">
@@ -155,7 +155,7 @@ const TermsOfServicePage = () => {
                   Our Service
                 </h3>
                 <p>
-                  The Scribo Notes AI application, including its design,
+                  The Scribo Notes application, including its design,
                   features, and code, is owned by us and protected by
                   intellectual property laws.
                 </p>
@@ -288,7 +288,7 @@ const TermsOfServicePage = () => {
 
         {/* Footer */}
         <div className="mt-8 text-center text-slate-500 dark:text-slate-400">
-          <p>© 2025 Scribo Notes AI. All rights reserved.</p>
+          <p>© 2025 Scribo Notes. All rights reserved.</p>
         </div>
       </div>
     </div>
