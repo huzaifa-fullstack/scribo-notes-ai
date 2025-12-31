@@ -21,6 +21,7 @@ describe("NoteCard", () => {
   const mockOnDelete = vi.fn();
   const mockOnTogglePin = vi.fn();
   const mockOnToggleArchive = vi.fn();
+  const mockOnExport = vi.fn();
 
   const defaultProps = {
     onView: mockOnView,
@@ -28,6 +29,7 @@ describe("NoteCard", () => {
     onDelete: mockOnDelete,
     onTogglePin: mockOnTogglePin,
     onToggleArchive: mockOnToggleArchive,
+    onExport: mockOnExport,
   };
 
   beforeEach(() => {

@@ -24,12 +24,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-     /* Path Aliases */
-    "baseUrl": ".",
+    /* Path Aliases */
     "paths": {
       "@/*": ["./src/*"]
-      },
-    "ignoreDeprecations": "6.0"
-    },
-    "include": ["src"]
+    }
+  },
+  "include": ["src"]
 }
