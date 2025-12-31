@@ -15,6 +15,8 @@ import AuthCallbackPage from "./pages/AuthCallbackPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import { Toaster } from "./components/ui/toaster";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -162,6 +164,10 @@ function App() {
 
               {/* Email Verification Route (Public - can be accessed with or without auth) */}
               <Route path="/verify-email" element={<VerifyEmailPage />} />
+
+              {/* Legal Pages (Public) */}
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsOfServicePage />} />
 
               {/* Protected Routes */}
               <Route
