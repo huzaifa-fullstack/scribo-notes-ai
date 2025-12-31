@@ -33,6 +33,16 @@ router.post('/resend-verification', protect, resendVerificationEmail); // Protec
 // Google OAuth routes
 router.get(
     '/google',
+    (req, res, next) => {
+        // Check if Google strategy is configured
+        if (!passport._strategies.google) {
+            return res.status(503).json({
+                success: false,
+                error: 'Google OAuth is not configured. Please check GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+            });
+        }
+        next();
+    },
     passport.authenticate('google', {
         scope: ['profile', 'email']
     })
@@ -41,7 +51,7 @@ router.get(
 router.get(
     '/google/callback',
     passport.authenticate('google', {
-        failureRedirect: '/login',
+        failureRedirect: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login?error=oauth_failed` : '/login',
         session: false
     }),
     googleCallback
