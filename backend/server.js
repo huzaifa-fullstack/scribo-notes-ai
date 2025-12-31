@@ -100,7 +100,8 @@ if (process.env.NODE_ENV === 'production') {
     const path = require('node:path');
     app.use(express.static('public'));
 
-    app.get('*', (req, res) => {
+    // Express 5 requires named wildcard parameter
+    app.get('/{*splat}', (req, res) => {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     });
 }
