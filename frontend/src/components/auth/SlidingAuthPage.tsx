@@ -199,7 +199,7 @@ const SlidingAuthPage = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex flex-col items-center justify-center p-4"
       style={{
         backgroundImage: `url(${loginBg})`,
         backgroundSize: "cover",
@@ -525,6 +525,29 @@ const SlidingAuthPage = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Footer with Privacy Policy and Terms of Service links */}
+      <div className="mt-6 text-center">
+        <p className="text-white/90 text-sm">
+          By continuing, you agree to our{" "}
+          <Link
+            to="/terms"
+            className="text-white font-medium underline hover:text-teal-200 transition-colors"
+          >
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            to="/privacy"
+            className="text-white font-medium underline hover:text-teal-200 transition-colors"
+          >
+            Privacy Policy
+          </Link>
+        </p>
+        <p className="text-white/70 text-xs mt-2">
+          © 2025 Scribo Notes. All rights reserved.
+        </p>
+      </div>
     </div>
   );
 };
