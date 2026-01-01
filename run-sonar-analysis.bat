@@ -116,6 +116,6 @@ echo   ANALYSIS COMPLETE!
 echo ========================================
 echo.
 echo View your results at:
-echo http://localhost:9000/dashboard?id=huzaifakarim-mern-10pshine
+echo http://localhost:9000/dashboard?id=scribo-notes-ai
 echo.
 pause

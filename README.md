@@ -335,8 +335,8 @@ This project is configured for deployment on **Render** (backend) and **Vercel**
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/huzaifa-fullstack/huzaifakarim-mern-10pshine.git
-cd huzaifakarim-mern-10pshine
+git clone https://github.com/huzaifa-fullstack/scribo-notes-ai.git
+cd scribo-notes-ai
 ```
 
 2. **Install Backend Dependencies**
