@@ -1,15 +1,16 @@
 const logger = require('../config/logger');
 
 const errorHandler = (err, req, res, next) => {
-    let error = { ...err };
-    error.message = err.message;
+    // Work directly with err object instead of spreading
+    let statusCode = err.statusCode || 500;
+    let message = err.message || 'Server Error';
 
     // Log error
     logger.error({
         err: {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
+            message: err.message,
+            stack: err.stack,
+            name: err.name
         },
         req: {
             method: req.method,
@@ -23,41 +24,36 @@ const errorHandler = (err, req, res, next) => {
 
     // Mongoose bad ObjectId (invalid format like "invalid-id")
     if (err.name === 'CastError') {
-        const message = 'Resource not found';
-        error.message = message;
-        error.statusCode = 404;
+        message = 'Resource not found';
+        statusCode = 404;
     }
 
     // Mongoose duplicate key
     if (err.code === 11000) {
-        const message = 'Duplicate field value entered';
-        error.message = message;
-        error.statusCode = 400;
+        message = 'Duplicate field value entered';
+        statusCode = 400;
     }
 
     // Mongoose validation error
     if (err.name === 'ValidationError') {
-        const message = Object.values(err.errors).map(val => val.message).join(', ');
-        error.message = message;
-        error.statusCode = 400;
+        message = Object.values(err.errors).map(val => val.message).join(', ');
+        statusCode = 400;
     }
 
     // JWT errors
     if (err.name === 'JsonWebTokenError') {
-        const message = 'Invalid token';
-        error.message = message;
-        error.statusCode = 401;
+        message = 'Invalid token';
+        statusCode = 401;
     }
 
     if (err.name === 'TokenExpiredError') {
-        const message = 'Token expired';
-        error.message = message;
-        error.statusCode = 401;
+        message = 'Token expired';
+        statusCode = 401;
     }
 
-    res.status(error.statusCode || 500).json({
+    res.status(statusCode).json({
         success: false,
-        error: error.message || 'Server Error',
+        error: message,
         ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
     });
 };
