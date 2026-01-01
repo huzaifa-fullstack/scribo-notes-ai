@@ -146,8 +146,8 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.projectName=ScriboNotesAI
             -Dsonar.sources=backend/src,frontend/src
-            -Dsonar.tests=backend/tests,frontend/src/tests
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/coverage/**
+            -Dsonar.tests=backend/tests
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/coverage/**,frontend/src/tests/**,backend/tests/**
             -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
 
   # ============================================
