@@ -62,14 +62,14 @@ jobs:
         continue-on-error: true
 
       - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v5
+        uses: sonarsource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST_URL }}
         with:
           args: >
             -Dsonar.projectKey=scribo-notes-ai
-            -Dsonar.projectName=Scribo - AI-Powered Smart Notes
+            -Dsonar.projectName=ScriboNotesAI
             -Dsonar.sources=backend/src,frontend/src
             -Dsonar.tests=backend/tests,frontend/src/tests
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/coverage/**
