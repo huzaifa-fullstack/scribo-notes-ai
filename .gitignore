@@ -149,5 +149,3 @@ coverage/
 .nyc_output/
 *.lcov
 
-# Local deployment docs (keep for reference, don't commit)
-DEPLOYMENT.md
