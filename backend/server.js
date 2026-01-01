@@ -114,19 +114,8 @@ if (process.env.NODE_ENV === 'production') {
 // The Sentry error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
-// Optional fallthrough error handler with Sentry ID
-app.use(function onError(err, req, res, next) {
-    // The error id is attached to `res.sentry` to be returned
-    // and optionally displayed to the user for support.
-    res.statusCode = 500;
-    res.json({
-        success: false,
-        error: 'Internal server error',
-        sentryId: res.sentry
-    });
-});
-
 // Error handling middleware (must be last)
+// This handles all errors including CastError (404), ValidationError (400), JWT errors (401), etc.
 app.use(errorHandler);
 
 // Start server only if not in test mode
