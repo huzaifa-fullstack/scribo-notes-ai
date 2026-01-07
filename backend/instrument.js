@@ -28,6 +28,11 @@ if (process.env.SENTRY_DSN) {
 
         // Filter sensitive data before sending to Sentry
         beforeSend(event) {
+            // Skip test environment errors entirely
+            if (process.env.NODE_ENV === 'test') {
+                return null;
+            }
+
             // Remove sensitive headers
             if (event.request && event.request.headers) {
                 delete event.request.headers.authorization;
