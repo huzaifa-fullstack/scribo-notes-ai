@@ -1,0 +1,14 @@
+# robots.txt for Scribo Notes AI
+User-agent: *
+Allow: /
+
+# Disallow auth pages and sensitive routes
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /notes
+Disallow: /profile
+Disallow: /settings
+
+# Sitemap location
+Sitemap: https://www.scribonotes.tech/sitemap.xml
